@@ -1,0 +1,224 @@
+# MVP Técnico 
+
+## 1. Objetivo del MVP
+
+Validar que la **mecánica principal funciona y es atractiva** sin deuda técnica y sin bloquear futuras expansiones.
+
+Este MVP debe demostrar que:
+
+* El progreso pasivo por tiempo bloqueado es comprensible y satisfactorio
+* El jugador entiende el loop básico
+* La arquitectura soporta Orbes, Santuarios y Stillwalks
+
+No busca todavía retención social ni profundidad de contenido.
+
+---
+
+## 2. Alcance del MVP (qué SÍ entra)
+
+### 2.1 Mecánicas incluidas
+
+* Generación de moneda (Esencia) por **tiempo sin desbloquear el móvil**
+* Una moneda única: `Esencia`
+* Compra de mejoras de generación pasiva
+* Compra de **Orbes** (1 tipo inicial)
+* Colocación de Orbes en **Santuarios** para eclosionar Stillwalks
+* Una cantidad inicial de **Santuarios** (1 por ahora)
+* Incubación / eclosión de Orbes mediante pasos 
+* Eclosión y obtención de Stillwalks
+* Registro básico tipo "Pokédex" con las 3 criaturas iniciales 
+---
+
+### 2.2 Mecánicas explícitamente fuera
+
+* Stillwalks como compañeros de paseo
+* Evoluciones de los stillwalks
+* stillwalks especiales (versiones variocolor)
+* Eventos temporales
+* Tipos diferentes de orbes (de diferentes distancias)
+* Tipos diferentes de santuarios (de diferentes beneficios)
+* Registro y login de usuario
+* Amigos / social
+* Intercambio de criaturas
+* Monetización
+
+---
+
+## 3. Loop de juego del MVP
+
+1. El usuario instala la app
+2. Acepta permisos mínimos (actividad física)
+3. La app empieza a contabilizar tiempo bloqueado
+4. El usuario gana **Esencia** pasiva
+5. Entra al juego
+6. Compra un **Orbe** con Esencia
+7. Coloca el Orbe en un **Santuario**
+8. Camina y acumula pasos
+9. El Orbe progresa y finalmente eclosiona
+10. Emerge un Stillwalk y se registra en la "Pokédex"
+12. Vuelve a dejar el móvil bloqueado
+
+---
+
+## 4. Arquitectura técnica
+
+### 4.1 Stack
+
+* Flutter (UI + lógica)
+* SQLite local
+* Android nativo (Kotlin) para:
+
+  * Tiempo bloqueado
+  * Pasos
+  * Widget
+  * Notificación
+
+---
+
+### 4.2 Capas
+
+#### Capa pasiva (background)
+
+* Servicio de tracking de tiempo bloqueado
+* Servicio de tracking de pasos
+* Foreground notification minimalista
+* Widget Android
+
+#### Capa activa (foreground)
+
+* UI Flutter
+* Animaciones de eclosión y evolución
+* Gestión de Orbes, Santuarios y Stillwalks
+
+---
+
+## 5. Modelo de datos (MVP)
+
+### 5.1 PlayerState
+
+* totalEsencia
+* idleMultiplier
+* lastActiveTimestamp
+
+---
+
+### 5.2 Santuario
+
+* id
+* speedMultiplier
+* orbeId (nullable)
+* animaciones y efectos visuales asociados
+
+---
+
+### 5.3 Orbe
+
+* id
+* tipoOrbeId
+* progresoEclosion
+* stillwalkAsignadoId (nullable)
+
+---
+
+### 5.4 OrbeType
+
+* id
+* requiredSteps
+* lootTable
+
+---
+
+### 5.5 CreatureSpecies
+
+* id
+* nombre
+* descripción visual base
+
+#### MVP Stillwalks (uno por ahora)
+
+1. **Spiristone**
+
+   * Forma base: Pequeña piedra cute con manitas y piernitas (evoluciones a futuro)
+
+---
+
+### 5.6 CreatureInstance
+
+* id
+* speciesId
+* forma_actual
+
+---
+
+## 6. Reglas del MVP
+
+* Solo 1 Santuario inicial
+* Solo 1 tipo de Orbe inicial
+* Pool de pasos para eclosión
+* Los pasos se asignan automáticamente al Orbe en el Santuario
+* El progreso pasivo se calcula por timestamps
+
+---
+
+## 7. Permisos y compliance
+
+### Android
+
+* ACTIVITY_RECOGNITION
+* Notificación visible permanente
+* Pantalla explicativa de uso
+
+---
+
+## 8. UX mínima requerida
+
+* Pantalla principal:
+
+  * Esencia actual
+  * Tasa por hora
+  * Estado del Santuario (libre, con orbe en proceso, orbe eclosionado...)
+
+* Pantalla Santuario:
+
+  * Orbe asignado
+  * Progreso de eclosión
+
+* Pantalla eclosión/evolución:
+
+  * Animación simple del Stillwalk correspondiente (aleatorio al abrir el huevo con probabilidades)
+
+* "Pokédex" Diario Stillwalks:
+
+  * Lista desbloqueada con 1 Stillwalk (sin evoluciones por el momento)
+
+---
+
+## 9. Criterios de éxito del MVP
+
+* El usuario entiende cómo progresa sin usar el móvil
+* La eclosión en Santuarios y evolución son claras
+* No hay consumo excesivo de batería
+* La app es publicable sin riesgos
+
+---
+
+## 10. Preparación para el futuro
+
+* IDs únicos en todas las entidades
+* Separación Species / Instance (pensando en poder intercambiar instancias pero no perder tu especie del pokedex)
+* Sistema basado en eventos
+* Multiplicadores configurables
+* Arquitectura preparada para agregar más Stillwalks, Orbes y Santuarios, así como mecánicas sociales
+
+---
+
+## 11. Qué construir primero (orden recomendado)
+
+1. Tracking de tiempo bloqueado
+2. Moneda Esencia pasiva
+3. UI mínima
+4. Tracking de pasos
+5. Santuario inicial
+6. Orbes
+7. Stillwalks + eclosión 
+8. Animación simple de eclosión

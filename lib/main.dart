@@ -1,0 +1,213 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'screens/permissions_screen.dart';
+import 'screens/home_screen.dart';
+import 'services/permission_service.dart';
+import 'services/esencia_service.dart';
+import 'services/orbe_service.dart';
+import 'services/collection_service.dart';
+import 'services/native_bridge.dart';
+import 'data/seeds/initial_data.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Seed database on first run
+  await InitialData.seedDatabase();
+  
+  runApp(const StillwalksApp());
+}
+
+class StillwalksApp extends StatelessWidget {
+  const StillwalksApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PermissionService()),
+        ChangeNotifierProvider(create: (_) => EsenciaService()),
+        ChangeNotifierProvider(create: (_) => OrbeService()),
+        ChangeNotifierProvider(create: (_) => CollectionService()),
+        Provider(create: (_) => NativeBridge()),
+      ],
+      child: Builder(
+        builder: (context) {
+          // Setup native bridge callbacks after providers are available
+          final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
+          final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+          final orbeService = Provider.of<OrbeService>(context, listen: false);
+          
+          // Configure callbacks from native Android
+          nativeBridge.onEsenciaGenerated = (esencia, hours) async {
+            await esenciaService.addEsencia(esencia, fromNative: true);
+            debugPrint('🎯 Main: Received $esencia Esencia from native ($hours hours)');
+          };
+          
+          nativeBridge.onStepsUpdated = (newSteps, totalSteps) async {
+            await orbeService.addStepsToActiveOrbes(newSteps);
+            debugPrint('👟 Main: Received $newSteps steps from native (Total: $totalSteps)');
+          };
+          
+          return MaterialApp(
+            title: 'Stillwalks',
+            theme: ThemeData(
+              brightness: Brightness.dark,
+              primarySwatch: Colors.deepPurple,
+              scaffoldBackgroundColor: Colors.black,
+              useMaterial3: true,
+            ),
+            home: const AppInitializer(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Widget that initializes all services before showing the app
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  bool _isInitialized = false;
+  bool _hasError = false;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    try {
+      debugPrint('🚀 Initializing Stillwalks...');
+      
+      final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+      final orbeService = Provider.of<OrbeService>(context, listen: false);
+      final collectionService = Provider.of<CollectionService>(context, listen: false);
+      final permissionService = Provider.of<PermissionService>(context, listen: false);
+      final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
+      
+      // Initialize all services
+      await esenciaService.initialize();
+      await orbeService.initialize();
+      await collectionService.initialize();
+      
+      // Calculate pending Esencia from offline time
+      await esenciaService.calculatePendingEsencia();
+      
+      // Check permissions
+      await permissionService.checkPermission();
+      
+      // Start native tracking if permissions granted
+      if (permissionService.hasPermission) {
+        try {
+          await nativeBridge.startTracking();
+          debugPrint('✅ Native tracking started');
+        } catch (e) {
+          debugPrint('⚠️ Error starting native tracking: $e');
+          // Non-fatal, can continue without native tracking
+        }
+      }
+      
+      setState(() {
+        _isInitialized = true;
+      });
+      
+      debugPrint('✅ Stillwalks initialized successfully');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error initializing app: $e');
+      debugPrint('Stack trace: $stackTrace');
+      setState(() {
+        _hasError = true;
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasError) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Error al inicializar',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _errorMessage,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _hasError = false;
+                      _isInitialized = false;
+                    });
+                    _initialize();
+                  },
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    
+    if (!_isInitialized) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/creatures/spiristone.png',
+                width: 100,
+                height: 100,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.pets, size: 100, color: Colors.deepPurple),
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurpleAccent),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Inicializando Stillwalks...',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    final permissionService = Provider.of<PermissionService>(context);
+    
+    // Show permissions screen if not granted
+    if (!permissionService.hasPermission) {
+      return const PermissionsScreen();
+    }
+    
+    // Show home if permissions granted
+    return const HomeScreen();
+  }
+}
