@@ -52,6 +52,11 @@ captures/
 *.apk
 *.ap_
 *.aab
+.externalNativeBuild/
+.cxx/
+output-metadata.json
+google-services.json
+*.hprof
 
 # iOS
 **/ios/**/*.mode1v3
