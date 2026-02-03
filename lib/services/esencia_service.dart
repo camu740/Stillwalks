@@ -56,8 +56,13 @@ class EsenciaService extends ChangeNotifier {
     );
   }
 
-  /// Calcula y reclama la Esencia pendiente
-  Future<double> claimPendingEsencia() async {
+  /// Inicializa el servicio
+  Future<void> initialize() async {
+    await loadPlayerState();
+  }
+
+  /// Calcula y añade la Esencia pendiente basada en tiempo offline
+  Future<void> calculatePendingEsencia() async {
     final now = DateTime.now();
     final elapsedMinutes = now.difference(_playerState.lastActiveTimestamp).inMinutes;
 
@@ -77,8 +82,6 @@ class EsenciaService extends ChangeNotifier {
 
     await _db.updatePlayerState(_playerState.toJson());
     notifyListeners();
-
-    return esenciaGenerated;
   }
 
   /// Añade Esencia (desde nativo o cálculo local)

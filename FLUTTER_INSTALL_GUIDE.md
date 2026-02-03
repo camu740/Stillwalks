@@ -188,14 +188,36 @@ Mientras la app está corriendo en modo debug:
 flutter doctor --android-licenses
 ```
 
-### Error "Gradle build failed"
+### Error "Android sdkmanager not found" o "cmdline-tools component is missing"
 
-1. Asegúrate de tener conexión a internet (Gradle descarga dependencias)
-2. Intenta limpiar el proyecto:
-   ```powershell
-   flutter clean
-   flutter pub get
-   ```
+Este error ocurre porque falta una herramienta específica en Android Studio:
+
+1. Abre **Android Studio**.
+2. Ve a **Settings > Appearance & Behavior > System Settings > Android SDK**.
+3. Haz clic en la pestaña **SDK Tools**.
+4. Marca la casilla **Android SDK Command-line Tools (latest)**.
+5. Haz clic en **Apply** e instala.
+6. Reinicia la terminal y ejecuta `flutter doctor --android-licenses`.
+
+### Error "Dart SDK is not configured"
+
+Si Android Studio muestra este mensaje en la parte superior:
+
+1. Ve a **File > Settings > Languages & Frameworks > Dart**.
+2. Marca **Enable Dart support for the project**.
+3. En **Dart SDK path**, busca la carpeta `bin\cache\dart-sdk` dentro de tu instalación de Flutter (ej: `C:\flutter\flutter3.38.9-stable\bin\cache\dart-sdk`).
+4. Ve a **Languages & Frameworks > Flutter** y comprueba que el **Flutter SDK path** sea la carpeta raíz de Flutter.
+5. Haz clic en **Apply** y reinicia Android Studio.
+
+### Error "Android Emulator hypervisor driver installation failed" (ERROR 1062)
+
+Este error ocurre por un conflicto con Hyper-V en Windows. No instales el driver manual; usa el de Windows:
+
+1. Busca en el menú inicio: **Activar o desactivar las características de Windows**.
+2. Marca la casilla **Plataforma del hipervisor de Windows**.
+3. Marca la casilla **Plataforma de máquina virtual**.
+4. Haz clic en Aceptar y **REINICIA el ordenador**.
+5. Abre el Administrador de Tareas > Rendimiento > CPU y confirma que **Virtualización: Habilitado**.
 
 ### El emulador va muy lento
 

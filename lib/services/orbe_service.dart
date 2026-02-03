@@ -16,6 +16,11 @@ class OrbeService extends ChangeNotifier {
   List<Orbe> get orbes => _orbes;
   List<OrbeType> get orbeTypes => _orbeTypes;
 
+  /// Inicializa el servicio
+  Future<void> initialize() async {
+    await loadOrbes();
+  }
+
   /// Carga todos los Orbes y tipos desde la base de datos
   Future<void> loadOrbes() async {
     final orbesData = await _db.getAllOrbes();

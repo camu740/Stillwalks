@@ -10,6 +10,9 @@ class InitialData {
 
   /// Inicializa todos los datos semilla del juego
   static Future<void> seedDatabase() async {
+    if (await isSeeded()) {
+      return;
+    }
     await _seedCreatureSpecies();
     await _seedOrbeTypes();
     await _seedSanctuaries();

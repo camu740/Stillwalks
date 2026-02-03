@@ -170,7 +170,7 @@ class DatabaseHelper {
 
   Future<void> insertSanctuary(Map<String, dynamic> sanctuary) async {
     final db = await database;
-    await db.insert('sanctuaries', sanctuary);
+    await db.insert('sanctuaries', sanctuary, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // ========== ORBE TYPES ==========
@@ -188,7 +188,7 @@ class DatabaseHelper {
 
   Future<void> insertOrbeType(Map<String, dynamic> orbeType) async {
     final db = await database;
-    await db.insert('orbe_types', orbeType);
+    await db.insert('orbe_types', orbeType, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // ========== ORBES ==========
@@ -224,7 +224,7 @@ class DatabaseHelper {
 
   Future<void> insertCreatureSpecies(Map<String, dynamic> species) async {
     final db = await database;
-    await db.insert('creature_species', species);
+    await db.insert('creature_species', species, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Map<String, dynamic>>> getAllCreatureSpecies() async {
@@ -266,7 +266,7 @@ class DatabaseHelper {
 
   Future<void> insertUpgrade(Map<String, dynamic> upgrade) async {
     final db = await database;
-    await db.insert('upgrades', upgrade);
+    await db.insert('upgrades', upgrade, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Map<String, dynamic>>> getAllUpgrades() async {

@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/esencia_service.dart';
+import 'package:stillwalks/services/orbe_service.dart';
+import 'package:stillwalks/screens/shop_screen.dart';
+import 'package:stillwalks/screens/explorer_journal_screen.dart';
+import 'package:stillwalks/screens/sanctuary_screen.dart';
 
 /// Pantalla principal con el estado del jugador
 class HomeScreen extends StatefulWidget {
@@ -9,13 +15,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // TODO: Conectar con provider de estado
-  double _currentEsencia = 0.0;
-  double _esenciaPerHour = 100.0;
-  bool _sanctuaryOccupied = false;
-
   @override
   Widget build(BuildContext context) {
+    // Escuchar cambios en los servicios
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final orbeService = Provider.of<OrbeService>(context);
+    
+    final currentEsencia = esenciaService.playerState.totalEsencia;
+    // Asumimos que esenciaPerHour está en el estado del jugador, si no, calculamos o usamos base
+    // Revisando EsenciaService: _playerState.esenciaPerHour se usa en calculatePendingEsencia.
+    // Si la propiedad no existe en el modelo público, usaremos un valor derivado o fijo por ahora.
+    // Para asegurar compilación, accediendo a playerState.
+    // Si playerState no tiene esenciaPerHour, esto fallará. 
+    // Mirando EsenciaService.dart linea 75: _playerState.esenciaPerHour * hoursElapsed. SI EXISTE.
+    final esenciaPerHour = esenciaService.playerState.esenciaPerHour; 
+    
+    // Ocupado si hay orbes no completados
+    final sanctuaryOccupied = orbeService.orbes.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stillwalks'),
@@ -53,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _currentEsencia.toStringAsFixed(0),
+                        currentEsencia.toStringAsFixed(0),
                         style: const TextStyle(
                           fontSize: 64,
                           fontWeight: FontWeight.bold,
@@ -71,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '+${_esenciaPerHour.toStringAsFixed(0)} / hora',
+                            '+${esenciaPerHour.toStringAsFixed(0)} / hora',
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white70,
@@ -97,46 +113,54 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white.withOpacity(0.1),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _sanctuaryOccupied ? Icons.hourglass_bottom : Icons.add_circle_outline,
-                        size: 40,
-                        color: _sanctuaryOccupied ? Colors.greenAccent : Colors.white54,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Santuario Primordial',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _sanctuaryOccupied
-                                  ? 'Canalizando Orbe...'
-                                  : 'Vacío',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: _sanctuaryOccupied
-                                    ? Colors.greenAccent
-                                    : Colors.white70,
-                              ),
-                            ),
-                          ],
+                  child: InkWell(
+                    onTap: () {
+                       Navigator.push(
+                        context, 
+                        MaterialPageRoute(builder: (_) => const SanctuaryScreen())
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          sanctuaryOccupied ? Icons.hourglass_bottom : Icons.add_circle_outline,
+                          size: 40,
+                          color: sanctuaryOccupied ? Colors.greenAccent : Colors.white54,
                         ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Colors.white54,
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Santuario Primordial',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                sanctuaryOccupied
+                                    ? 'Canalizando Orbe...'
+                                    : 'Vacío - Toca para asignar',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: sanctuaryOccupied
+                                      ? Colors.greenAccent
+                                      : Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white54,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -152,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.shopping_bag,
                         label: 'Tienda',
                         onPressed: () {
-                          // TODO: Navegar a tienda
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
                         },
                       ),
                       const SizedBox(height: 12),
@@ -160,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.book,
                         label: 'Diario de Explorador',
                         onPressed: () {
-                          // TODO: Navegar a diario
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
                         },
                       ),
                       const SizedBox(height: 12),
@@ -168,7 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.settings,
                         label: 'Ajustes',
                         onPressed: () {
-                          // TODO: Navegar a ajustes
+                          // TODO: Crear SettingsScreen
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Próximamente...')),
+                          );
                         },
                       ),
                     ],

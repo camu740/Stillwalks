@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/permission_service.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 
 /// Pantalla inicial que solicita permisos necesarios
 class PermissionsScreen extends StatelessWidget {
@@ -59,9 +62,23 @@ class PermissionsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 48),
               ElevatedButton(
-                onPressed: () {
-                  // TODO: Implementar lógica de solicitud de permisos
-                  Navigator.of(context).pushReplacementNamed('/home');
+                onPressed: () async {
+                  final permissionService = Provider.of<PermissionService>(context, listen: false);
+                  final granted = await permissionService.requestActivityRecognition();
+                  
+                  if (!granted && context.mounted) {
+                    // Si se deniega, mostrar diálogo o abrir ajustes
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Necesitamos este permiso para que el juego funcione'),
+                        action: SnackBarAction(
+                          label: 'Ajustes',
+                          onPressed: ph.openAppSettings, // Usando el alias que ya debería estar o importamos
+                        ),
+                      ),
+                    );
+                  }
+                  // Si se concede, el AppInitializer reconstruirá automáticamente la UI
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

@@ -22,6 +22,11 @@ class CollectionService extends ChangeNotifier {
     return discoveredIds.length;
   }
 
+  /// Inicializa el servicio
+  Future<void> initialize() async {
+    await loadCollection();
+  }
+
   /// Carga todas las especies y criaturas capturadas
   Future<void> loadCollection() async {
     final speciesData = await _db.getAllCreatureSpecies();
