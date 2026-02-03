@@ -52,7 +52,9 @@ class MainActivity: FlutterActivity() {
     
     private fun startBackgroundServices() {
         // Iniciar servicio foreground para tracking
-        val serviceIntent = Intent(this, TrackingForegroundService::class.java)
+        val serviceIntent = Intent(this, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_START
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent)
         } else {

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/orbe_service.dart';
+import 'package:stillwalks/models/creature_species.dart';
 
 /// Pantalla del Diario de explorador (colección de Stillwalks)
 class ExplorerJournalScreen extends StatefulWidget {
@@ -9,37 +12,33 @@ class ExplorerJournalScreen extends StatefulWidget {
 }
 
 class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
-  // TODO: Conectar con CollectionService
-  final List<Map<String, dynamic>> _species = [
-    {
-      'id': 'spiristone',
-      'name': 'Spiristone',
-      'dexNumber': 1,
-      'discovered': true,
-      'assetPath': 'assets/creatures/spiristone.png',
-      'rarity': 'common',
-    },
-    {
-      'id': 'radispirit',
-      'name': 'Radispirit',
-      'dexNumber': 2,
-      'discovered': false,
-      'assetPath': 'assets/creatures/radispirit.png',
-      'rarity': 'uncommon',
-    },
-    {
-      'id': 'slugrry',
-      'name': 'Slugrry',
-      'dexNumber': 3,
-      'discovered': false,
-      'assetPath': 'assets/creatures/slugrry.png',
-      'rarity': 'rare',
-    },
-  ];
+  List<CreatureSpecies> _allSpecies = [];
+  Set<String> _unlockedIds = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final orbeService = Provider.of<OrbeService>(context, listen: false);
+    final species = await orbeService.getAllSpecies();
+    final unlocked = await orbeService.getUnlockedSpeciesIds();
+
+    if (mounted) {
+      setState(() {
+        _allSpecies = species;
+        _unlockedIds = unlocked.toSet();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final discoveredCount = _species.where((s) => s['discovered']).length;
+    final discoveredCount = _unlockedIds.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -57,7 +56,9 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
             ],
           ),
         ),
-        child: Column(
+        child: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
           children: [
             // Header con estadísticas
             Padding(
@@ -65,10 +66,10 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.catching_pokemon, size: 32, color: Colors.amberAccent),
+                  const Icon(Icons.auto_stories, size: 32, color: Colors.amberAccent),
                   const SizedBox(width: 12),
                   Text(
-                    '$discoveredCount / ${_species.length} Descubiertos',
+                    '$discoveredCount / ${_allSpecies.length} Descubiertos',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -89,17 +90,19 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
-                itemCount: _species.length,
+                itemCount: _allSpecies.length,
                 itemBuilder: (context, index) {
-                  final species = _species[index];
+                  final species = _allSpecies[index];
+                  final isDiscovered = _unlockedIds.contains(species.id);
+                  
                   return _CreatureCard(
-                    dexNumber: species['dexNumber'],
-                    name: species['name'],
-                    discovered: species['discovered'],
-                    assetPath: species['assetPath'],
-                    rarity: species['rarity'],
+                    dexNumber: species.dexNumber,
+                    name: species.name,
+                    discovered: isDiscovered,
+                    assetPath: species.assetPath,
+                    rarity: species.rarity,
                     onTap: () {
-                      if (species['discovered']) {
+                      if (isDiscovered) {
                         _showCreatureDetails(context, species);
                       }
                     },
@@ -113,31 +116,38 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
     );
   }
 
-  void _showCreatureDetails(BuildContext context, Map<String, dynamic> species) {
+  void _showCreatureDetails(BuildContext context, CreatureSpecies species) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text(species['name']),
+        title: Text(species.name),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              species['assetPath'],
+              species.assetPath,
               width: 128,
               height: 128,
               errorBuilder: (context, error, stackTrace) => const Icon(
                 Icons.image_not_supported,
                 size: 128,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              '#${species['dexNumber'].toString().padLeft(3, '0')}',
+              '#${species.dexNumber.toString().padLeft(3, '0')}',
               style: const TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 8),
-            _RarityBadge(rarity: species['rarity']),
+            _RarityBadge(rarity: species.rarity),
+            const SizedBox(height: 16),
+            Text(
+              species.description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white60),
+            ),
           ],
         ),
         actions: [

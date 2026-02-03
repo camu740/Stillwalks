@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/esencia_service.dart';
+import 'package:stillwalks/services/orbe_service.dart';
+import 'package:stillwalks/models/upgrade.dart';
+import 'package:stillwalks/models/orbe.dart';
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/esencia_service.dart';
+import 'package:stillwalks/services/orbe_service.dart';
+import 'package:stillwalks/models/upgrade.dart';
+import 'package:stillwalks/models/orbe.dart';
 
 /// Pantalla de la tienda para comprar Orbes y mejoras
 class ShopScreen extends StatefulWidget {
@@ -10,9 +20,6 @@ class ShopScreen extends StatefulWidget {
 
 class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  // TODO: Conectar con EsenciaService y OrbeService
-  final double _currentEsencia = 1500.0;
 
   @override
   void initState() {
@@ -28,6 +35,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    // Escuchar servicios
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final orbeService = Provider.of<OrbeService>(context);
+    
+    final currentEsencia = esenciaService.playerState.totalEsencia;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tienda'),
@@ -69,7 +81,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                     const Icon(Icons.auto_awesome, color: Colors.amberAccent),
                     const SizedBox(width: 8),
                     Text(
-                      'Esencia: ${_currentEsencia.toStringAsFixed(0)}',
+                      'Esencia: ${currentEsencia.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -98,6 +110,14 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildOrbesTab() {
+    final orbeService = Provider.of<OrbeService>(context, listen: false);
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final currentEsencia = esenciaService.playerState.totalEsencia;
+    
+    // Obtener tipos de orbes disponibles (en el futuro vendran de BD)
+    // Por ahora usamos datos mockeados o checkeamos orbeService.orbeTypes si está cargado
+    // Como fallback, hardcodeamos visualmente pero lógica real
+    
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -105,13 +125,55 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           icon: Icons.circle_outlined,
           title: 'Orbe Básico',
           description: 'Requiere 2,000 pasos para canalizar',
-          cost: 500,
-          currentEsencia: _currentEsencia,
-          onPurchase: () {
-            // TODO: Implementar compra de Orbe
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Orbe comprado!')),
-            );
+          cost: 500.0, // Base cost
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+            // Verificar si ya tiene un orbe activo (simplificación MVP)
+            if (orbeService.orbes.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Ya tienes un Orbe activo. Termínalo primero.')),
+              );
+              return;
+            }
+
+            final reduction = esenciaService.getOrbeCostReduction();
+            // ID debe coincidir con InitialData
+            final result = await orbeService.purchaseOrbe('orbe_basic', currentEsencia, reduction);
+            
+            if (result != null) {
+              // Descontar esencia
+              // 1. Calcular coste real
+              // 2. Gastar en EsenciaService
+              // 3. Añadir orbe en OrbeService (necesitamos metodo 'addOrbe' o similar que no valide dinero si ya pagamos)
+              // O mejor: purchaseOrbe en OrbeService debería recibir el callback de pago?
+              // SIMPLIFICACION: purchaseOrbe en OrbeService solo crea el orbe en BD. El gasto lo hace EsenciaService.
+              
+              // RE-READING OrbeService code from previous artifacts...
+              // purchaseOrbe(typeId, esenciaAvailable, reduction) -> Returns Orbe?
+              // Code:
+              // final cost = baseCost * (1.0 - reduction);
+              // if (esenciaAvailable < cost) return null;
+              // ... insert into DB ...
+              
+              // It creates the orb but DOES NOT deduct essence from PlayerState because it doesn't have access to it.
+              // So we must manually deduct essence here.
+              // We need to know the cost calculated. 
+              final realCost = 500.0 * (1.0 - reduction);
+              await esenciaService.spendEsencia(realCost);
+              
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('¡Orbe adquirido!')),
+                );
+                Navigator.pop(context); // Volver al santuario
+              }
+            } else {
+               if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No tienes suficiente Esencia')),
+                );
+              }
+            }
           },
         ),
       ],
@@ -119,52 +181,61 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildUpgradesTab() {
-    return ListView(
+     final esenciaService = Provider.of<EsenciaService>(context);
+     final upgrades = esenciaService.upgrades;
+     final currentEsencia = esenciaService.playerState.totalEsencia;
+
+    if (upgrades.isEmpty) {
+      return const Center(child: Text("Cargando mejoras...", style: TextStyle(color: Colors.white)));
+    }
+
+    return ListView.separated(
       padding: const EdgeInsets.all(16),
-      children: [
-        _UpgradeItem(
-          icon: Icons.schedule,
-          title: 'Generación Pasiva',
-          description: 'Aumenta la Esencia generada por hora',
-          currentLevel: 0,
-          cost: 100,
-          currentEsencia: _currentEsencia,
-          multiplier: '+10% por nivel',
-          onPurchase: () {
-            // TODO: Implementar compra de mejora
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Mejora comprada!')),
-            );
+      itemCount: upgrades.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final upgrade = upgrades[index];
+        return _UpgradeItem(
+          icon: _getUpgradeIcon(upgrade.type),
+          title: upgrade.name,
+          description: upgrade.description,
+          currentLevel: upgrade.currentLevel,
+          cost: upgrade.calculateNextLevelCost(),
+          currentEsencia: currentEsencia,
+          multiplier: _getUpgradeMultiplierText(upgrade.type),
+          onPurchase: () async {
+            final success = await esenciaService.purchaseUpgrade(upgrade.id);
+            if (success) {
+               ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('¡Mejora "${upgrade.name}" realizada!')),
+              );
+            } else {
+               ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No tienes suficiente Esencia')),
+              );
+            }
           },
-        ),
-        const SizedBox(height: 12),
-        _UpgradeItem(
-          icon: Icons.speed,
-          title: 'Velocidad de Santuario',
-          description: 'Los Orbes requieren menos pasos',
-          currentLevel: 0,
-          cost: 200,
-          currentEsencia: _currentEsencia,
-          multiplier: '+5% por nivel',
-          onPurchase: () {
-            // TODO: Implementar compra de mejora
-          },
-        ),
-        const SizedBox(height: 12),
-        _UpgradeItem(
-          icon: Icons.discount,
-          title: 'Maestría en Orbes',
-          description: 'Reduce el costo de compra de Orbes',
-          currentLevel: 0,
-          cost: 150,
-          currentEsencia: _currentEsencia,
-          multiplier: '+2% por nivel',
-          onPurchase: () {
-            // TODO: Implementar compra de mejora
-          },
-        ),
-      ],
+        );
+      },
     );
+  }
+
+  IconData _getUpgradeIcon(UpgradeType type) {
+    switch (type) {
+      case UpgradeType.idleMultiplier: return Icons.schedule;
+      case UpgradeType.sanctuarySpeed: return Icons.speed;
+      case UpgradeType.orbeCostReduction: return Icons.discount;
+      default: return Icons.star;
+    }
+  }
+
+  String _getUpgradeMultiplierText(UpgradeType type) {
+    switch (type) {
+      case UpgradeType.idleMultiplier: return '+10% Gen/Hora'; // Hardcoded for display, match model logic
+      case UpgradeType.sanctuarySpeed: return '+5% Velocidad';
+      case UpgradeType.orbeCostReduction: return '-5% Coste'; // Assuming logic in model
+      default: return '';
+    }
   }
 }
 

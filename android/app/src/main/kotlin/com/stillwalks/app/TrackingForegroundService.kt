@@ -32,7 +32,15 @@ class TrackingForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
-                startForeground(NOTIFICATION_ID, createNotification())
+                if (Build.VERSION.SDK_INT >= 34) {
+                    startForeground(
+                        NOTIFICATION_ID, 
+                        createNotification(),
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+                    )
+                } else {
+                    startForeground(NOTIFICATION_ID, createNotification())
+                }
                 Log.d(TAG, "Foreground service started")
             }
             ACTION_STOP -> {

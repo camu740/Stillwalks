@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import 'dart:math' show pi;
 
 /// Pantalla de animación de canalización (cuando el Orbe está completo)
-class ChannelingScreen extends StatefulWidget {
-  // TODO: Recibir datos del Stillwalk canalizadofinal String stillwalkId;
-  // final String stillwalkName;
-  // final String stillwalkAsset;
+import 'package:stillwalks/models/creature_instance.dart';
+import 'package:stillwalks/models/creature_species.dart';
 
-  const ChannelingScreen({super.key});
+/// Pantalla de animación de canalización (cuando el Orbe está completo)
+class ChannelingScreen extends StatefulWidget {
+  final CreatureInstance instance;
+  final CreatureSpecies species;
+  final bool isNew;
+
+  const ChannelingScreen({
+    super.key,
+    required this.instance,
+    required this.species,
+    required this.isNew,
+  });
 
   @override
   State<ChannelingScreen> createState() => _ChannelingScreenState();
@@ -21,7 +30,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
   late Animation<double> _opacityAnimation;
 
   bool _showCreature = false;
-  bool _isFirstTime = true; // TODO: Obtener de la base de datos
+  // bool _isFirstTime -> Usamos widget.isNew
 
   @override
   void initState() {
@@ -133,7 +142,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                             ],
                           ),
                           child: Image.asset(
-                            'assets/creatures/spiristone.png',
+                            widget.species.assetPath,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Icon(Icons.pets, size: 150, color: Colors.white),
                           ),
@@ -142,9 +151,9 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                         const SizedBox(height: 32),
 
                         // Nombre de la criatura
-                        const Text(
-                          'Spiristone', // TODO: Nombre dinámico
-                          style: TextStyle(
+                        Text(
+                          widget.species.name,
+                          style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -154,7 +163,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                         const SizedBox(height: 16),
 
                         // Badge de "Nuevo" si es primera captura
-                        if (_isFirstTime)
+                        if (widget.isNew)
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,

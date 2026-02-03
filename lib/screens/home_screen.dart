@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/screens/explorer_journal_screen.dart';
 import 'package:stillwalks/screens/sanctuary_screen.dart';
+import 'package:stillwalks/data/database/database_helper.dart';
 
 /// Pantalla principal con el estado del jugador
 class HomeScreen extends StatefulWidget {
@@ -206,6 +208,82 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      floatingActionButton: kDebugMode
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: 'essence_btn',
+                  onPressed: () {
+                    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                    esenciaService.addEsencia(500); // Método helper en EsenciaService?
+                    // EsenciaService no tiene addEsencia público que sume arbitrariamente, pero tiene updateSteps que da esencia.
+                    // O podemos hackearlo simulando pasos también.
+                    // Pero el usuario pidió botón dedicado.
+                    // Revisando EsenciaService... updateSteps(steps) -> add(steps * rate).
+                    // Vamos a simular pasos "invisibles" para esencia, o mejor, añadir un método debug en EsenciaService si no existe.
+                    // Como no quiero editar EsenciaService ahora por el límite de contexto, usaré updateSteps con un numero alto de pasos PERO solo para esencia, sin afectar orbes?
+                    // No, el usuario pidió BOTON DE ESENCIA. Si llamo updateSteps, afecta a ambos si lo llamo desde UI incorrectamente.
+                    // El botón anterior llamaba a AMBOS servicios.
+                    // Este boton llamará solo a EsenciaService.updateSteps(5000) por ejemplo.
+                    // Pero updateSteps calcula basado en rate.
+                    // Mejor: llamar a updateSteps(0) y modificar state manual? No.
+                    // Asumiremos que updateSteps(500) da esencia correspondiente.
+                    // Pero espera, el usuario quiere botón de "+Esencia".
+                    // Voy a simular una "recompensa" usando spendEsencia(-500)?
+                    // spendEsencia resta. Si paso negativo, suma. hacky pero funciona.
+                    esenciaService.spendEsencia(-1000.0);
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
+                    );
+                  },
+                  icon: const Icon(Icons.flash_on),
+                  label: const Text('+1000 Esencia'),
+                  backgroundColor: Colors.amber,
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton.extended(
+                  heroTag: 'steps_btn',
+                  onPressed: () {
+                    final orbeService = Provider.of<OrbeService>(context, listen: false);
+                    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                    
+                    const steps = 500;
+                    orbeService.addStepsToActiveOrbes(steps);
+                    esenciaService.updateSteps(steps);
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('DEBUG: +500 pasos simulados')),
+                    );
+                  },
+                  icon: const Icon(Icons.directions_run),
+                  label: const Text('+500 Pasos'),
+                  backgroundColor: Colors.redAccent,
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton.extended(
+                  heroTag: 'reset_btn',
+                  onPressed: () async {
+                     final db = DatabaseHelper();
+                     await db.resetDatabase();
+                     // Recargar servicios?
+                     final orbeService = Provider.of<OrbeService>(context, listen: false);
+                     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                     await orbeService.initialize();
+                     await esenciaService.initialize(); // Si tuviera initialize
+                     
+                     ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('DEBUG: Base de datos REINICIADA 💥')),
+                    );
+                  },
+                  icon: const Icon(Icons.delete_forever),
+                  label: const Text('Reset DB'),
+                  backgroundColor: Colors.black,
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

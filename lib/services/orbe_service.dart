@@ -72,8 +72,16 @@ class OrbeService extends ChangeNotifier {
     if (orbeIndex == -1) return;
 
     final orbe = _orbes[orbeIndex];
+    final type = getOrbeType(orbe.orbeTypeId);
+    final maxSteps = type?.requiredSteps ?? 2000; // Fallback
+
+    // Clamp al máximo
+    final newProgress = (orbe.currentProgress + steps).clamp(0, maxSteps);
+
+    if (newProgress == orbe.currentProgress) return; // No hay cambios
+
     final updatedOrbe = orbe.copyWith(
-      currentProgress: orbe.currentProgress + steps,
+      currentProgress: newProgress,
     );
 
     await _db.updateOrbe(orbeId, {'currentProgress': updatedOrbe.currentProgress});
@@ -81,22 +89,18 @@ class OrbeService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Actualiza todos los Orbes en santuarios con nuevos pasos
+  /// Actualiza todos los Orbes activos (en progreso) con nuevos pasos
   Future<void> addStepsToActiveOrbes(int newSteps) async {
-    // Obtener santuarios con Orbes activos
-    // Nota: Asumiendo que DatabaseHelper tiene un método para obtener santuarios
-    // y que estos santuarios pueden contener un orbeId.
-    // Si no existe, necesitará ser implementado en DatabaseHelper.
-    final sanctuaries = await _db.getAllSanctuaries(); // This method needs to exist in DatabaseHelper
+    // MVP: Actualizar todos los orbes que no han sido canalizados aún
+    // En el futuro, solo los que estén en un santuario
+    final activeOrbes = _orbes.where((o) => !o.isChanneled).toList();
 
-    for (var sanctuaryMap in sanctuaries) {
-      final orbeId = sanctuaryMap['orbeId'] as String?;
-      if (orbeId != null) {
-        await updateOrbeProgress(orbeId, newSteps);
-      }
+    for (var orbe in activeOrbes) {
+      await updateOrbeProgress(orbe.id, newSteps);
     }
 
-    debugPrint('OrbeService: Added $newSteps steps to all active orbes');
+    debugPrint('OrbeService: Added $newSteps steps to ${activeOrbes.length} active orbes');
+    notifyListeners();
   }
 
   /// Canaliza un Orbe completado (determina qué Stillwalk sale)
@@ -105,17 +109,74 @@ class OrbeService extends ChangeNotifier {
     if (orbeIndex == -1) return null;
 
     final orbe = _orbes[orbeIndex];
-    final orbeType = getOrbeType(orbe.orbeTypeId);
-    if (orbeType == null) return null;
+    var orbeType = getOrbeType(orbe.orbeTypeId);
+    
+    // Fallback para legacy bug
+    if (orbeType == null) {
+      // Intentar buscar el básico por defecto
+      orbeType = getOrbeType('orbe_basic');
+      // Si aún así falla (no debería), hardcodeamos uno temporal
+      orbeType ??= OrbeType(
+          id: 'temp', 
+          requiredSteps: 2000, 
+          name: 'Unknown', 
+          description: '', 
+          lootTable: {
+            'spiristone': 0.50,
+            'radispirit': 0.35,
+            'slugrry': 0.15,
+          }
+      );
+    }
+
+    // Obtener inventario actual para ajustar probabilidades (Bad Luck Protection)
+    final allInstances = await _db.getAllCreatureInstances();
+    
+    // Crear tabla de loot ajustada
+    final Map<String, double> adjustedLootTable = {};
+    double totalWeight = 0.0;
+
+    for (var entry in orbeType.lootTable.entries) {
+      final speciesId = entry.key;
+      final baseProbability = entry.value;
+      
+      // Contar cuántos tenemos de esta especie
+      final count = allInstances.where((i) => i['speciesId'] == speciesId).length;
+      
+      // Fórmula: Peso = Base / (1 + count * 0.5)
+      // Ejemplo: Spiristone (base 0.5). Con 0 => 0.5. Con 1 => 0.33. Con 10 => 0.08.
+      final adjustedWeight = baseProbability / (1.0 + (count * 0.5));
+      
+      adjustedLootTable[speciesId] = adjustedWeight;
+      totalWeight += adjustedWeight;
+    }
+
+    // Normalizar a 1.0 (opcional, pero buena práctica para _rollLootTable si este espera 0-1)
+    // Mi _rollLootTable suma acumulativamente, así que si el total != 1.0, el random (0-1) podría salirse de rango si total < 1.
+    // O si total > 1.
+    // Mejor normalizar la tabla ajustada.
+    
+    final Map<String, double> finalLootTable = {};
+    if (totalWeight > 0) {
+      adjustedLootTable.forEach((key, weight) {
+        finalLootTable[key] = weight / totalWeight;
+      });
+    } else {
+      // Fallback si algo falló
+      finalLootTable.addAll(orbeType.lootTable);
+    }
 
     // Verificar que está listo para canalizar
     if (!orbe.isReadyToChannel(orbeType.requiredSteps)) {
       return null;
     }
 
-    // Determinar qué criatura sale usando la loot table
-    final speciesId = _rollLootTable(orbeType.lootTable);
+    // Determinar qué criatura sale usando la loot table ajustada
+    final speciesId = _rollLootTable(finalLootTable);
     if (speciesId == null) return null;
+
+    // DEBUG: Mostrar probabilidades reales en consola
+    debugPrint('🎲 Loot Roll: $finalLootTable -> Result: $speciesId');
 
     // Crear instancia de criatura
     final instance = CreatureInstance(
@@ -159,10 +220,50 @@ class OrbeService extends ChangeNotifier {
     return _orbes.where((o) => !o.isChanneled).toList();
   }
 
+  /// Obtiene una instancia por ID (helper para UI)
+  Future<CreatureInstance?> getCreatureInstanceById(String instanceId) async {
+    final allInstances = await _db.getAllCreatureInstances();
+    try {
+      final data = allInstances.firstWhere((i) => i['id'] == instanceId);
+      return CreatureInstance.fromJson(data);
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Elimina un Orbe ya canalizado
   Future<void> deleteChanneledOrbe(String orbeId) async {
     await _db.deleteOrbe(orbeId);
     _orbes.removeWhere((o) => o.id == orbeId);
     notifyListeners();
+  }
+
+  /// Obtiene una especie por ID (helper para UI)
+  Future<CreatureSpecies?> getSpeciesById(String speciesId) async {
+    final allSpeciesData = await _db.getAllCreatureSpecies();
+    try {
+      final speciesData = allSpeciesData.firstWhere((s) => s['id'] == speciesId);
+      return CreatureSpecies.fromJson(speciesData);
+    } catch (e) {
+      return null;
+    }
+  }
+  /// Comprueba si es la primera vez que se captura esta especie (para mostrar badge "Nuevo")
+  Future<bool> isNewDiscovery(String speciesId) async {
+    final allInstances = await _db.getAllCreatureInstances();
+    final count = allInstances.where((i) => i['speciesId'] == speciesId).length;
+    return count == 1;
+  }
+
+  /// Obtiene lista de IDs de especies descubiertas
+  Future<List<String>> getUnlockedSpeciesIds() async {
+    final allInstances = await _db.getAllCreatureInstances();
+    return allInstances.map((i) => i['speciesId'] as String).toSet().toList();
+  }
+
+  /// Helper para exponer todas las especies al diario
+  Future<List<CreatureSpecies>> getAllSpecies() async {
+    final data = await _db.getAllCreatureSpecies();
+    return data.map((d) => CreatureSpecies.fromJson(d)).toList();
   }
 }

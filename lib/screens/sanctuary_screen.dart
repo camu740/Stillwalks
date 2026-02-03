@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/orbe_service.dart';
+import 'package:stillwalks/services/esencia_service.dart';
+import 'package:stillwalks/screens/shop_screen.dart';
+import 'package:stillwalks/models/orbe.dart';
+import 'package:stillwalks/screens/channeling_screen.dart';
 
 /// Pantalla del santuario donde se visualiza y gestiona el Orbe asignado
 class SanctuaryScreen extends StatefulWidget {
@@ -9,15 +15,32 @@ class SanctuaryScreen extends StatefulWidget {
 }
 
 class _SanctuaryScreenState extends State<SanctuaryScreen> {
-  // TODO: Conectar con services
-  bool _hasOrbe = false;
-  int _currentSteps = 500;
-  int _requiredSteps = 2000;
-  bool _isReadyToChannel = false;
-
   @override
   Widget build(BuildContext context) {
-    final progress = _hasOrbe ? (_currentSteps / _requiredSteps).clamp(0.0, 1.0) : 0.0;
+    final orbeService = Provider.of<OrbeService>(context);
+    final orbe = orbeService.orbes.isNotEmpty ? orbeService.orbes.first : null; // Asumiendo 1 orbe por ahora
+    final hasOrbe = orbe != null;
+    
+    // Calcular progreso real
+    double progress = 0.0;
+    int currentSteps = 0;
+    int requiredSteps = 1;
+    bool isReadyToChannel = false;
+
+    if (hasOrbe) {
+      currentSteps = orbe.currentProgress; // Mostrar pasos siempre, aunque el tipo sea desconocido
+      final type = orbeService.getOrbeType(orbe.orbeTypeId);
+      if (type != null) {
+        requiredSteps = type.requiredSteps;
+        progress = (currentSteps / requiredSteps).clamp(0.0, 1.0);
+        isReadyToChannel = orbe.isReadyToChannel(requiredSteps);
+      } else {
+        // Fallback para orbes legacy/corruptos
+        requiredSteps = 2000;
+        progress = (currentSteps / requiredSteps).clamp(0.0, 1.0);
+        isReadyToChannel = currentSteps >= requiredSteps;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +72,7 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
-                        colors: _hasOrbe
+                        colors: hasOrbe
                             ? [
                                 Colors.purpleAccent.withOpacity(0.6),
                                 Colors.deepPurple.withOpacity(0.3),
@@ -59,7 +82,7 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                                 Colors.grey.withOpacity(0.1),
                               ],
                       ),
-                      boxShadow: _hasOrbe
+                      boxShadow: hasOrbe
                           ? [
                               BoxShadow(
                                 color: Colors.purpleAccent.withOpacity(0.5),
@@ -71,9 +94,9 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                     ),
                     child: Center(
                       child: Icon(
-                        _hasOrbe ? Icons.circle : Icons.add_circle_outline,
+                        hasOrbe ? Icons.circle : Icons.add_circle_outline,
                         size: 100,
-                        color: _hasOrbe ? Colors.white : Colors.white30,
+                        color: hasOrbe ? Colors.white : Colors.white30,
                       ),
                     ),
                   ),
@@ -81,13 +104,13 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                   const SizedBox(height: 40),
 
                   // Información del estado
-                  if (_hasOrbe) ...[
+                    if (hasOrbe) ...[
                     Text(
-                      _isReadyToChannel ? '¡Listo para Canalizar!' : 'Canalizando...',
+                      isReadyToChannel ? '¡Listo para Canalizar!' : 'Canalizando...',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: _isReadyToChannel ? Colors.greenAccent : Colors.white,
+                        color: isReadyToChannel ? Colors.greenAccent : Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -107,7 +130,7 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                             children: [
                               const Text('Progreso:', style: TextStyle(fontSize: 16)),
                               Text(
-                                '$_currentSteps / $_requiredSteps pasos',
+                                '$currentSteps / $requiredSteps pasos',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -124,7 +147,7 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                               minHeight: 20,
                               backgroundColor: Colors.grey.withOpacity(0.3),
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                _isReadyToChannel ? Colors.greenAccent : Colors.cyanAccent,
+                                isReadyToChannel ? Colors.greenAccent : Colors.cyanAccent,
                               ),
                             ),
                           ),
@@ -135,11 +158,62 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                     const SizedBox(height: 24),
 
                     // Botón de acción
-                    if (_isReadyToChannel)
+                    if (isReadyToChannel || (orbe != null && orbe.isChanneled))
                       ElevatedButton(
-                        onPressed: () {
-                          // TODO: Navegar a pantalla de canalización
-                          Navigator.pushNamed(context, '/channeling');
+                        onPressed: () async {
+                          if (orbe!.isChanneled) {
+                            // Si ya está canalizado, recuperar la instancia y mostrar la animación de nuevo
+                            final instance = await orbeService.getCreatureInstanceById(orbe.stillwalkId!);
+                            
+                            if (instance != null && context.mounted) {
+                              final species = await orbeService.getSpeciesById(instance.speciesId);
+                              const isNew = false; 
+
+                              if (species != null && context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ChannelingScreen(
+                                      instance: instance,
+                                      species: species,
+                                      isNew: isNew,
+                                    ),
+                                  ),
+                                ).then((_) {
+                                  orbeService.deleteChanneledOrbe(orbe.id);
+                                });
+                              }
+                            } else {
+                              await orbeService.deleteChanneledOrbe(orbe.id);
+                            }
+                          } else {
+                            // Canalizar orbe normal
+                            final instance = await orbeService.channelOrbe(orbe.id);
+                            
+                            if (instance != null && context.mounted) {
+                              final species = await orbeService.getSpeciesById(instance.speciesId);
+                              final isNew = await orbeService.isNewDiscovery(instance.speciesId);
+
+                              if (species != null && context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ChannelingScreen(
+                                      instance: instance,
+                                      species: species,
+                                      isNew: isNew,
+                                    ),
+                                  ),
+                                ).then((_) {
+                                  orbeService.deleteChanneledOrbe(orbe.id);
+                                });
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Error al canalizar. Intenta de nuevo.')),
+                              );
+                            }
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.greenAccent,
@@ -172,7 +246,7 @@ class _SanctuaryScreenState extends State<SanctuaryScreen> {
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/shop');
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurpleAccent,
