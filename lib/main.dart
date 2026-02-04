@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/permissions_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/shop_screen.dart';
 import 'services/permission_service.dart';
 import 'services/esencia_service.dart';
 import 'services/orbe_service.dart';
@@ -58,6 +59,9 @@ class StillwalksApp extends StatelessWidget {
               useMaterial3: true,
             ),
             home: const AppInitializer(),
+            routes: {
+              '/shop': (context) => const ShopScreen(),
+            },
             debugShowCheckedModeBanner: false,
           );
         },

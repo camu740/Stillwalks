@@ -23,7 +23,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -42,7 +42,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // Tabla de santuarios
+    // Tabla de santuarios (mejorada para temporales)
     await db.execute('''
       CREATE TABLE sanctuaries (
         id TEXT PRIMARY KEY,
@@ -50,6 +50,9 @@ class DatabaseHelper {
         orbeId TEXT,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
+        isTemporary INTEGER NOT NULL DEFAULT 0,
+        remainingUses INTEGER NOT NULL DEFAULT 0,
+        typeId TEXT,
         FOREIGN KEY (orbeId) REFERENCES orbes(id) ON DELETE SET NULL
       )
     ''');
@@ -103,6 +106,16 @@ class DatabaseHelper {
       )
     ''');
 
+    // Tabla de inventario (Bolsa) para consumibles/objetos
+    await db.execute('''
+      CREATE TABLE inventory_items (
+        id TEXT PRIMARY KEY,
+        typeId TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        metadata TEXT
+      )
+    ''');
+
     // Tabla de mejoras
     await db.execute('''
       CREATE TABLE upgrades (
@@ -131,9 +144,26 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Manejar migraciones futuras aquí
     if (oldVersion < 2) {
-      // Ejemplo: await db.execute('ALTER TABLE ...');
+      // Crear tabla de inventario si no existe (migración)
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS inventory_items (
+          id TEXT PRIMARY KEY,
+          typeId TEXT NOT NULL,
+          quantity INTEGER NOT NULL DEFAULT 1,
+          metadata TEXT
+        )
+      ''');
+      
+      // Asegurar que las columnas nuevas de santuarios existan
+      // Nota: En SQLite ALTER TABLE solo permite añadir una columna a la vez
+      try {
+        await db.execute('ALTER TABLE sanctuaries ADD COLUMN isTemporary INTEGER NOT NULL DEFAULT 0');
+        await db.execute('ALTER TABLE sanctuaries ADD COLUMN remainingUses INTEGER NOT NULL DEFAULT 0');
+        await db.execute('ALTER TABLE sanctuaries ADD COLUMN typeId TEXT');
+      } catch (e) {
+        // Ignorar si las columnas ya existen
+      }
     }
   }
 
@@ -166,6 +196,11 @@ class DatabaseHelper {
   Future<void> updateSanctuary(String id, Map<String, dynamic> data) async {
     final db = await database;
     await db.update('sanctuaries', data, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteSanctuary(String id) async {
+    final db = await database;
+    await db.delete('sanctuaries', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> insertSanctuary(Map<String, dynamic> sanctuary) async {
@@ -262,6 +297,37 @@ class DatabaseHelper {
     await db.update('creature_instances', data, where: 'id = ?', whereArgs: [id]);
   }
 
+  // ========== INVENTORY ITEMS ==========
+
+  Future<List<Map<String, dynamic>>> getAllInventoryItems() async {
+    final db = await database;
+    return await db.query('inventory_items');
+  }
+
+  Future<void> updateInventoryItem(String typeId, int delta) async {
+    final db = await database;
+    final items = await db.query('inventory_items', where: 'typeId = ?', whereArgs: [typeId]);
+    
+    if (items.isEmpty) {
+      if (delta > 0) {
+        await db.insert('inventory_items', {
+          'id': 'item_$typeId',
+          'typeId': typeId,
+          'quantity': delta,
+        });
+      }
+    } else {
+      final currentQuantity = items.first['quantity'] as int;
+      final newQuantity = currentQuantity + delta;
+      
+      if (newQuantity <= 0) {
+        await db.delete('inventory_items', where: 'typeId = ?', whereArgs: [typeId]);
+      } else {
+        await db.update('inventory_items', {'quantity': newQuantity}, where: 'typeId = ?', whereArgs: [typeId]);
+      }
+    }
+  }
+
   // ========== UPGRADES ==========
 
   Future<void> insertUpgrade(Map<String, dynamic> upgrade) async {
@@ -292,7 +358,14 @@ class DatabaseHelper {
     await db.delete('creature_instances');
     await db.delete('orbes');
     await db.delete('upgrades');
-    await db.update('sanctuaries', {'orbeId': null});
+    await db.delete('inventory_items');
+    
+    // Eliminar santuarios temporales
+    await db.delete('sanctuaries', where: 'isTemporary = ?', whereArgs: [1]);
+    
+    // Limpiar orbeId del santuario permanente
+    await db.update('sanctuaries', {'orbeId': null}, where: 'isTemporary = ?', whereArgs: [0]);
+    
     await db.update('player_state', {
       'totalEsencia': 0,
       'idleMultiplier': 1.0,

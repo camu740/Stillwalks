@@ -7,6 +7,7 @@ import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/screens/explorer_journal_screen.dart';
 import 'package:stillwalks/screens/sanctuary_screen.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
+import 'package:stillwalks/screens/widgets/sanctuary_slot_widgets.dart';
 
 /// Pantalla principal con el estado del jugador
 class HomeScreen extends StatefulWidget {
@@ -102,67 +103,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // Sección media: Estado del santuario
+              // Sección media: Santuarios (2 slots lado a lado)
               Expanded(
                 flex: 1,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.1),
-                    ),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                       Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (_) => const SanctuaryScreen())
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          sanctuaryOccupied ? Icons.hourglass_bottom : Icons.add_circle_outline,
-                          size: 40,
-                          color: sanctuaryOccupied ? Colors.greenAccent : Colors.white54,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                'Santuario Primordial',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                sanctuaryOccupied
-                                    ? 'Canalizando Orbe...'
-                                    : 'Vacío - Toca para asignar',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: sanctuaryOccupied
-                                      ? Colors.greenAccent
-                                      : Colors.white70,
-                                ),
-                              ),
-                            ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      // Santuario Primordial (izquierda)
+                      Expanded(
+                        child: SanctuarySlot(
+                          sanctuary: orbeService.sanctuaries.firstWhere(
+                            (s) => !s.isTemporary,
+                            orElse: () => orbeService.sanctuaries.first,
                           ),
+                          orbeService: orbeService,
                         ),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: Colors.white54,
+                      ),
+                      const SizedBox(width: 12),
+                      // Santuario Temporal (derecha)
+                      Expanded(
+                        child: TemporarySanctuarySlot(
+                          orbeService: orbeService,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

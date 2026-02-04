@@ -4,15 +4,13 @@ import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/models/orbe.dart';
-import 'package:provider/provider.dart';
-import 'package:stillwalks/services/esencia_service.dart';
-import 'package:stillwalks/services/orbe_service.dart';
-import 'package:stillwalks/models/upgrade.dart';
-import 'package:stillwalks/models/orbe.dart';
+import 'package:stillwalks/models/inventory_item.dart';
 
 /// Pantalla de la tienda para comprar Orbes y mejoras
 class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key});
+  final int initialTab;
+  
+  const ShopScreen({super.key, this.initialTab = 0});
 
   @override
   State<ShopScreen> createState() => _ShopScreenState();
@@ -24,7 +22,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
   }
 
   @override
@@ -48,6 +46,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           controller: _tabController,
           tabs: const [
             Tab(icon: Icon(Icons.circle), text: 'Orbes'),
+            Tab(icon: Icon(Icons.auto_awesome), text: 'Santuarios'),
             Tab(icon: Icon(Icons.trending_up), text: 'Mejoras'),
           ],
         ),
@@ -99,6 +98,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 controller: _tabController,
                 children: [
                   _buildOrbesTab(),
+                  _buildSanctuariesTab(),
                   _buildUpgradesTab(),
                 ],
               ),
@@ -110,67 +110,106 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildOrbesTab() {
-    final orbeService = Provider.of<OrbeService>(context, listen: false);
+    final orbeService = Provider.of<OrbeService>(context);
     final esenciaService = Provider.of<EsenciaService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
-    
-    // Obtener tipos de orbes disponibles (en el futuro vendran de BD)
-    // Por ahora usamos datos mockeados o checkeamos orbeService.orbeTypes si está cargado
-    // Como fallback, hardcodeamos visualmente pero lógica real
-    
+    final reduction = esenciaService.getOrbeCostReduction();
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Orbes disponibles para comprar',
+            style: TextStyle(
+              color: Colors.purpleAccent,
+              fontStyle: FontStyle.italic,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
         _ShopItem(
           icon: Icons.circle_outlined,
           title: 'Orbe Básico',
-          description: 'Requiere 2,000 pasos para canalizar',
-          cost: 500.0, // Base cost
+          description: 'Requiere 2.000 pasos para canalizar',
+          cost: 500.0 * (1.0 - reduction),
           currentEsencia: currentEsencia,
           onPurchase: () async {
-            // Verificar si ya tiene un orbe activo (simplificación MVP)
-            if (orbeService.orbes.isNotEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Ya tienes un Orbe activo. Termínalo primero.')),
-              );
-              return;
-            }
-
-            final reduction = esenciaService.getOrbeCostReduction();
-            // ID debe coincidir con InitialData
             final result = await orbeService.purchaseOrbe('orbe_basic', currentEsencia, reduction);
-            
             if (result != null) {
-              // Descontar esencia
-              // 1. Calcular coste real
-              // 2. Gastar en EsenciaService
-              // 3. Añadir orbe en OrbeService (necesitamos metodo 'addOrbe' o similar que no valide dinero si ya pagamos)
-              // O mejor: purchaseOrbe en OrbeService debería recibir el callback de pago?
-              // SIMPLIFICACION: purchaseOrbe en OrbeService solo crea el orbe en BD. El gasto lo hace EsenciaService.
-              
-              // RE-READING OrbeService code from previous artifacts...
-              // purchaseOrbe(typeId, esenciaAvailable, reduction) -> Returns Orbe?
-              // Code:
-              // final cost = baseCost * (1.0 - reduction);
-              // if (esenciaAvailable < cost) return null;
-              // ... insert into DB ...
-              
-              // It creates the orb but DOES NOT deduct essence from PlayerState because it doesn't have access to it.
-              // So we must manually deduct essence here.
-              // We need to know the cost calculated. 
-              final realCost = 500.0 * (1.0 - reduction);
-              await esenciaService.spendEsencia(realCost);
-              
+              await esenciaService.spendEsencia(500.0 * (1.0 - reduction));
+              if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('¡Orbe comprado! Revisa tu Bolsa.'))
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSanctuariesTab() {
+    final orbeService = Provider.of<OrbeService>(context);
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final currentEsencia = esenciaService.playerState.totalEsencia;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Santuarios Temporales',
+            style: TextStyle(
+              color: Colors.cyanAccent,
+              fontStyle: FontStyle.italic,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        _ShopItem(
+          icon: Icons.flash_on,
+          title: 'Santuario de Flujo Rápido',
+          description: 'Reduce requisito de pasos en 50% (1 uso)',
+          cost: 1200.0,
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+            final success = await orbeService.purchaseInventoryItem(
+              InventoryItemTypes.tempSanctuaryFastFlow,
+              1200.0,
+              currentEsencia,
+            );
+            if (success) {
+              await esenciaService.spendEsencia(1200.0);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('¡Orbe adquirido!')),
+                  const SnackBar(content: Text('¡Santuario comprado! Revisa tu Bolsa.')),
                 );
-                Navigator.pop(context); // Volver al santuario
               }
-            } else {
-               if (mounted) {
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        _ShopItem(
+          icon: Icons.all_inclusive,
+          title: 'Santuario de Simbiosis',
+          description: 'Otorga esencia al canalizar: 1 esencia / 10 pasos (2 usos)',
+          cost: 2000.0,
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+            final success = await orbeService.purchaseInventoryItem(
+              InventoryItemTypes.tempSanctuarySymbiosis,
+              2000.0,
+              currentEsencia,
+            );
+            if (success) {
+              await esenciaService.spendEsencia(2000.0);
+              if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('No tienes suficiente Esencia')),
+                  const SnackBar(content: Text('¡Santuario comprado! Revisa tu Bolsa.')),
                 );
               }
             }
@@ -181,9 +220,9 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildUpgradesTab() {
-     final esenciaService = Provider.of<EsenciaService>(context);
-     final upgrades = esenciaService.upgrades;
-     final currentEsencia = esenciaService.playerState.totalEsencia;
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final upgrades = esenciaService.upgrades;
+    final currentEsencia = esenciaService.playerState.totalEsencia;
 
     if (upgrades.isEmpty) {
       return const Center(child: Text("Cargando mejoras...", style: TextStyle(color: Colors.white)));
@@ -206,11 +245,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           onPurchase: () async {
             final success = await esenciaService.purchaseUpgrade(upgrade.id);
             if (success) {
-               ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('¡Mejora "${upgrade.name}" realizada!')),
               );
             } else {
-               ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('No tienes suficiente Esencia')),
               );
             }
