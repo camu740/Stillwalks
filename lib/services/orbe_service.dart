@@ -129,6 +129,15 @@ class OrbeService extends ChangeNotifier {
     }
   }
 
+  /// Obtiene un Orbe por su ID
+  Orbe? getOrbeById(String id) {
+    try {
+      return _orbes.firstWhere((o) => o.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Actualiza el progreso de un Orbe con pasos
   Future<void> updateOrbeProgress(String orbeId, int steps) async {
     final orbeIndex = _orbes.indexWhere((o) => o.id == orbeId);

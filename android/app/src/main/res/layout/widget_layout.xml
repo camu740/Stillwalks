@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header Row: Essence (Left) - Journal (Right) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <!-- Left: Essence -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical">
+            
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_essence"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_total_essence"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+
+        <!-- Right: Journal Progress -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_journal_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 / 0"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_marginEnd="8dp"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_journal"
+                android:tint="#FFFFFF"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Sanctuary 1 -->
+    <LinearLayout
+        android:id="@+id/layout_sanctuary_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="4dp">
+            
+            <ImageView
+                android:id="@+id/iv_sanctuary_1_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_sanctuary"
+                android:tint="#B0BEC5"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_sanctuary_1_name"
+                android:text="Santuario Primordial"
+                android:textSize="12sp"
+                android:textColor="#B0BEC5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Background Track -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:src="@drawable/widget_progress_background" />
+
+            <!-- Progress Fill (ClipDrawable) -->
+            <ImageView
+                android:id="@+id/iv_progress_sanctuary_1"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:src="@drawable/widget_progress_clip"
+                android:scaleType="fitXY" />
+
+            <TextView
+                android:id="@+id/tv_sanctuary_1_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sin orbe activo"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:shadowColor="#000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Sanctuary 2 -->
+    <LinearLayout
+        android:id="@+id/layout_sanctuary_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="4dp">
+            
+            <ImageView
+                android:id="@+id/iv_sanctuary_2_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_sanctuary"
+                android:tint="#B0BEC5"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_sanctuary_2_name"
+                android:text="Santuario Temporal"
+                android:textSize="12sp"
+                android:textColor="#B0BEC5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Background Track -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:src="@drawable/widget_progress_background" />
+
+            <!-- Progress Fill -->
+            <ImageView
+                android:id="@+id/iv_progress_sanctuary_2"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:src="@drawable/widget_progress_clip"
+                android:scaleType="fitXY" />
+
+            <TextView
+                android:id="@+id/tv_sanctuary_2_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sin orbe activo"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:shadowColor="#000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Storage -->
+    <LinearLayout
+        android:id="@+id/layout_storage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="4dp">
+            
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_storage"
+                android:tint="#B3E5FC"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/tv_storage_name"
+                android:text="Almacén de Energía"
+                android:textSize="12sp"
+                android:textColor="#B3E5FC"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Background Track -->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:src="@drawable/widget_progress_background" />
+
+            <!-- Progress Fill -->
+            <ImageView
+                android:id="@+id/iv_progress_storage"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:src="@drawable/widget_progress_clip"
+                android:scaleType="fitXY" />
+
+            <TextView
+                android:id="@+id/tv_storage_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 / 0"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:shadowColor="#000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </LinearLayout>
+
+</LinearLayout>

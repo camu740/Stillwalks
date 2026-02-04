@@ -188,11 +188,34 @@ class InventoryScreen extends StatelessWidget {
                           trailing: ElevatedButton(
                             onPressed: () async {
                               final success = await orbeService.activateTemporarySanctuary(item.typeId);
-                              if (success) {
+                              if (success && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('$name Activado')),
                                 );
-                                Navigator.pop(context); // Ir al santuario a verlo
+                                
+                                // Encontrar el santuario temporal recién creado
+                                try {
+                                  final tempSanctuary = orbeService.sanctuaries.firstWhere((s) => s.isTemporary);
+                                  
+                                  // Navegar directamente al selector (reemplazando esta pantalla)
+                                  if (context.mounted) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => InventoryScreen(
+                                          isSelectionMode: true,
+                                          sanctuaryId: tempSanctuary.id,
+                                        )
+                                      )
+                                    );
+                                  }
+                                } catch (e) {
+                                  // No se encontró santuario temporal, volver normalmente
+                                  debugPrint('Error finding temporary sanctuary: $e');
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Ya tienes un santuario temporal activo')),

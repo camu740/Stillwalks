@@ -23,10 +23,12 @@ class SanctuaryScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.inventory_2_outlined),
-            onPressed: () => Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (_) => const InventoryScreen())
-            ),
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (_) => const InventoryScreen())
+              );
+            },
             tooltip: 'Tu Bolsa',
           ),
         ],

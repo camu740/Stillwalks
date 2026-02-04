@@ -84,4 +84,18 @@ class NativeBridge {
       return 0;
     }
   }
+  /// Actualiza el contenido de la notificación
+  Future<void> updateNotificationContent({
+    required String title,
+    required String body,
+  }) async {
+    try {
+      await platform.invokeMethod('updateNotificationContent', {
+        'title': title,
+        'body': body,
+      });
+    } on PlatformException catch (e) {
+      debugPrint('NativeBridge: Error updating notification: ${e.message}');
+    }
+  }
 }

@@ -32,6 +32,20 @@ class EsenciaService extends ChangeNotifier {
     final upgradesData = await _db.getAllUpgrades();
     _upgrades = upgradesData.map((data) => Upgrade.fromJson(data)).toList();
 
+    // Verificación de integridad: Asegurar que existe Energy Storage
+    if (!_upgrades.any((u) => u.type == UpgradeType.energyStorage)) {
+      final storageUpgrade = Upgrade(
+        id: 'upgrade_energy_storage',
+        type: UpgradeType.energyStorage,
+        currentLevel: 0,
+        name: 'Almacén de Energía',
+        description: 'Permite acumular pasos para orbes futuros.',
+      );
+      await _db.insertUpgrade(storageUpgrade.toJson());
+      _upgrades.add(storageUpgrade);
+      debugPrint('🔋 EsenciaService: Upgrade "Energy Storage" inserted because it was missing.');
+    }
+
     // Recalcular multiplicador basado en mejoras
     _updateMultipliers();
 

@@ -47,6 +47,12 @@ class TrackingForegroundService : Service() {
                 stopForeground(true)
                 stopSelf()
                 Log.d(TAG, "Foreground service stopped")
+                Log.d(TAG, "Foreground service stopped")
+            }
+            "com.stillwalks.app.UPDATE_CONTENT" -> {
+                val title = intent.getStringExtra("title")
+                val body = intent.getStringExtra("body")
+                updateNotification(title, body)
             }
         }
         
@@ -90,7 +96,7 @@ class TrackingForegroundService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Stillwalks activo")
             .setContentText("Generando Esencia...")
-            .setSmallIcon(android.R.drawable.ic_menu_compass) // TODO: Usar icono personalizado
+            .setSmallIcon(R.drawable.ic_essence) 
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -99,17 +105,20 @@ class TrackingForegroundService : Service() {
     }
 
     /**
-     * Actualiza el contenido de la notificación (llamado desde ScreenLockTracker)
+     * Actualiza el contenido de la notificación
      */
-    fun updateNotification(esencia: Double, rate: Double, steps: Int) {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Stillwalks")
-            .setContentText("Esencia: ${esencia.toInt()} (+${rate.toInt()}/h) | Pasos: $steps")
-            .setSmallIcon(android.R.drawable.ic_menu_compass)
+    fun updateNotification(title: String?, body: String?) {
+        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(title ?: "Stillwalks")
+            .setContentText(body ?: "Generando Esencia...")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body ?: "Generando Esencia..."))
+            .setSmallIcon(R.drawable.ic_essence)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
+        val notification = notificationBuilder.build()
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notification)
     }

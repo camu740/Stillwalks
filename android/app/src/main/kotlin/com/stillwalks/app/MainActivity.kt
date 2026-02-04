@@ -33,6 +33,18 @@ class MainActivity: FlutterActivity() {
                     val steps = stepCounter.getSessionSteps()
                     result.success(steps)
                 }
+                "updateNotificationContent" -> {
+                    val title = call.argument<String>("title")
+                    val body = call.argument<String>("body")
+                    
+                    val serviceIntent = Intent(context, TrackingForegroundService::class.java).apply {
+                        action = "com.stillwalks.app.UPDATE_CONTENT"
+                        putExtra("title", title)
+                        putExtra("body", body)
+                    }
+                    startService(serviceIntent)
+                    result.success(true)
+                }
                 else -> {
                     result.notImplemented()
                 }

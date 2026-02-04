@@ -8,6 +8,7 @@ import 'services/esencia_service.dart';
 import 'services/orbe_service.dart';
 import 'services/collection_service.dart';
 import 'services/native_bridge.dart';
+import 'services/widget_service.dart';
 import 'data/seeds/initial_data.dart';
 
 void main() async {
@@ -31,6 +32,7 @@ class StillwalksApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => OrbeService()),
         ChangeNotifierProvider(create: (_) => CollectionService()),
         Provider(create: (_) => NativeBridge()),
+        Provider(create: (_) => WidgetService()),
       ],
       child: Builder(
         builder: (context) {
@@ -38,11 +40,29 @@ class StillwalksApp extends StatelessWidget {
           final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
           final esenciaService = Provider.of<EsenciaService>(context, listen: false);
           final orbeService = Provider.of<OrbeService>(context, listen: false);
+          final widgetService = Provider.of<WidgetService>(context, listen: false);
+          final collectionService = Provider.of<CollectionService>(context, listen: false);
+          
+          // Helper to update widget
+          void updateWidget() {
+            widgetService.updateWidgetData(
+              essenceService: esenciaService, 
+              orbeService: orbeService,
+              collectionService: collectionService,
+              nativeBridge: nativeBridge
+            );
+          }
+          
+          // Listen to changes in services to update widget automatically
+          esenciaService.addListener(updateWidget);
+          orbeService.addListener(updateWidget);
+          collectionService.addListener(updateWidget);
           
           // Configure callbacks from native Android
           nativeBridge.onEsenciaGenerated = (esencia, hours) async {
             await esenciaService.addEsencia(esencia, fromNative: true);
             debugPrint('🎯 Main: Received $esencia Esencia from native ($hours hours)');
+            updateWidget();
           };
           
           nativeBridge.onStepsUpdated = (newSteps, totalSteps) async {
@@ -51,6 +71,7 @@ class StillwalksApp extends StatelessWidget {
               await esenciaService.addStoredSteps(newSteps);
             }
             debugPrint('👟 Main: Received $newSteps steps from native (Total: $totalSteps)');
+            updateWidget();
           };
           
           return MaterialApp(
@@ -81,7 +102,7 @@ class AppInitializer extends StatefulWidget {
   State<AppInitializer> createState() => _AppInitializerState();
 }
 
-class _AppInitializerState extends State<AppInitializer> {
+class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObserver {
   bool _isInitialized = false;
   bool _hasError = false;
   String _errorMessage = '';
@@ -89,7 +110,42 @@ class _AppInitializerState extends State<AppInitializer> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initialize();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      debugPrint('📱 App lifecycle changed to $state. Updating widget...');
+      _updateWidget();
+    }
+  }
+
+  void _updateWidget() {
+    if (!mounted) return;
+    try {
+      final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
+      final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+      final orbeService = Provider.of<OrbeService>(context, listen: false);
+      final collectionService = Provider.of<CollectionService>(context, listen: false);
+      final widgetService = Provider.of<WidgetService>(context, listen: false);
+      
+      widgetService.updateWidgetData(
+        essenceService: esenciaService, 
+        orbeService: orbeService, 
+        collectionService: collectionService,
+        nativeBridge: nativeBridge
+      );
+    } catch (e) {
+      debugPrint('⚠️ Error updating widget from lifecycle: $e');
+    }
   }
 
   Future<void> _initialize() async {
