@@ -15,7 +15,7 @@ class EsenciaService extends ChangeNotifier {
 
   // Constantes de anti-cheat
   static const int maxAccumulableHours = 12;
-  static const double baseEsenciaPerHour = 100.0;
+  static const double baseEsenciaPerHour = 300.0;
 
   /// Carga el estado del jugador y mejoras desde la base de datos
   Future<void> loadPlayerState() async {
@@ -46,7 +46,7 @@ class EsenciaService extends ChangeNotifier {
         id: 'upgrade_idle_multiplier',
         type: UpgradeType.idleMultiplier,
         currentLevel: 0,
-        name: 'Generación Pasiva',
+        name: 'Recolector de Esencia',
         description: '',
       ),
     );
@@ -122,6 +122,10 @@ class EsenciaService extends ChangeNotifier {
     if (upgradeIndex == -1) return false;
 
     final upgrade = _upgrades[upgradeIndex];
+    
+    // Verificar si puede ser mejorado
+    if (!upgrade.canUpgrade()) return false;
+    
     final cost = upgrade.calculateNextLevelCost();
 
     // Verificar si hay suficiente Esencia
@@ -158,36 +162,56 @@ class EsenciaService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Obtiene la mejora de reducción de costo de Orbes
-  double getOrbeCostReduction() {
-    final upgrade = _upgrades.firstWhere(
-      (u) => u.type == UpgradeType.orbeCostReduction,
+  /// Capacidad máxima del Almacén de Energía
+  int get storageCapacity {
+    final storageUpgrade = _upgrades.firstWhere(
+      (u) => u.type == UpgradeType.energyStorage,
       orElse: () => Upgrade(
-        id: 'upgrade_orbe_cost',
-        type: UpgradeType.orbeCostReduction,
+        id: 'upgrade_energy_storage',
+        type: UpgradeType.energyStorage,
         currentLevel: 0,
-        name: '',
+        name: 'Almacén de Energía',
         description: '',
       ),
     );
-
-    // El multiplicador indica quanto reduce (ej: nivel 5 = 1.10, reduce 10%)
-    return (upgrade.calculateMultiplier() - 1.0).clamp(0.0, 0.5); // Máximo 50% reducción
+    return storageUpgrade.currentLevel * 300;
   }
 
-  /// Obtiene el multiplicador de velocidad de santuario
-  double getSanctuarySpeedMultiplier() {
-    final upgrade = _upgrades.firstWhere(
-      (u) => u.type == UpgradeType.sanctuarySpeed,
-      orElse: () => Upgrade(
-        id: 'upgrade_sanctuary_speed',
-        type: UpgradeType.sanctuarySpeed,
-        currentLevel: 0,
-        name: '',
-        description: '',
-      ),
+  /// Añade pasos al almacén (respetando el límite)
+  Future<void> addStoredSteps(int steps) async {
+    final capacity = storageCapacity;
+    if (capacity <= 0 || steps <= 0) return;
+
+    final currentStored = _playerState.storedSteps;
+    if (currentStored >= capacity) return;
+
+    final spaceAvailable = capacity - currentStored;
+    final stepsToAdd = steps > spaceAvailable ? spaceAvailable : steps;
+
+    _playerState = _playerState.copyWith(
+      storedSteps: currentStored + stepsToAdd,
     );
 
-    return upgrade.calculateMultiplier();
+    await _db.updatePlayerState(_playerState.toJson());
+    notifyListeners();
+    debugPrint('🔋 EsenciaService: Stored $stepsToAdd steps. Total: ${_playerState.storedSteps}/$capacity');
+  }
+
+  /// Consume pasos del almacén
+  Future<int> consumeStoredSteps(int amount) async {
+    if (amount <= 0 || _playerState.storedSteps <= 0) return 0;
+
+    final available = _playerState.storedSteps;
+    final consumed = amount > available ? available : amount;
+
+    _playerState = _playerState.copyWith(
+      storedSteps: available - consumed,
+    );
+
+    await _db.updatePlayerState(_playerState.toJson());
+    notifyListeners();
+    debugPrint('🔋 EsenciaService: Consumed $consumed stored steps. Remaining: ${_playerState.storedSteps}');
+    
+    return consumed;
   }
 }

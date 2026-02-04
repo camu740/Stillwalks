@@ -46,7 +46,10 @@ class StillwalksApp extends StatelessWidget {
           };
           
           nativeBridge.onStepsUpdated = (newSteps, totalSteps) async {
-            await orbeService.addStepsToActiveOrbes(newSteps);
+            final activeOrbs = await orbeService.addStepsToActiveOrbes(newSteps);
+            if (activeOrbs == 0) {
+              await esenciaService.addStoredSteps(newSteps);
+            }
             debugPrint('👟 Main: Received $newSteps steps from native (Total: $totalSteps)');
           };
           

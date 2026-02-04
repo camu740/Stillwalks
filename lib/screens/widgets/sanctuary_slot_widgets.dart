@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stillwalks/models/sanctuary.dart';
@@ -22,6 +23,8 @@ class SanctuarySlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final storedSteps = esenciaService.playerState.storedSteps;
     final hasOrbe = sanctuary.orbeId != null;
     
     // Obtener información del orbe si existe
@@ -143,6 +146,22 @@ class SanctuarySlot extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.purpleAccent.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Nv. ${sanctuary.speedUpgradeLevel}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.purpleAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -163,6 +182,25 @@ class SanctuarySlot extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white54,
+                      ),
+                    ),
+                  if (hasOrbe && !isReadyToChannel && storedSteps > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: SizedBox(
+                        height: 28,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent.withOpacity(0.3),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          icon: const Icon(Icons.battery_charging_full, size: 14, color: Colors.blueAccent),
+                          label: Text(
+                            'Usar Almacén ($storedSteps)',
+                            style: const TextStyle(fontSize: 11, color: Colors.white),
+                          ),
+                          onPressed: () => _showStorageChannelDialog(context, sanctuary.orbeId!, requiredSteps - currentSteps, storedSteps, esenciaService),
+                        ),
                       ),
                     ),
                 ],
@@ -187,21 +225,87 @@ class SanctuarySlot extends StatelessWidget {
     );
   }
 
-  void _showPrimordialInfo(BuildContext context, Sanctuary sanctuary) {
-    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+  void _showStorageChannelDialog(BuildContext context, String orbeId, int needed, int stored, EsenciaService esenciaService) {
+    int toTransfer = min(needed, stored);
     
-    // Buscar la mejora de velocidad de forma segura
-    final speedUpgrade = esenciaService.upgrades.firstWhere(
-      (u) => u.type == UpgradeType.sanctuarySpeed,
-      orElse: () => Upgrade(
-        id: 'upgrade_sanctuary_speed',
-        type: UpgradeType.sanctuarySpeed,
-        currentLevel: 0,
-        name: 'Velocidad de Canalización',
-        description: '',
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.blueGrey.shade900,
+            title: const Text('Canalizar Energía'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Elige cuánta energía transferir:'),
+                const SizedBox(height: 16),
+                Text(
+                  '$toTransfer',
+                  style: const TextStyle(
+                    fontSize: 32, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.blueAccent
+                  ),
+                ),
+                const Text('pasos', style: TextStyle(color: Colors.blueAccent)),
+                const SizedBox(height: 16),
+                Slider(
+                  value: toTransfer.toDouble(),
+                  min: 1,
+                  max: min(needed, stored).toDouble(),
+                  activeColor: Colors.blueAccent,
+                  inactiveColor: Colors.blueAccent.withOpacity(0.2),
+                  onChanged: (value) {
+                    setState(() {
+                      toTransfer = value.round();
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('1', style: TextStyle(fontSize: 10, color: Colors.white54)),
+                    Text('${min(needed, stored)}', style: TextStyle(fontSize: 10, color: Colors.white54)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Almacén: $stored | Necesarios: $needed',
+                  style: const TextStyle(fontSize: 12, color: Colors.white54),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context), 
+                child: const Text('Cancelar', style: TextStyle(color: Colors.white70))
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final consumed = await esenciaService.consumeStoredSteps(toTransfer);
+                  if (consumed > 0) {
+                    await orbeService.updateOrbeProgress(orbeId, consumed);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('¡Se canalizaron $consumed pasos del almacén!'))
+                      );
+                    }
+                  }
+                },
+                child: const Text('Transferir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
       ),
     );
-    
+  }
+
+  void _showPrimordialInfo(BuildContext context, Sanctuary sanctuary) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -223,7 +327,7 @@ class SanctuarySlot extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text('• Tipo: Santuario Permanente'),
-            Text('• Nivel de mejora: ${speedUpgrade.currentLevel}'),
+            Text('• Nivel de mejora: ${sanctuary.speedUpgradeLevel} (-${(sanctuary.speedUpgradeLevel * 2).toStringAsFixed(0)}%)'),
             const Text('• Usos: Ilimitados ♾️'),
             const SizedBox(height: 16),
             const Text(
@@ -260,6 +364,8 @@ class TemporarySanctuarySlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final storedSteps = esenciaService.playerState.storedSteps;
     final tempSanctuary = orbeService.sanctuaries.where((s) => s.isTemporary).firstOrNull;
     final hasTemp = tempSanctuary != null;
     
@@ -453,6 +559,25 @@ class TemporarySanctuarySlot extends StatelessWidget {
                         color: hasTemporaryItems ? Colors.white54 : Colors.amber.withOpacity(0.7),
                       ),
                     ),
+                  if (hasTemp && orbe != null && !isReadyToChannel && storedSteps > 0)
+                   Padding(
+                     padding: const EdgeInsets.only(top: 8.0),
+                     child: SizedBox(
+                       height: 28,
+                       child: ElevatedButton.icon(
+                         style: ElevatedButton.styleFrom(
+                           backgroundColor: Colors.blueAccent.withOpacity(0.3),
+                           padding: const EdgeInsets.symmetric(horizontal: 8),
+                         ),
+                         icon: const Icon(Icons.battery_charging_full, size: 14, color: Colors.blueAccent),
+                         label: Text(
+                           'Usar Almacén ($storedSteps)',
+                           style: const TextStyle(fontSize: 11, color: Colors.white),
+                         ),
+                         onPressed: () => _showStorageChannelDialog(context, tempSanctuary!.orbeId!, requiredSteps - currentSteps, storedSteps, esenciaService),
+                       ),
+                     ),
+                   ),
                 ],
               ),
             ),
@@ -472,6 +597,86 @@ class TemporarySanctuarySlot extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  void _showStorageChannelDialog(BuildContext context, String orbeId, int needed, int stored, EsenciaService esenciaService) {
+    int toTransfer = min(needed, stored);
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.blueGrey.shade900,
+            title: const Text('Canalizar Energía'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Elige cuánta energía transferir:'),
+                const SizedBox(height: 16),
+                Text(
+                  '$toTransfer',
+                  style: const TextStyle(
+                    fontSize: 32, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.blueAccent
+                  ),
+                ),
+                const Text('pasos', style: TextStyle(color: Colors.blueAccent)),
+                const SizedBox(height: 16),
+                Slider(
+                  value: toTransfer.toDouble(),
+                  min: 1,
+                  max: min(needed, stored).toDouble(),
+                  activeColor: Colors.blueAccent,
+                  inactiveColor: Colors.blueAccent.withOpacity(0.2),
+                  onChanged: (value) {
+                    setState(() {
+                      toTransfer = value.round();
+                    });
+                  },
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('1', style: TextStyle(fontSize: 10, color: Colors.white54)),
+                    Text('${min(needed, stored)}', style: TextStyle(fontSize: 10, color: Colors.white54)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Almacén: $stored | Necesarios: $needed',
+                  style: const TextStyle(fontSize: 12, color: Colors.white54),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context), 
+                child: const Text('Cancelar', style: TextStyle(color: Colors.white70))
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final consumed = await esenciaService.consumeStoredSteps(toTransfer);
+                  if (consumed > 0) {
+                    await orbeService.updateOrbeProgress(orbeId, consumed);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('¡Se canalizaron $consumed pasos del almacén!'))
+                      );
+                    }
+                  }
+                },
+                child: const Text('Transferir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

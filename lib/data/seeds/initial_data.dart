@@ -99,22 +99,8 @@ class InitialData {
         id: 'upgrade_idle_multiplier',
         type: UpgradeType.idleMultiplier,
         currentLevel: 0,
-        name: 'Generación Pasiva',
-        description: 'Aumenta la cantidad de Esencia generada mientras el dispositivo está bloqueado.',
-      ),
-      Upgrade(
-        id: 'upgrade_sanctuary_speed',
-        type: UpgradeType.sanctuarySpeed,
-        currentLevel: 0,
-        name: 'Velocidad de Santuario',
-        description: 'Los Orbes en santuarios requieren menos pasos para canalizar.',
-      ),
-      Upgrade(
-        id: 'upgrade_orbe_cost',
-        type: UpgradeType.orbeCostReduction,
-        currentLevel: 0,
-        name: 'Maestría en Orbes',
-        description: 'Reduce el costo de compra de Orbes.',
+        name: 'Recolector de Esencia',
+        description: 'Aumenta la velocidad de generación pasiva de Esencia.',
       ),
     ];
 
@@ -128,11 +114,5 @@ class InitialData {
   /// Obtiene el costo base de un Orbe básico
   static double getBasicOrbeCost() {
     return 500.0; // 500 Esencia
-  }
-
-  /// Calcula el costo de un Orbe considerando mejoras
-  static double calculateOrbeCost(double reductionMultiplier) {
-    final baseCost = getBasicOrbeCost();
-    return baseCost * (1.0 - reductionMultiplier);
   }
 }

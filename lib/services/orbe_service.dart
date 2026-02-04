@@ -69,7 +69,7 @@ class OrbeService extends ChangeNotifier {
   }
 
   /// Compra un nuevo Orbe (va a la bolsa, no al santuario)
-  Future<Orbe?> purchaseOrbe(String orbeTypeId, double esenciaAvailable, double reductionMultiplier) async {
+  Future<Orbe?> purchaseOrbe(String orbeTypeId, double esenciaAvailable) async {
     final type = getOrbeType(orbeTypeId);
     if (type == null) return null;
 
@@ -148,14 +148,25 @@ class OrbeService extends ChangeNotifier {
   }
 
   /// Actualiza SOLO los Orbes asignados a santuarios
-  Future<void> addStepsToActiveOrbes(int newSteps) async {
+  /// Retorna el número de orbes actualizados
+  Future<int> addStepsToActiveOrbes(int newSteps) async {
     int updatedCount = 0;
     for (var sanctuary in _sanctuaries) {
       if (sanctuary.orbeId != null) {
-        // Ahora los pasos se suman 1:1 siempre (según nueva regla de "reducción de total")
-        // No multiplicamos aquí para que el "total" se vea reducido en la UI
-        await updateOrbeProgress(sanctuary.orbeId!, newSteps);
-        updatedCount++;
+        final orbeIndex = _orbes.indexWhere((o) => o.id == sanctuary.orbeId);
+        if (orbeIndex != -1) {
+          final orbe = _orbes[orbeIndex];
+          final type = getOrbeType(orbe.orbeTypeId);
+          
+          if (type != null) {
+             final effectiveRequiredSteps = (type.requiredSteps / sanctuary.speedMultiplier).round();
+             if (orbe.currentProgress < effectiveRequiredSteps) {
+               // Aún necesita pasos
+               await updateOrbeProgress(sanctuary.orbeId!, newSteps);
+               updatedCount++;
+             }
+          }
+        }
       }
     }
 
@@ -163,6 +174,8 @@ class OrbeService extends ChangeNotifier {
       debugPrint('OrbeService: Added steps to $updatedCount orbes in sanctuaries');
       notifyListeners();
     }
+    
+    return updatedCount;
   }
 
   /// Canaliza un Orbe completado
@@ -362,5 +375,34 @@ class OrbeService extends ChangeNotifier {
   Future<List<CreatureSpecies>> getAllSpecies() async {
     final data = await _db.getAllCreatureSpecies();
     return data.map((d) => CreatureSpecies.fromJson(d)).toList();
+  }
+
+  /// Mejora el nivel de velocidad de un santuario específico
+  Future<bool> upgradeSanctuarySpeed(String sanctuaryId, double esenciaAvailable) async {
+    final sIdx = _sanctuaries.indexWhere((s) => s.id == sanctuaryId);
+    if (sIdx == -1) return false;
+
+    final sanctuary = _sanctuaries[sIdx];
+    
+    // Verificar que puede ser mejorado
+    if (!sanctuary.canUpgrade()) return false;
+    
+    // Verificar coste
+    final cost = Sanctuary.getUpgradeCost(sanctuary.speedUpgradeLevel);
+    if (esenciaAvailable < cost) return false;
+    
+    // Incrementar nivel y recalcular multiplicador
+    final newLevel = sanctuary.speedUpgradeLevel + 1;
+    final newMultiplier = Sanctuary.calculateSpeedMultiplier(newLevel);
+    
+    _sanctuaries[sIdx] = sanctuary.copyWith(
+      speedUpgradeLevel: newLevel,
+      speedMultiplier: newMultiplier,
+    );
+    
+    await _db.updateSanctuary(sanctuaryId, _sanctuaries[sIdx].toJson());
+    notifyListeners();
+    
+    return true;
   }
 }

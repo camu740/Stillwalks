@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -23,7 +24,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 2,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -38,6 +39,7 @@ class DatabaseHelper {
         idleMultiplier REAL NOT NULL DEFAULT 1.0,
         lastActiveTimestamp TEXT NOT NULL,
         totalSteps INTEGER NOT NULL DEFAULT 0,
+        storedSteps INTEGER NOT NULL DEFAULT 0,
         lastBootTime TEXT
       )
     ''');
@@ -53,6 +55,7 @@ class DatabaseHelper {
         isTemporary INTEGER NOT NULL DEFAULT 0,
         remainingUses INTEGER NOT NULL DEFAULT 0,
         typeId TEXT,
+        speedUpgradeLevel INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (orbeId) REFERENCES orbes(id) ON DELETE SET NULL
       )
     ''');
@@ -139,6 +142,7 @@ class DatabaseHelper {
       'idleMultiplier': 1.0,
       'lastActiveTimestamp': DateTime.now().toIso8601String(),
       'totalSteps': 0,
+      'storedSteps': 0,
       'lastBootTime': DateTime.now().toIso8601String(),
     });
   }
@@ -165,6 +169,75 @@ class DatabaseHelper {
         // Ignorar si las columnas ya existen
       }
     }
+    
+    // Añadir campo speedUpgradeLevel para mejoras por santuario (v4)
+    if (oldVersion < 4) {
+      try {
+        await db.execute('ALTER TABLE sanctuaries ADD COLUMN speedUpgradeLevel INTEGER NOT NULL DEFAULT 0');
+      } catch (e) {
+        // Ignorar si la columna ya existe
+        debugPrint('Migration v4 warning: $e');
+      }
+    }
+
+    // Insertar mejoras globales iniciales si no existen (v5)
+    if (oldVersion < 5) {
+      await _seedGlobalUpgrades(db);
+    }
+
+    // Eliminación de 'Eficiencia de Orbes', 'Velocidad de Santuario' global y ajuste de textos (v6)
+    if (oldVersion < 6) {
+      await db.delete('upgrades', where: 'id = ?', whereArgs: ['upgrade_orbe_cost']);
+      await db.delete('upgrades', where: 'id = ?', whereArgs: ['upgrade_sanctuary_speed']);
+      
+      await db.update('upgrades', {
+        'name': 'Recolector de Esencia',
+        'description': 'Aumenta la velocidad de generación pasiva de Esencia',
+      }, where: 'id = ?', whereArgs: ['upgrade_idle_multiplier']);
+    }
+
+    // Añadir columna storedSteps y mejora de Almacén de Energía (v7)
+    if (oldVersion < 7) {
+      try {
+        await db.execute('ALTER TABLE player_state ADD COLUMN storedSteps INTEGER NOT NULL DEFAULT 0');
+      } catch (e) {
+        // Columna ya existe
+      }
+
+      await db.insert('upgrades', {
+        'id': 'upgrade_energy_storage',
+        'type': 'UpgradeType.energyStorage',
+        'currentLevel': 0,
+        'name': 'Almacén de Energía',
+        'description': 'Permite almacenar pasos no usados cuando no hay orbes activos.',
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+  }
+
+  Future<void> _seedGlobalUpgrades(Database db) async {
+    final batch = db.batch();
+    
+    // Recolector de Esencia
+    batch.insert('upgrades', {
+      'id': 'upgrade_idle_multiplier',
+      'type': 'UpgradeType.idleMultiplier',
+      'currentLevel': 0,
+      'name': 'Recolector de Esencia',
+      'description': 'Aumenta la velocidad de generación pasiva de Esencia',
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+    // Almacén de Energía
+    batch.insert('upgrades', {
+      'id': 'upgrade_energy_storage',
+      'type': 'UpgradeType.energyStorage',
+      'currentLevel': 0,
+      'name': 'Almacén de Energía',
+      'description': 'Permite almacenar pasos no usados cuando no hay orbes activos.',
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+    // NOTA: 'Eficiencia de Orbes' eliminada en v6
+
+    await batch.commit();
   }
 
   // ========== PLAYER STATE ==========
@@ -363,13 +436,21 @@ class DatabaseHelper {
     // Eliminar santuarios temporales
     await db.delete('sanctuaries', where: 'isTemporary = ?', whereArgs: [1]);
     
-    // Limpiar orbeId del santuario permanente
-    await db.update('sanctuaries', {'orbeId': null}, where: 'isTemporary = ?', whereArgs: [0]);
+    // Limpiar orbeId y mejoras del santuario permanente
+    await db.update('sanctuaries', {
+      'orbeId': null,
+      'speedUpgradeLevel': 0,
+      'speedMultiplier': 1.0,
+    }, where: 'isTemporary = ?', whereArgs: [0]);
+    
+    // Restaurar mejoras por defecto
+    await _seedGlobalUpgrades(db);
     
     await db.update('player_state', {
       'totalEsencia': 0,
       'idleMultiplier': 1.0,
       'totalSteps': 0,
+      'storedSteps': 0,
       'lastActiveTimestamp': DateTime.now().toIso8601String(),
     }, where: 'id = ?', whereArgs: [1]);
   }

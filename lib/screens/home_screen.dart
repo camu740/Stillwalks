@@ -7,6 +7,7 @@ import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/screens/explorer_journal_screen.dart';
 import 'package:stillwalks/screens/sanctuary_screen.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
+import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/screens/widgets/sanctuary_slot_widgets.dart';
 
 /// Pantalla principal con el estado del jugador
@@ -96,8 +97,25 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.white70,
                             ),
                           ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Nv. ${esenciaService.upgrades.firstWhere((u) => u.type == UpgradeType.idleMultiplier, orElse: () => Upgrade(id: '', type: UpgradeType.idleMultiplier, currentLevel: 0, name: '', description: '')).currentLevel}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
+
                     ],
                   ),
                 ),
@@ -131,6 +149,35 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+
+              // Almacén de Energía (Debajo de santuarios)
+              if (esenciaService.storageCapacity > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Almacén: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
               // Sección inferior: Botones de navegación
               Expanded(
@@ -181,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   heroTag: 'essence_btn',
                   onPressed: () {
                     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                    esenciaService.addEsencia(500); // Método helper en EsenciaService?
+
                     // EsenciaService no tiene addEsencia público que sume arbitrariamente, pero tiene updateSteps que da esencia.
                     // O podemos hackearlo simulando pasos también.
                     // Pero el usuario pidió botón dedicado.
@@ -210,12 +257,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 16),
                 FloatingActionButton.extended(
                   heroTag: 'steps_btn',
-                  onPressed: () {
+                  onPressed: () async {
                     final orbeService = Provider.of<OrbeService>(context, listen: false);
                     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
                     
                     const steps = 500;
-                    orbeService.addStepsToActiveOrbes(steps);
+                    final activeOrbs = await orbeService.addStepsToActiveOrbes(steps);
+                    if (activeOrbs == 0) {
+                      await esenciaService.addStoredSteps(steps);
+                    }
                     esenciaService.updateSteps(steps);
                     
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -228,18 +278,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 16),
                 FloatingActionButton.extended(
+                  heroTag: 'storage_btn',
+                  onPressed: () {
+                    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                    esenciaService.addStoredSteps(100);
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('DEBUG: +100 pasos al Almacén')),
+                    );
+                  },
+                  icon: const Icon(Icons.battery_charging_full),
+                  label: const Text('+100 Almacén'),
+                  backgroundColor: Colors.blueAccent,
+                ),
+                const SizedBox(height: 16),
+                FloatingActionButton.extended(
                   heroTag: 'reset_btn',
                   onPressed: () async {
                      final db = DatabaseHelper();
                      await db.resetDatabase();
-                     // Recargar servicios?
+                     
+                     // Recargar servicios para reflejar el reset
                      final orbeService = Provider.of<OrbeService>(context, listen: false);
                      final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                     
                      await orbeService.initialize();
-                     await esenciaService.initialize(); // Si tuviera initialize
+                     await esenciaService.initialize();
                      
                      ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('DEBUG: Base de datos REINICIADA 💥')),
+                      const SnackBar(content: Text('DEBUG: Base de datos REINICIADA y Servicios Recargados 💥')),
                     );
                   },
                   icon: const Icon(Icons.delete_forever),

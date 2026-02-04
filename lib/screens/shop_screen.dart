@@ -4,6 +4,7 @@ import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/models/orbe.dart';
+import 'package:stillwalks/models/sanctuary.dart';
 import 'package:stillwalks/models/inventory_item.dart';
 
 /// Pantalla de la tienda para comprar Orbes y mejoras
@@ -113,7 +114,6 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     final orbeService = Provider.of<OrbeService>(context);
     final esenciaService = Provider.of<EsenciaService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
-    final reduction = esenciaService.getOrbeCostReduction();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -134,12 +134,12 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           icon: Icons.circle_outlined,
           title: 'Orbe Básico',
           description: 'Requiere 2.000 pasos para canalizar',
-          cost: 500.0 * (1.0 - reduction),
+          cost: 500.0,
           currentEsencia: currentEsencia,
           onPurchase: () async {
-            final result = await orbeService.purchaseOrbe('orbe_basic', currentEsencia, reduction);
+            final result = await orbeService.purchaseOrbe('orbe_basic', currentEsencia);
             if (result != null) {
-              await esenciaService.spendEsencia(500.0 * (1.0 - reduction));
+              await esenciaService.spendEsencia(500.0);
               if (mounted) ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('¡Orbe comprado! Revisa tu Bolsa.'))
               );
@@ -221,60 +221,158 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
   Widget _buildUpgradesTab() {
     final esenciaService = Provider.of<EsenciaService>(context);
-    final upgrades = esenciaService.upgrades;
+    final orbeService = Provider.of<OrbeService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
+    
+    // Obtener mejoras globales
+    final globalUpgrades = esenciaService.upgrades;
+    
+    // Obtener santuarios permanentes
+    final permanentSanctuaries = orbeService.sanctuaries.where((s) => !s.isTemporary).toList();
 
-    if (upgrades.isEmpty) {
-      return const Center(child: Text("Cargando mejoras...", style: TextStyle(color: Colors.white)));
-    }
-
-    return ListView.separated(
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: upgrades.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final upgrade = upgrades[index];
-        return _UpgradeItem(
-          icon: _getUpgradeIcon(upgrade.type),
-          title: upgrade.name,
-          description: upgrade.description,
-          currentLevel: upgrade.currentLevel,
-          cost: upgrade.calculateNextLevelCost(),
-          currentEsencia: currentEsencia,
-          multiplier: _getUpgradeMultiplierText(upgrade.type),
-          onPurchase: () async {
-            final success = await esenciaService.purchaseUpgrade(upgrade.id);
-            if (success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('¡Mejora "${upgrade.name}" realizada!')),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No tienes suficiente Esencia')),
-              );
-            }
-          },
-        );
-      },
+      children: [
+        // Sección: Mejoras de Santuarios
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              Icon(Icons.fort, color: Colors.purpleAccent, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Mejoras de Santuarios Permanentes',
+                style: TextStyle(
+                  color: Colors.purpleAccent,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        
+        // Mostrar una tarjeta por cada santuario permanente
+        ...permanentSanctuaries.map((sanctuary) {
+          final canUpgrade = sanctuary.canUpgrade();
+          final cost = Sanctuary.getUpgradeCost(sanctuary.speedUpgradeLevel);
+          final currentLevel = sanctuary.speedUpgradeLevel;
+          final reductionPercent = (currentLevel * 2);
+          
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _SanctuaryUpgradeItem(
+              title: sanctuary.name,
+              description: sanctuary.description,
+              currentLevel: currentLevel,
+              maxLevel: 15,
+              cost: cost,
+              currentEsencia: currentEsencia,
+              reductionPercent: reductionPercent,
+              onPurchase: () async {
+                final success = await orbeService.upgradeSanctuarySpeed(sanctuary.id, currentEsencia);
+                if (success) {
+                  await esenciaService.spendEsencia(cost);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('¡Mejora de "${sanctuary.name}" a Nivel ${currentLevel + 1}!')),
+                    );
+                  }
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No tienes suficiente Esencia')),
+                    );
+                  }
+                }
+              },
+            ),
+          );
+        }).toList(),
+        
+        const SizedBox(height: 24),
+        const Divider(color: Colors.white24),
+        const SizedBox(height: 16),
+        
+        // Sección: Mejoras Globales
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              Icon(Icons.trending_up, color: Colors.greenAccent, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Mejoras Globales',
+                style: TextStyle(
+                  color: Colors.greenAccent,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        
+        // Mostrar mejoras globales
+        if (globalUpgrades.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                "Cargando mejoras...",
+                style: TextStyle(color: Colors.white54),
+              ),
+            ),
+          )
+        else
+          ...globalUpgrades.map((upgrade) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _UpgradeItem(
+                icon: _getUpgradeIcon(upgrade.type),
+                title: upgrade.name,
+                description: upgrade.description,
+                currentLevel: upgrade.currentLevel,
+                maxLevel: upgrade.type.maxLevel,
+                cost: upgrade.calculateNextLevelCost(),
+                currentEsencia: currentEsencia,
+                multiplier: _getUpgradeMultiplierText(upgrade.type),
+                bonusText: upgrade.type == UpgradeType.energyStorage
+                    ? 'Capacidad: ${(upgrade.currentLevel * 300)}'
+                    : 'Bono actual: +${(upgrade.currentLevel * 2)}%',
+                onPurchase: () async {
+                  final success = await esenciaService.purchaseUpgrade(upgrade.id);
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('¡Mejora "${upgrade.name}" realizada!')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No tienes suficiente Esencia')),
+                    );
+                  }
+                },
+              ),
+            );
+          }).toList(),
+      ],
     );
   }
 
   IconData _getUpgradeIcon(UpgradeType type) {
-    switch (type) {
-      case UpgradeType.idleMultiplier: return Icons.schedule;
-      case UpgradeType.sanctuarySpeed: return Icons.speed;
-      case UpgradeType.orbeCostReduction: return Icons.discount;
-      default: return Icons.star;
-    }
+    if (type == UpgradeType.idleMultiplier) return Icons.schedule;
+    if (type == UpgradeType.energyStorage) return Icons.battery_charging_full;
+    return Icons.star;
   }
 
   String _getUpgradeMultiplierText(UpgradeType type) {
-    switch (type) {
-      case UpgradeType.idleMultiplier: return '+10% Gen/Hora'; // Hardcoded for display, match model logic
-      case UpgradeType.sanctuarySpeed: return '+5% Velocidad';
-      case UpgradeType.orbeCostReduction: return '-5% Coste'; // Assuming logic in model
-      default: return '';
-    }
+    if (type == UpgradeType.idleMultiplier) return '+2% bono / nivel';
+    if (type == UpgradeType.energyStorage) return '+300 capacidad / nivel';
+    return '';
   }
 }
 
@@ -366,9 +464,11 @@ class _UpgradeItem extends StatelessWidget {
   final String title;
   final String description;
   final int currentLevel;
+  final int maxLevel;
   final double cost;
   final double currentEsencia;
   final String multiplier;
+  final String bonusText;
   final VoidCallback onPurchase;
 
   const _UpgradeItem({
@@ -376,15 +476,18 @@ class _UpgradeItem extends StatelessWidget {
     required this.title,
     required this.description,
     required this.currentLevel,
+    required this.maxLevel,
     required this.cost,
     required this.currentEsencia,
     required this.multiplier,
+    required this.bonusText,
     required this.onPurchase,
   });
 
   @override
   Widget build(BuildContext context) {
-    final canAfford = currentEsencia >= cost;
+    final isMaxLevel = currentLevel >= maxLevel;
+    final canAfford = currentEsencia >= cost && !isMaxLevel;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -416,12 +519,16 @@ class _UpgradeItem extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(0.2),
+                            color: isMaxLevel ? Colors.amber.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            'Nv. $currentLevel',
-                            style: const TextStyle(fontSize: 12, color: Colors.blueAccent),
+                            isMaxLevel ? 'MAX' : 'Nv. $currentLevel',
+                            style: TextStyle(
+                              fontSize: 12, 
+                              color: isMaxLevel ? Colors.amber : Colors.blueAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -431,10 +538,15 @@ class _UpgradeItem extends StatelessWidget {
                       description,
                       style: const TextStyle(fontSize: 14, color: Colors.white70),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
+                    Text(
+                      bonusText,
+                      style: const TextStyle(fontSize: 13, color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
                     Text(
                       multiplier,
-                      style: const TextStyle(fontSize: 12, color: Colors.greenAccent),
+                      style: const TextStyle(fontSize: 11, color: Colors.white54),
                     ),
                   ],
                 ),
@@ -445,29 +557,170 @@ class _UpgradeItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.auto_awesome, size: 20, color: Colors.amberAccent),
-                  const SizedBox(width: 4),
-                  Text(
-                    cost.toStringAsFixed(0),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.amberAccent,
+              if (!isMaxLevel)
+                Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, size: 20, color: Colors.amberAccent),
+                    const SizedBox(width: 4),
+                    Text(
+                      cost.toStringAsFixed(0),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amberAccent,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              ElevatedButton(
-                onPressed: canAfford ? onPurchase : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent.withOpacity(0.8),
-                  foregroundColor: Colors.black,
-                  disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                  ],
+                )
+              else
+                const Text(
+                  'Nivel máximo alcanzado',
+                  style: TextStyle(color: Colors.amber, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
-                child: const Text('Mejorar'),
+              if (!isMaxLevel)
+                ElevatedButton(
+                  onPressed: canAfford ? onPurchase : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.greenAccent.withOpacity(0.8),
+                    foregroundColor: Colors.black,
+                    disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                  ),
+                  child: const Text('Mejorar'),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SanctuaryUpgradeItem extends StatelessWidget {
+  final String title;
+  final String description;
+  final int currentLevel;
+  final int maxLevel;
+  final double cost;
+  final double currentEsencia;
+  final int reductionPercent;
+  final VoidCallback onPurchase;
+
+  const _SanctuaryUpgradeItem({
+    required this.title,
+    required this.description,
+    required this.currentLevel,
+    required this.maxLevel,
+    required this.cost,
+    required this.currentEsencia,
+    required this.reductionPercent,
+    required this.onPurchase,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isMaxLevel = currentLevel >= maxLevel;
+    final canAfford = currentEsencia >= cost && !isMaxLevel;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.fort, size: 40, color: Colors.purpleAccent),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isMaxLevel 
+                                ? Colors.amber.withOpacity(0.2)
+                                : Colors.purpleAccent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isMaxLevel ? 'MAX' : 'Nv. $currentLevel',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isMaxLevel ? Colors.amber : Colors.purpleAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: const TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Bono actual: -$reductionPercent%',
+                      style: const TextStyle(fontSize: 13, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      '-2% pasos a realizar / nivel',
+                      style: TextStyle(fontSize: 11, color: Colors.white54),
+                    ),
+                  ],
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (!isMaxLevel)
+                Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, size: 20, color: Colors.amberAccent),
+                    const SizedBox(width: 4),
+                    Text(
+                      cost.toStringAsFixed(0),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amberAccent,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                const Text(
+                  'Nivel máximo alcanzado',
+                  style: TextStyle(color: Colors.amber, fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+              if (!isMaxLevel)
+                ElevatedButton(
+                  onPressed: canAfford ? onPurchase : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purpleAccent.withOpacity(0.8),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                  ),
+                  child: const Text('Mejorar'),
+                ),
             ],
           ),
         ],
