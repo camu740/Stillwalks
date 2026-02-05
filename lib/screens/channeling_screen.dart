@@ -4,6 +4,8 @@ import 'dart:math' show pi;
 /// Pantalla de animación de canalización (cuando el Orbe está completo)
 import 'package:stillwalks/models/creature_instance.dart';
 import 'package:stillwalks/models/creature_species.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Pantalla de animación de canalización (cuando el Orbe está completo)
 class ChannelingScreen extends StatefulWidget {
@@ -174,14 +176,14 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.amberAccent),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.star, color: Colors.amberAccent, size: 20),
-                                SizedBox(width: 8),
+                                const Icon(Icons.star, color: Colors.amberAccent, size: 20),
+                                const SizedBox(width: 8),
                                 Text(
-                                  '¡NUEVO!',
-                                  style: TextStyle(
+                                  AppLocalizations.of(context)!.newCreatureBadge,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.amberAccent,
@@ -206,9 +208,9 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                               vertical: 16,
                             ),
                           ),
-                          child: const Text(
-                            'Continuar',
-                            style: TextStyle(fontSize: 18),
+                            child: Text(
+                            AppLocalizations.of(context)!.continueButton,
+                            style: const TextStyle(fontSize: 18),
                           ),
                         ),
                       ],

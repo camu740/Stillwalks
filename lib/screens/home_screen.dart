@@ -6,9 +6,11 @@ import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/screens/explorer_journal_screen.dart';
 import 'package:stillwalks/screens/sanctuary_screen.dart';
+import 'package:stillwalks/screens/settings_screen.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/screens/widgets/sanctuary_slot_widgets.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Pantalla principal con el estado del jugador
 class HomeScreen extends StatefulWidget {
@@ -38,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final sanctuaryOccupied = orbeService.orbes.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stillwalks'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         backgroundColor: Colors.deepPurple.withOpacity(0.8),
         elevation: 0,
       ),
@@ -63,9 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Esencia',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.essence,
+                        style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white70,
                           fontWeight: FontWeight.w300,
@@ -91,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '+${esenciaPerHour.toStringAsFixed(0)} / hora',
+                            '+${esenciaPerHour.toStringAsFixed(0)} ${AppLocalizations.of(context)!.perHour}',
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.white70,
@@ -105,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Nv. ${esenciaService.upgrades.firstWhere((u) => u.type == UpgradeType.idleMultiplier, orElse: () => Upgrade(id: '', type: UpgradeType.idleMultiplier, currentLevel: 0, name: '', description: '')).currentLevel}',
+                              '${AppLocalizations.of(context)!.level} ${esenciaService.upgrades.firstWhere((u) => u.type == UpgradeType.idleMultiplier, orElse: () => Upgrade(id: '', type: UpgradeType.idleMultiplier, currentLevel: 0, name: '', description: '')).currentLevel}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.blueAccent,
@@ -167,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
                         const SizedBox(width: 8),
                         Text(
-                          'Almacén: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                          '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.blueAccent,
@@ -188,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       _NavButton(
                         icon: Icons.shopping_bag,
-                        label: 'Tienda',
+                        label: AppLocalizations.of(context)!.shop,
                         onPressed: () {
                           Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
                         },
@@ -196,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       _NavButton(
                         icon: Icons.book,
-                        label: 'Diario de Explorador',
+                        label: AppLocalizations.of(context)!.explorerJournal,
                         onPressed: () {
                           Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
                         },
@@ -204,12 +206,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       _NavButton(
                         icon: Icons.settings,
-                        label: 'Ajustes',
+                        label: AppLocalizations.of(context)!.settings,
                         onPressed: () {
-                          // TODO: Crear SettingsScreen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Próximamente...')),
-                          );
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
                         },
                       ),
                     ],

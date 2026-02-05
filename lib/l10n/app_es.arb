@@ -1,0 +1,377 @@
+{
+  "@@locale": "es",
+  
+  "appTitle": "Stillwalks",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  
+  "settings": "Ajustes",
+  "general": "GENERAL",
+  "notifications": "NOTIFICACIONES",
+  "wellbeing": "BIENESTAR",
+  "privacySystem": "PRIVACIDAD Y SISTEMA",
+  "information": "INFORMACIÓN",
+  
+  "language": "Idioma",
+  "spanish": "Español",
+  "english": "English",
+  "system": "Sistema",
+  "selectLanguage": "Seleccionar Idioma",
+  
+  "soundVibration": "Sonido / vibración",
+  "soundVibrationDesc": "Feedback sonoro y háptico",
+  "batterySaver": "Modo ahorro batería",
+  "batterySaverDesc": "Reduce el consumo de batería",
+  
+  "permanent": "Permanente",
+  "permanentDesc": "Tracking activo en segundo plano",
+  "events": "Eventos",
+  "eventsDesc": "Orbes e hitos de esencia",
+  "reminders": "Recordatorios",
+  "remindersDesc": "Invitaciones a caminar",
+  "disabledInBatterySaver": "Desactivado en modo ahorro",
+  
+  "pauseProgress": "Pausar progreso",
+  "pauseProgressDesc": "Detiene temporalmente el tracking",
+  "doNotDisturb": "Horas no molestar",
+  "configure": "Configurar",
+  "dndTimeRange": "{start} - {end}",
+  "@dndTimeRange": {
+    "placeholders": {
+      "start": {"type": "String"},
+      "end": {"type": "String"}
+    }
+  },
+  "dndStartTime": "HORA DE INICIO",
+  "dndEndTime": "HORA DE FIN",
+  "dailyGoal": "Objetivo diario",
+  "dailyGoalSteps": "{count} pasos",
+  "@dailyGoalSteps": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "selectDailyGoal": "Objetivo Diario",
+  
+  "permissions": "Permisos",
+  "permissionsDesc": "Gestionar accesos de la app",
+  "sensors": "Sensores",
+  "sensorsDesc": "Estado del podómetro",
+  "trackingStatus": "Estado de seguimiento",
+  "trackingStatusDesc": "Ver log de actividad",
+  
+  "help": "Ayuda",
+  "contact": "Contacto",
+  "credits": "Créditos",
+  "version": "Versión v{version}",
+  "@version": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  
+  "essence": "Esencia",
+  "orbs": "Orbes",
+  "sanctuary": "Santuario",
+  "collection": "Colección",
+  "shop": "Tienda",
+  
+  "freeSlot": "Ranura libre",
+  "activeOrb": "Orbe activo",
+  "readyToChannel": "¡Listo para canalizar!",
+  "channel": "Canalizar",
+  "channeling": "Canalizando...",
+  "selectOrb": "Seleccionar Orbe",
+  "cancel": "Cancelar",
+  "confirm": "Confirmar",
+  
+  "progressSteps": "{current}/{total} pasos",
+  "@progressSteps": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  
+  "creature": "Criatura",
+  "evolution": "Evolución",
+  "basePower": "Poder base",
+  "generation": "Generación",
+  
+  "buy": "Comprar",
+  "cost": "Costo",
+  "owned": "Posees",
+  "upgrades": "Mejoras",
+  "items": "Objetos",
+  
+  "permissionsRequired": "Permisos Necesarios",
+  "permissionsDescription": "Stillwalks necesita los siguientes permisos para funcionar:",
+  "activityPermission": "Actividad física",
+  "activityPermissionDesc": "Para contar pasos",
+  "notificationPermission": "Notificaciones",
+  "notificationPermissionDesc": "Para mostrar progreso",
+  "requestPermissions": "Solicitar permisos",
+  "continueButton": "Continuar",
+  
+  "welcome": "Bienvenido",
+  "loading": "Cargando...",
+  "error": "Error",
+  "retry": "Reintentar",
+  "close": "Cerrar",
+  "save": "Guardar",
+  "delete": "Eliminar",
+  
+  "noCreatures": "No hay criaturas disponibles",
+  "noOrbs": "No tienes orbes activos",
+  "notEnoughEssence": "No tienes suficiente esencia",
+  
+  "orbTypes": "TIPOS DE ORBE",
+  "mystical": "Místico",
+  "primal": "Primigenio",
+  "ethereal": "Etéreo",
+  
+  "sanctuarySlots": "Ranuras de Santuario",
+  "availableSlots": "{count} disponibles",
+  "@availableSlots": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
+  "walkReminder": "Recordatorio para caminar",
+  "orbReady": "Orbe listo",
+  "milestoneReached": "¡Hito alcanzado!",
+  "essenceGenerated": "Esencia generada",
+  
+  "locked": "Bloqueado",
+  "unlocked": "Desbloqueado",
+  "upgrade": "Mejorar",
+  "maxLevel": "Nivel máximo",
+  
+  "perHour": "/ hora",
+  "level": "Nv.",
+  "orbsReady": "¡Orbe listo para canalizar!",
+  "noActiveOrbs": "Orbes activos",
+  "idleProduction": "Producción pasiva",
+  
+  "storage": "Almacén",
+  "explorerJournal": "Diario de Explorador",
+  
+  "sanctuaries": "Santuarios",
+  "temporarySanctuaries": "Santuarios Temporales",
+  "orbPurchased": "¡Orbe comprado! Revisa tu Bolsa.",
+  "sanctuaryPurchased": "¡Santuario comprado! Revisa tu Bolsa.",
+  "upgradeCompleted": "¡Mejora \"{name}\" realizada!",
+  "@upgradeCompleted": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "sanctuaryUpgraded": "¡Mejora de \"{name}\" a Nivel {level}!",
+  "@sanctuaryUpgraded": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "level": {"type": "int"}
+    }
+  },
+  "checkBag": "Revisa tu Bolsa",
+  
+  "permanentSanctuaryUpgrades": "Mejoras de Santuarios Permanentes",
+  "globalUpgrades": "Mejoras Globales",
+  "loadingUpgrades": "Cargando mejoras...",
+  
+  "primordialSanctuaries": "Santuarios Primordiales",
+  "yourBag": "Tu Bolsa",
+  "emptySanctuary": "Santuario Vacío",
+  "placeOrb": "Colocar Orbe",
+  "channelNow": "Canalizar Ahora",
+  "symbiosisReward": "¡Santuario de Simbiosis te otorgó {essence} de Esencia!",
+  "@symbiosisReward": {
+    "placeholders": {
+      "essence": {"type": "String"}
+    }
+  },
+  "orb": "Orbe",
+  "stepsProgress": "{current} / {total} pasos",
+  "@stepsProgress": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  
+  "discoveredCount": "{current} / {total} Descubiertos",
+  "@discoveredCount": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "rarityCommon": "Común",
+  "rarityUncommon": "Poco común",
+  "rarityRare": "Raro",
+  "rarityEpic": "Épico",
+  "rarityLegendary": "Legendario",
+  
+  "selectSanctuary": "Seleccionar Santuario",
+  "selectOrbTitle": "Seleccionar Orbe",
+  "waitingOrbs": "Orbes en Espera",
+  "noOrbsAvailable": "No tienes orbes disponibles",
+  "noOrbsInstructions": "Visita la tienda para comprar orbes y comenzar a canalizar criaturas",
+  "goToShop": "Ir a la Tienda",
+  "inventoryItems": "Objetos de Inventario",
+  "noItemsAvailable": "No tienes objetos disponibles",
+  "noItemsInstructions": "Los objetos especiales aparecerán aquí cuando los consigas",
+  "use": "Usar",
+  "quantity": "Cantidad",
+  
+  "noUnassignedOrbs": "No tienes orbes sin asignar",
+  "unknownOrb": "Orbe Desconocido",
+  "stepsRequired": "{count} pasos requeridos",
+  "@stepsRequired": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "assign": "Asignar",
+  "inventoryItemsAndSanctuaries": "Objetos y Santuarios",
+  "emptyInventoryBag": "Bolsa de objetos vacía",
+  "quantityDisplay": "Cantidad: {count}",
+  "@quantityDisplay": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemActivated": "{name} Activado",
+  "@itemActivated": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "tempSanctuaryAlreadyActive": "Ya tienes un santuario temporal activo",
+  
+  "newCreatureBadge": "¡NUEVO!",
+  
+  "useSingular": "uso",
+  "usesPlural": "usos",
+  "energyStorage": "Almacén de Energía",
+  
+  "orbReadyTitle": "✨ Orbe Listo",
+  "orbReadyBody": "Tu {type} ha terminado de canalizar",
+  "@orbReadyBody": {
+    "placeholders": {
+      "type": {"type": "String"}
+    }
+  },
+  "walkReminderTitle": "🌿 Momento de Paseo",
+  "walkMsg1": "¿Un paseo tranquilo?",
+  "walkMsg2": "Tal vez es buen momento para caminar",
+  "walkMsg3": "El aire fresco siempre viene bien",
+  "walkMsg4": "¿Qué tal estirar las piernas?",
+  
+  "noGoal": "Sin objetivo",
+  "notifyGoal": "Notificar al conseguir objetivo",
+  "notifyGoalDesc": "Recibe un aviso cuando cumplas tu meta diaria de pasos",
+  "goalReachedTitle": "¡Objetivo Cumplido!",
+  "goalReachedBody": "Has alcanzado tu objetivo diario de {goal} pasos",
+  
+  "trackingServiceTitle": "Stillwalks activo",
+  "trackingServiceBody": "Generando Esencia...",
+  
+  "primordial": "Primordial",
+  "temporary": "Temporal",
+  "ready": "¡Listo!",
+  "noActiveOrbsStatus": "Sin orbes activos",
+  "orbsAvailableForPurchase": "Orbes disponibles para comprar",
+  
+  "levelAbbr": "Nv.",
+  "channelNow": "¡Canalizar ahora!",
+  "emptySlot": "Vacío",
+  "useStorage": "Usar Almacén",
+  "channelEnergy": "Canalizar Energía",
+  "chooseEnergyTransfer": "Elige cuánta energía transferir:",
+  "stepsLower": "pasos",
+  "storageVsNeeded": "Almacén: {stored} | Necesarios: {needed}",
+  "@storageVsNeeded": {
+    "placeholders": {
+      "stored": {"type": "int"},
+      "needed": {"type": "int"}
+    }
+  },
+  "transfer": "Transferir",
+  "stepsChanneledFromStorage": "¡Se canalizaron {count} pasos del almacén!",
+  "@stepsChanneledFromStorage": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
+  "stats": "Características:",
+  "typePermanent": "Tipo: Santuario Permanente",
+  "upgradeLevel": "Nivel de mejora: {level} (-{percentage}%)",
+  "@upgradeLevel": {
+    "placeholders": {
+      "level": {"type": "int"},
+      "percentage": {"type": "String"}
+    }
+  },
+  "unlimitedUses": "Usos: Ilimitados ♾️",
+  "specialAbility": "Habilidad Especial:",
+  "infiniteChannelingDesc": "Canalización Infinita. Nunca se agota y permite canalizar cualquier tipo de orbe.",
+  "improveSpeedHint": "Mejora la velocidad de canalización en la tienda para reducir los pasos necesarios.",
+  
+  "activateSanctuary": "Activar Santuario",
+  "buy": "Comprar",
+  "emptyUses": "Vacío ({count} usos)",
+  "@emptyUses": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "tapToActivate": "Toca para activar",
+  "goToShop": "Ir a tienda",
+  "typeTemporary": "Tipo: Santuario Temporal",
+  "remainingUses": "Usos restantes: {count}",
+  "@remainingUses": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "destroyWarning": "Se destruye automáticamente después de agotar todos los usos.",
+  
+  "abilityFastFlow": "Reduce los pasos requeridos en un 50% (multiplicador 2x de velocidad).",
+  "abilitySymbiosis": "Otorga 1 punto de Esencia por cada 10 pasos realizados durante la canalización.",
+  "abilityQuietude": "Permite eclosionar orbes usando Esencia en lugar de pasos.",
+  "abilityEcho": "Reduce pasos en 70% pero solo genera criaturas comunes/inusuales.",
+  "abilityResonance": "Aumenta la probabilidad de obtener criaturas raras en +10%.", 
+  "abilityActive": "Habilidad especial activa.",
+  
+  "upgradeIdleName": "Recolector de Esencia",
+  "upgradeIdleDesc": "Aumenta la velocidad de generación pasiva de Esencia.",
+  "upgradeIdleBonus": "+2% bono / nivel",
+  "upgradeStorageName": "Almacén de Energía",
+  "upgradeStorageDesc": "Permite almacenar pasos no usados cuando no hay orbes activos.",
+  "upgradeStorageBonus": "+300 capacidad / nivel",
+  "upgradeSpeedName": "Mejora de Velocidad",
+  
+  "sancPrimordialName": "Primordial",
+  "sancPrimordialDesc": "El primer santuario descubierto. Un lugar tranquilo donde los Orbes pueden canalizar su energía.",
+  "sancFastFlowName": "Flujo Rápido",
+  "sancFastFlowDesc": "-50% pasos requeridos (1 uso)",
+  "sancSymbiosisName": "Simbiosis",
+  "sancSymbiosisDesc": "+1 Esencia cada 10 pasos (2 usos)",
+  "sancQuietudeName": "Quietud Absoluta",
+  "sancQuietudeDesc": "Eclosión con Esencia (1 uso)",
+  "sancEchoName": "Eco Vital",
+  "sancEchoDesc": "-70% pasos | Solo comunes/inusuales (1 uso)",
+  "sancResonanceName": "Resonancia",
+  "sancResonanceDesc": "+10% prob. criatura rara (1 uso)",
+  
+  "orbBasicName": "Orbe Básico",
+  "orbBasicDesc": "Un Orbe común que requiere 2000 pasos para canalizar.",
+  
+  "descSpiristone": "Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.",
+  "descRadispirit": "Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.",
+  "descSlugrry": "Una babosa peluda blanca de movimientos lentos pero pensamiento rápido."
+}

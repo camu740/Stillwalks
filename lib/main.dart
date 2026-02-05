@@ -9,7 +9,12 @@ import 'services/orbe_service.dart';
 import 'services/collection_service.dart';
 import 'services/native_bridge.dart';
 import 'services/widget_service.dart';
+import 'services/notification_preferences_service.dart';
+import 'services/notification_guard_service.dart';
+import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +36,9 @@ class StillwalksApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EsenciaService()),
         ChangeNotifierProvider(create: (_) => OrbeService()),
         ChangeNotifierProvider(create: (_) => CollectionService()),
+        ChangeNotifierProvider(create: (_) => NotificationPreferencesService()),
+        ChangeNotifierProvider(create: (_) => NotificationGuardService()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         Provider(create: (_) => NativeBridge()),
         Provider(create: (_) => WidgetService()),
       ],
@@ -42,15 +50,23 @@ class StillwalksApp extends StatelessWidget {
           final orbeService = Provider.of<OrbeService>(context, listen: false);
           final widgetService = Provider.of<WidgetService>(context, listen: false);
           final collectionService = Provider.of<CollectionService>(context, listen: false);
+          final notificationGuard = Provider.of<NotificationGuardService>(context, listen: false);
           
           // Helper to update widget
-          void updateWidget() {
+          void updateWidget() async {
+            final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+            final l10n = await AppLocalizations.delegate.load(localeProvider.locale);
+            
             widgetService.updateWidgetData(
               essenceService: esenciaService, 
               orbeService: orbeService,
               collectionService: collectionService,
-              nativeBridge: nativeBridge
+              nativeBridge: nativeBridge,
+              l10n: l10n,
             );
+            
+            // Sync localization to native
+            nativeBridge.syncLocalization(l10n);
           }
           
           // Listen to changes in services to update widget automatically
@@ -70,23 +86,42 @@ class StillwalksApp extends StatelessWidget {
             if (activeOrbs == 0) {
               await esenciaService.addStoredSteps(newSteps);
             }
+            
+            // Check daily goal
+            await notificationGuard.updateDailySteps(newSteps);
+
             debugPrint('👟 Main: Received $newSteps steps from native (Total: $totalSteps)');
             updateWidget();
           };
           
-          return MaterialApp(
-            title: 'Stillwalks',
-            theme: ThemeData(
-              brightness: Brightness.dark,
-              primarySwatch: Colors.deepPurple,
-              scaffoldBackgroundColor: Colors.black,
-              useMaterial3: true,
-            ),
-            home: const AppInitializer(),
-            routes: {
-              '/shop': (context) => const ShopScreen(),
+          return Consumer<LocaleProvider>(
+            builder: (context, localeProvider, _) {
+              return MaterialApp(
+                title: 'Stillwalks',
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('es'),
+                  Locale('en'),
+                ],
+                locale: localeProvider.locale,
+                theme: ThemeData(
+                  brightness: Brightness.dark,
+                  primarySwatch: Colors.deepPurple,
+                  scaffoldBackgroundColor: Colors.black,
+                  useMaterial3: true,
+                ),
+                home: const AppInitializer(),
+                routes: {
+                  '/shop': (context) => const ShopScreen(),
+                },
+                debugShowCheckedModeBanner: false,
+              );
             },
-            debugShowCheckedModeBanner: false,
           );
         },
       ),
@@ -137,12 +172,21 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       final collectionService = Provider.of<CollectionService>(context, listen: false);
       final widgetService = Provider.of<WidgetService>(context, listen: false);
       
+      final notificationGuard = Provider.of<NotificationGuardService>(context, listen: false);
+      
+      notificationGuard.updateAppActive();
+      
+      final l10n = AppLocalizations.of(context)!;
+      
       widgetService.updateWidgetData(
         essenceService: esenciaService, 
         orbeService: orbeService, 
         collectionService: collectionService,
-        nativeBridge: nativeBridge
+        nativeBridge: nativeBridge,
+        l10n: l10n,
       );
+      
+      nativeBridge.syncLocalization(l10n);
     } catch (e) {
       debugPrint('⚠️ Error updating widget from lifecycle: $e');
     }
@@ -162,6 +206,23 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       await esenciaService.initialize();
       await orbeService.initialize();
       await collectionService.initialize();
+      
+      // Initialize notification preferences
+      final notificationPreferences = Provider.of<NotificationPreferencesService>(context, listen: false);
+      final notificationGuard = Provider.of<NotificationGuardService>(context, listen: false);
+      final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+      await notificationPreferences.initialize();
+      await notificationGuard.initialize();
+      
+      // Sync locale with saved language setting
+      localeProvider.setLocale(notificationPreferences.settings.language);
+      
+      // Wire notification services to services
+      notificationPreferences.setNativeBridge(nativeBridge);
+      notificationGuard.setPreferences(notificationPreferences);
+      notificationGuard.setNativeBridge(nativeBridge);
+      orbeService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
+      esenciaService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
       
       // Calculate pending Esencia from offline time
       await esenciaService.calculatePendingEsencia();

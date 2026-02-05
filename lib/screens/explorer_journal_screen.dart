@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stillwalks/services/orbe_service.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/data_localizations.dart';
 import 'package:stillwalks/models/creature_species.dart';
+import 'package:stillwalks/services/collection_service.dart';
+import 'package:stillwalks/services/orbe_service.dart';
 
 /// Pantalla del Diario de explorador (colección de Stillwalks)
 class ExplorerJournalScreen extends StatefulWidget {
@@ -42,7 +45,7 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Diario de Explorador'),
+        title: Text(AppLocalizations.of(context)!.explorerJournal),
         backgroundColor: Colors.deepPurple.withOpacity(0.8),
       ),
       body: Container(
@@ -69,7 +72,7 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
                   const Icon(Icons.auto_stories, size: 32, color: Colors.amberAccent),
                   const SizedBox(width: 12),
                   Text(
-                    '$discoveredCount / ${_allSpecies.length} Descubiertos',
+                    AppLocalizations.of(context)!.discoveredCount(discoveredCount, _allSpecies.length),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -144,7 +147,7 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
             _RarityBadge(rarity: species.rarity),
             const SizedBox(height: 16),
             Text(
-              species.description,
+              AppLocalizations.of(context)!.getCreatureDescription(species.id, species.description),
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.white60),
             ),
@@ -153,7 +156,7 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -271,18 +274,19 @@ class _RarityBadge extends StatelessWidget {
     }
   }
 
-  String _getRarityLabel() {
+  String _getRarityLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (rarity) {
       case 'common':
-        return 'Común';
+        return l10n.rarityCommon;
       case 'uncommon':
-        return 'Poco común';
+        return l10n.rarityUncommon;
       case 'rare':
-        return 'Raro';
+        return l10n.rarityRare;
       case 'epic':
-        return 'Épico';
+        return l10n.rarityEpic;
       case 'legendary':
-        return 'Legendario';
+        return l10n.rarityLegendary;
       default:
         return rarity;
     }
@@ -298,7 +302,7 @@ class _RarityBadge extends StatelessWidget {
         border: Border.all(color: _getRarityColor()),
       ),
       child: Text(
-        _getRarityLabel(),
+        _getRarityLabel(context),
         style: TextStyle(
           fontSize: 12,
           color: _getRarityColor(),

@@ -11,6 +11,9 @@ import 'package:stillwalks/screens/channeling_screen.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/models/upgrade.dart';
 
+import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/data_localizations.dart';
+
 class SanctuarySlot extends StatelessWidget {
   final Sanctuary sanctuary;
   final OrbeService orbeService;
@@ -76,7 +79,7 @@ class SanctuarySlot extends StatelessWidget {
                         await esenciaService.addEsencia(symbiosisReward);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('¡Santuario de Simbiosis te otorgó ${symbiosisReward.toStringAsFixed(0)} de Esencia!'),
+                            content: Text(AppLocalizations.of(context)!.symbiosisReward(symbiosisReward.toStringAsFixed(0))),
                             backgroundColor: Colors.cyanAccent.withOpacity(0.8),
                             duration: const Duration(seconds: 3),
                           ),
@@ -139,9 +142,9 @@ class SanctuarySlot extends StatelessWidget {
                           color: isReadyToChannel ? Colors.greenAccent : Colors.purpleAccent,
                         ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Primordial',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -154,7 +157,7 @@ class SanctuarySlot extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'Nv. ${sanctuary.speedUpgradeLevel}',
+                          '${AppLocalizations.of(context)!.levelAbbr} ${sanctuary.speedUpgradeLevel}',
                           style: const TextStyle(
                             fontSize: 10,
                             color: Colors.purpleAccent,
@@ -168,8 +171,8 @@ class SanctuarySlot extends StatelessWidget {
                   if (hasOrbe)
                     Text(
                       isReadyToChannel 
-                          ? '¡Canalizar ahora!' 
-                          : '$currentSteps / $requiredSteps pasos',
+                          ? AppLocalizations.of(context)!.channelNow 
+                          : AppLocalizations.of(context)!.progressSteps(currentSteps, requiredSteps),
                       style: TextStyle(
                         fontSize: 12,
                         color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
@@ -177,8 +180,8 @@ class SanctuarySlot extends StatelessWidget {
                       ),
                     )
                   else
-                    const Text(
-                      'Vacío',
+                    Text(
+                      AppLocalizations.of(context)!.emptySlot,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white54,
@@ -196,7 +199,7 @@ class SanctuarySlot extends StatelessWidget {
                           ),
                           icon: const Icon(Icons.battery_charging_full, size: 14, color: Colors.blueAccent),
                           label: Text(
-                            'Usar Almacén ($storedSteps)',
+                            '${AppLocalizations.of(context)!.useStorage} ($storedSteps)',
                             style: const TextStyle(fontSize: 11, color: Colors.white),
                           ),
                           onPressed: () => _showStorageChannelDialog(context, sanctuary.orbeId!, requiredSteps - currentSteps, storedSteps, esenciaService),
@@ -310,35 +313,35 @@ class SanctuarySlot extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.deepPurple.shade900,
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.fort_outlined, color: Colors.purpleAccent),
             const SizedBox(width: 8),
-            Text('Santuario Primordial'),
+            Text(AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '📊 Características:',
+            Text(
+              AppLocalizations.of(context)!.stats,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            const Text('• Tipo: Santuario Permanente'),
-            Text('• Nivel de mejora: ${sanctuary.speedUpgradeLevel} (-${(sanctuary.speedUpgradeLevel * 2).toStringAsFixed(0)}%)'),
-            const Text('• Usos: Ilimitados ♾️'),
+            Text('• ${AppLocalizations.of(context)!.typePermanent}'),
+            Text('• ${AppLocalizations.of(context)!.upgradeLevel(sanctuary.speedUpgradeLevel, (sanctuary.speedUpgradeLevel * 2).toStringAsFixed(0))}'),
+            Text('• ${AppLocalizations.of(context)!.unlimitedUses}'),
             const SizedBox(height: 16),
-            const Text(
-              '⚡ Habilidad Especial:',
+            Text(
+              '⚡ ${AppLocalizations.of(context)!.specialAbility}',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.purpleAccent),
             ),
             const SizedBox(height: 8),
-            const Text('Canalización Infinita. Nunca se agota y permite canalizar cualquier tipo de orbe.'),
+            Text(AppLocalizations.of(context)!.infiniteChannelingDesc),
             const SizedBox(height: 16),
-            const Text(
-              '💡 Mejora la velocidad de canalización en la tienda para reducir los pasos necesarios.',
+            Text(
+              '💡 ${AppLocalizations.of(context)!.improveSpeedHint}',
               style: TextStyle(color: Colors.amberAccent, fontSize: 12),
             ),
           ],
@@ -346,7 +349,7 @@ class SanctuarySlot extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),
@@ -423,7 +426,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                         await esenciaService.addEsencia(symbiosisReward);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('¡Santuario de Simbiosis te otorgó ${symbiosisReward.toStringAsFixed(0)} de Esencia!'),
+                            content: Text(AppLocalizations.of(context)!.symbiosisReward(symbiosisReward.toStringAsFixed(0))),
                             backgroundColor: Colors.cyanAccent.withOpacity(0.8),
                             duration: const Duration(seconds: 3),
                           ),
@@ -515,19 +518,19 @@ class TemporarySanctuarySlot extends StatelessWidget {
                         ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          hasTemp 
-                              ? (tempSanctuary.typeId != null 
-                                  ? InventoryItemTypes.getShortName(tempSanctuary.typeId!) 
-                                  : tempSanctuary.name)
-                              : (hasTemporaryItems ? 'Activar Santuario' : 'Comprar'),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: hasTemp ? Colors.white : (hasTemporaryItems ? Colors.white70 : Colors.amber),
+                            child: Text(
+                            hasTemp 
+                                ? (tempSanctuary.typeId != null 
+                                    ? AppLocalizations.of(context)!.getSanctuaryName(tempSanctuary.id, tempSanctuary.typeId!, tempSanctuary.name)
+                                    : tempSanctuary.name)
+                                : (hasTemporaryItems ? AppLocalizations.of(context)!.activateSanctuary : AppLocalizations.of(context)!.buy),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: hasTemp ? Colors.white : (hasTemporaryItems ? Colors.white70 : Colors.amber),
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
                       ),
                     ],
                   ),
@@ -535,8 +538,8 @@ class TemporarySanctuarySlot extends StatelessWidget {
                   if (hasTemp && orbe != null)
                     Text(
                       isReadyToChannel 
-                          ? '¡Canalizar ahora!' 
-                          : '$currentSteps / $requiredSteps pasos',
+                          ? AppLocalizations.of(context)!.channelNow 
+                          : AppLocalizations.of(context)!.progressSteps(currentSteps, requiredSteps),
                       style: TextStyle(
                         fontSize: 12,
                         color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
@@ -545,7 +548,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                     )
                   else if (hasTemp)
                     Text(
-                      'Vacío (${tempSanctuary.remainingUses} usos)',
+                      AppLocalizations.of(context)!.emptyUses(tempSanctuary.remainingUses),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white54,
@@ -553,7 +556,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                     )
                   else
                     Text(
-                      hasTemporaryItems ? 'Toca para activar' : 'Ir a tienda',
+                      hasTemporaryItems ? AppLocalizations.of(context)!.tapToActivate : AppLocalizations.of(context)!.goToShop,
                       style: TextStyle(
                         fontSize: 12,
                         color: hasTemporaryItems ? Colors.white54 : Colors.amber.withOpacity(0.7),
@@ -570,10 +573,10 @@ class TemporarySanctuarySlot extends StatelessWidget {
                            padding: const EdgeInsets.symmetric(horizontal: 8),
                          ),
                          icon: const Icon(Icons.battery_charging_full, size: 14, color: Colors.blueAccent),
-                         label: Text(
-                           'Usar Almacén ($storedSteps)',
-                           style: const TextStyle(fontSize: 11, color: Colors.white),
-                         ),
+                           label: Text(
+                             '${AppLocalizations.of(context)!.useStorage} ($storedSteps)',
+                             style: const TextStyle(fontSize: 11, color: Colors.white),
+                           ),
                          onPressed: () => _showStorageChannelDialog(context, tempSanctuary!.orbeId!, requiredSteps - currentSteps, storedSteps, esenciaService),
                        ),
                      ),
@@ -610,11 +613,11 @@ class TemporarySanctuarySlot extends StatelessWidget {
         builder: (context, setState) {
           return AlertDialog(
             backgroundColor: Colors.blueGrey.shade900,
-            title: const Text('Canalizar Energía'),
+            title: Text(AppLocalizations.of(context)!.channelEnergy),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Elige cuánta energía transferir:'),
+                Text(AppLocalizations.of(context)!.chooseEnergyTransfer),
                 const SizedBox(height: 16),
                 Text(
                   '$toTransfer',
@@ -624,7 +627,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                     color: Colors.blueAccent
                   ),
                 ),
-                const Text('pasos', style: TextStyle(color: Colors.blueAccent)),
+                Text(AppLocalizations.of(context)!.stepsLower, style: TextStyle(color: Colors.blueAccent)),
                 const SizedBox(height: 16),
                 Slider(
                   value: toTransfer.toDouble(),
@@ -648,7 +651,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Almacén: $stored | Necesarios: $needed',
+                  AppLocalizations.of(context)!.storageVsNeeded(stored, needed),
                   style: const TextStyle(fontSize: 12, color: Colors.white54),
                 ),
               ],
@@ -656,7 +659,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context), 
-                child: const Text('Cancelar', style: TextStyle(color: Colors.white70))
+                child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: Colors.white70))
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
@@ -667,12 +670,12 @@ class TemporarySanctuarySlot extends StatelessWidget {
                     await orbeService.updateOrbeProgress(orbeId, consumed);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('¡Se canalizaron $consumed pasos del almacén!'))
+                        SnackBar(content: Text(AppLocalizations.of(context)!.stepsChanneledFromStorage(consumed)))
                       );
                     }
                   }
                 },
-                child: const Text('Transferir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context)!.transfer, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ],
           );
@@ -684,32 +687,25 @@ class TemporarySanctuarySlot extends StatelessWidget {
   void _showTemporaryInfo(BuildContext context, Sanctuary sanctuary) {
     if (sanctuary.typeId == null) return;
     
-    String abilityDescription = '';
+    final abilityDescription = AppLocalizations.of(context)!.getTemporarySanctuaryAbilityDescription(sanctuary.typeId!);
     String abilityIcon = '⚡';
     
     switch (sanctuary.typeId) {
       case InventoryItemTypes.tempSanctuaryFastFlow:
-        abilityDescription = 'Reduce los pasos requeridos en un 50% (multiplicador 2x de velocidad).';
         abilityIcon = '⚡';
         break;
       case InventoryItemTypes.tempSanctuarySymbiosis:
-        abilityDescription = 'Otorga 1 punto de Esencia por cada 10 pasos realizados durante la canalización.';
         abilityIcon = '♾️';
         break;
       case InventoryItemTypes.tempSanctuaryQuietude:
-        abilityDescription = 'Permite eclosionar orbes usando Esencia en lugar de pasos.';
         abilityIcon = '🧘';
         break;
       case InventoryItemTypes.tempSanctuaryEcho:
-        abilityDescription = 'Reduce pasos en 70% pero solo genera criaturas comunes/inusuales.';
         abilityIcon = '📊';
         break;
       case InventoryItemTypes.tempSanctuaryResonance:
-        abilityDescription = 'Aumenta la probabilidad de obtener criaturas raras en +10%.';
         abilityIcon = '⭕';
         break;
-      default:
-        abilityDescription = 'Habilidad especial activa.';
     }
     
     showDialog(
@@ -722,7 +718,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                InventoryItemTypes.getName(sanctuary.typeId!),
+                AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId!, sanctuary.name),
                 style: const TextStyle(fontSize: 18),
               ),
             ),
@@ -732,23 +728,23 @@ class TemporarySanctuarySlot extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '📊 Características:',
+            Text(
+              AppLocalizations.of(context)!.stats,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            const Text('• Tipo: Santuario Temporal'),
-            Text('• Usos restantes: ${sanctuary.remainingUses}'),
+            Text('• ${AppLocalizations.of(context)!.typeTemporary}'),
+            Text('• ${AppLocalizations.of(context)!.remainingUses(sanctuary.remainingUses)}'),
             const SizedBox(height: 16),
             Text(
-              '$abilityIcon Habilidad Especial:',
+              '$abilityIcon ${AppLocalizations.of(context)!.specialAbility}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.cyanAccent),
             ),
             const SizedBox(height: 8),
             Text(abilityDescription),
             const SizedBox(height: 16),
-            const Text(
-              '⚠️ Se destruye automáticamente después de agotar todos los usos.',
+            Text(
+              '⚠️ ${AppLocalizations.of(context)!.destroyWarning}',
               style: TextStyle(color: Colors.orangeAccent, fontSize: 12),
             ),
           ],
@@ -756,7 +752,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
+            child: Text(AppLocalizations.of(context)!.close),
           ),
         ],
       ),

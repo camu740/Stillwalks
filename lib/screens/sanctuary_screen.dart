@@ -7,6 +7,8 @@ import 'package:stillwalks/models/orbe.dart';
 import 'package:stillwalks/models/sanctuary.dart';
 import 'package:stillwalks/screens/channeling_screen.dart';
 import 'package:stillwalks/screens/inventory_screen.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/data_localizations.dart';
 
 class SanctuaryScreen extends StatelessWidget {
   const SanctuaryScreen({super.key});
@@ -18,7 +20,7 @@ class SanctuaryScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Santuarios Primordiales'),
+        title: Text(AppLocalizations.of(context)!.primordialSanctuaries),
         backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
@@ -29,7 +31,7 @@ class SanctuaryScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const InventoryScreen())
               );
             },
-            tooltip: 'Tu Bolsa',
+            tooltip: AppLocalizations.of(context)!.yourBag,
           ),
         ],
       ),
@@ -98,7 +100,7 @@ class SanctuaryWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  sanctuary.name,
+                  AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -123,8 +125,8 @@ class SanctuaryWidget extends StatelessWidget {
                 children: [
                   const Icon(Icons.circle_outlined, size: 60, color: Colors.white10),
                   const SizedBox(height: 12),
-                  const Text('Santuario Vacío', style: TextStyle(color: Colors.white30)),
-                  const SizedBox(height: 16),
+                  Text(AppLocalizations.of(context)!.emptySanctuary, style: const TextStyle(color: Colors.white30)),
+                  const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () => Navigator.push(
                       context, 
@@ -136,7 +138,7 @@ class SanctuaryWidget extends StatelessWidget {
                       )
                     ),
                     icon: const Icon(Icons.add),
-                    label: const Text('Colocar Orbe'),
+                    label: Text(AppLocalizations.of(context)!.placeOrb),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.purpleAccent.withOpacity(0.3)),
                   ),
                 ],
@@ -163,11 +165,13 @@ class SanctuaryWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    type?.name ?? 'Orbe',
+                    type != null 
+                      ? AppLocalizations.of(context)!.getOrbName(type.id, type.name) 
+                      : AppLocalizations.of(context)!.orb,
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '$currentSteps / $requiredSteps pasos',
+                    AppLocalizations.of(context)!.stepsProgress(currentSteps, requiredSteps),
                     style: const TextStyle(color: Colors.white54),
                   ),
                   const SizedBox(height: 20),
@@ -184,7 +188,7 @@ class SanctuaryWidget extends StatelessWidget {
                           await esenciaService.addEsencia(symbiosisReward);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('¡Santuario de Simbiosis te otorgó ${symbiosisReward.toStringAsFixed(0)} de Esencia!'),
+                              content: Text(AppLocalizations.of(context)!.symbiosisReward(symbiosisReward.toStringAsFixed(0))),
                               backgroundColor: Colors.cyanAccent.withOpacity(0.8),
                               duration: const Duration(seconds: 3),
                             ),
@@ -215,7 +219,7 @@ class SanctuaryWidget extends StatelessWidget {
                         foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                       ),
-                      child: const Text('Canalizar Ahora', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(AppLocalizations.of(context)!.channelNow, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                 ],
               ),

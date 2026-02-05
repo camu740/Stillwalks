@@ -6,6 +6,7 @@ import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/services/collection_service.dart';
 import 'package:stillwalks/services/native_bridge.dart';
 import 'package:stillwalks/models/upgrade.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
 
 class WidgetService {
   static const String _groupId = 'group.stillwalks.widget'; // Para iOS si se implementa
@@ -17,10 +18,11 @@ class WidgetService {
     required OrbeService orbeService,
     required CollectionService collectionService,
     required NativeBridge nativeBridge,
+    required AppLocalizations l10n,
   }) async {
     try {
       // 0. Enviar actualización a la notificación nativa
-      _updateNativeNotification(nativeBridge, orbeService, essenceService);
+      _updateNativeNotification(nativeBridge, orbeService, essenceService, l10n);
       
       final futures = <Future>[];
 
@@ -44,8 +46,8 @@ class WidgetService {
 
       if (primordial.id != 'dummy') {
         // Incluir nivel en el nombre
-        futures.add(HomeWidget.saveWidgetData<String>('s1_name', '${primordial.name} (Nv. ${primordial.speedUpgradeLevel})'));
-        futures.addAll(_getSanctuaryUpdateFutures('s1', primordial, orbeService));
+        futures.add(HomeWidget.saveWidgetData<String>('s1_name', '${primordial.name} (${l10n.level} ${primordial.speedUpgradeLevel})'));
+        futures.addAll(_getSanctuaryUpdateFutures('s1', primordial, orbeService, l10n));
       }
 
       // Santuario Temporal
@@ -54,7 +56,7 @@ class WidgetService {
         futures.add(HomeWidget.saveWidgetData<bool>('s2_visible', true));
         
         // Incluir usos restantes en el nombre
-        final usosText = temporary.remainingUses == 1 ? 'uso' : 'usos';
+        final usosText = temporary.remainingUses == 1 ? l10n.useSingular : l10n.usesPlural;
         futures.add(HomeWidget.saveWidgetData<String>('s2_name', '${temporary.name} (${temporary.remainingUses} $usosText)'));
         
         // Determinar icono
@@ -65,7 +67,7 @@ class WidgetService {
         }
         futures.add(HomeWidget.saveWidgetData<String>('s2_icon_type', iconType));
         
-        futures.addAll(_getSanctuaryUpdateFutures('s2', temporary, orbeService));
+        futures.addAll(_getSanctuaryUpdateFutures('s2', temporary, orbeService, l10n));
       } catch (e) {
         // No hay santuario temporal
         futures.add(HomeWidget.saveWidgetData<bool>('s2_visible', false));
@@ -79,10 +81,10 @@ class WidgetService {
         // Obtener nivel del almacén
         final storageUpgrade = essenceService.upgrades.firstWhere(
           (u) => u.type == UpgradeType.energyStorage,
-          orElse: () => Upgrade(id: '', type: UpgradeType.energyStorage, currentLevel: 0, name: 'Almacén', description: ''),
+          orElse: () => Upgrade(id: '', type: UpgradeType.energyStorage, currentLevel: 0, name: l10n.storage, description: ''),
         );
         
-        futures.add(HomeWidget.saveWidgetData<String>('storage_name', 'Almacén de Energía (Nv. ${storageUpgrade.currentLevel})'));
+        futures.add(HomeWidget.saveWidgetData<String>('storage_name', '${l10n.energyStorage} (${l10n.level} ${storageUpgrade.currentLevel})'));
         
         final stored = essenceService.playerState.storedSteps;
         final progress = (stored / storageCap * 10000).clamp(0, 10000).toInt(); // 0-10000 for setImageLevel
@@ -109,7 +111,7 @@ class WidgetService {
     }
   }
 
-  List<Future> _getSanctuaryUpdateFutures(String prefix, Sanctuary sanctuary, OrbeService orbeService) {
+  List<Future> _getSanctuaryUpdateFutures(String prefix, Sanctuary sanctuary, OrbeService orbeService, AppLocalizations l10n) {
     final futures = <Future>[];
     int color = 0xFFE040FB; // Default Purple (Primordial)
 
@@ -130,7 +132,7 @@ class WidgetService {
           final progress = (orbe.currentProgress / requiredSteps * 10000).clamp(0, 10000).toInt();
           
           if (orbe.currentProgress >= requiredSteps) {
-            futures.add(HomeWidget.saveWidgetData<String>('${prefix}_status', '¡Canalizar ahora!'));
+            futures.add(HomeWidget.saveWidgetData<String>('${prefix}_status', l10n.channelNow));
             color = 0xFF66BB6A; // Green for READY
           } else {
             futures.add(HomeWidget.saveWidgetData<String>('${prefix}_status', '${orbe.currentProgress} / $requiredSteps'));
@@ -145,24 +147,24 @@ class WidgetService {
     }
     
     // Si no hay orbe o hay error
-    futures.add(HomeWidget.saveWidgetData<String>('${prefix}_status', 'Sin orbe activo'));
+    futures.add(HomeWidget.saveWidgetData<String>('${prefix}_status', l10n.noActiveOrbsStatus));
     futures.add(HomeWidget.saveWidgetData<int>('${prefix}_progress', 0));
     futures.add(HomeWidget.saveWidgetData<int>('${prefix}_color', color)); // Empty bar color
     futures.add(HomeWidget.saveWidgetData<int>('${prefix}_title_color', color)); // Title color matches even when empty
     return futures;
   }
 
-  Future<void> _updateNativeNotification(NativeBridge nativeBridge, OrbeService orbeService, EsenciaService essenceService) async {
+  Future<void> _updateNativeNotification(NativeBridge nativeBridge, OrbeService orbeService, EsenciaService essenceService, AppLocalizations l10n) async {
     try {
       // (Misma lógica de notificación)
       // 0. Construir Línea 1 (Recursos)
       final currentEsencia = essenceService.playerState.totalEsencia.toInt();
-      String resourceLine = 'Esencia: $currentEsencia';
+      String resourceLine = '${l10n.essence}: $currentEsencia';
       
       if (essenceService.storageCapacity > 0) {
         final stored = essenceService.playerState.storedSteps;
         final cap = essenceService.storageCapacity;
-        resourceLine = 'Esencia: $currentEsencia | Almacén: $stored/$cap';
+        resourceLine = '${l10n.essence}: $currentEsencia | ${l10n.storage}: $stored/$cap';
       }
 
       // 0. Construir Línea 2 (Santuarios)
@@ -182,8 +184,8 @@ class WidgetService {
           if (type != null) {
             final requiredSteps = (type.requiredSteps / primordial.speedMultiplier).round();
             final pct = (orbe.currentProgress / requiredSteps * 100).toInt();
-            final pText = (orbe.currentProgress >= requiredSteps) ? '¡Listo!' : '$pct%';
-            sanctuaryLine = 'Primordial: $pText';
+            final pText = (orbe.currentProgress >= requiredSteps) ? l10n.ready : '$pct%';
+            sanctuaryLine = '${l10n.primordial}: $pText';
           }
         }
       }
@@ -201,19 +203,19 @@ class WidgetService {
           if (type != null) {
             final requiredSteps = (type.requiredSteps / temporary.speedMultiplier).round();
             final pct = (orbe.currentProgress / requiredSteps * 100).toInt();
-            final tText = (orbe.currentProgress >= requiredSteps) ? '¡Listo!' : '$pct%';
+            final tText = (orbe.currentProgress >= requiredSteps) ? l10n.ready : '$pct%';
             
             if (sanctuaryLine.isNotEmpty) {
-              sanctuaryLine = '$sanctuaryLine | Temporal: $tText';
+              sanctuaryLine = '$sanctuaryLine | ${l10n.temporary}: $tText';
             } else {
-              sanctuaryLine = 'Temporal: $tText';
+              sanctuaryLine = '${l10n.temporary}: $tText';
             }
           }
         }
       }
       
       if (sanctuaryLine.isEmpty) {
-        sanctuaryLine = 'Sin orbes activos';
+        sanctuaryLine = l10n.noActiveOrbsStatus;
       }
 
       // Enviar actualización

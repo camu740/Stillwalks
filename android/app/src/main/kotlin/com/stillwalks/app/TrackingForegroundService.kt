@@ -16,30 +16,36 @@ class TrackingForegroundService : Service() {
 
     companion object {
         private const val TAG = "TrackingService"
-        private const val CHANNEL_ID = "stillwalks_tracking"
-        private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_ID = NotificationChannels.NOTIFICATION_FOREGROUND
         
         const val ACTION_START = "com.stillwalks.app.START"
         const val ACTION_STOP = "com.stillwalks.app.STOP"
     }
 
+    private lateinit var notificationManager: StillwalksNotificationManager
+
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        notificationManager = StillwalksNotificationManager(this)
         Log.d(TAG, "Tracking service created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
+                val title = notificationManager.getLocalized("trackingServiceTitle", "Stillwalks activo")
+                val body = notificationManager.getLocalized("trackingServiceBody", "Generando Esencia...")
+                
+                val notification = notificationManager.buildForegroundNotification(title, body)
+                
                 if (Build.VERSION.SDK_INT >= 34) {
                     startForeground(
                         NOTIFICATION_ID, 
-                        createNotification(),
+                        notification,
                         android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
                     )
                 } else {
-                    startForeground(NOTIFICATION_ID, createNotification())
+                    startForeground(NOTIFICATION_ID, notification)
                 }
                 Log.d(TAG, "Foreground service started")
             }
@@ -47,79 +53,21 @@ class TrackingForegroundService : Service() {
                 stopForeground(true)
                 stopSelf()
                 Log.d(TAG, "Foreground service stopped")
-                Log.d(TAG, "Foreground service stopped")
             }
             "com.stillwalks.app.UPDATE_CONTENT" -> {
-                val title = intent.getStringExtra("title")
-                val body = intent.getStringExtra("body")
-                updateNotification(title, body)
+                val title = intent.getStringExtra("title") ?: "Stillwalks"
+                val body = intent.getStringExtra("body") ?: "Generando Esencia..."
+                
+                val notification = notificationManager.buildForegroundNotification(title, body)
+                val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nm.notify(NOTIFICATION_ID, notification)
             }
         }
         
-        // Si el sistema mata el servicio, reiniciarlo
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Tracking de Esencia y Pasos",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Mantiene el tracking activo mientras la app está en background"
-                setShowBadge(false)
-            }
-
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private fun createNotification(): Notification {
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            notificationIntent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
-        )
-
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Stillwalks activo")
-            .setContentText("Generando Esencia...")
-            .setSmallIcon(R.drawable.ic_essence) 
-            .setContentIntent(pendingIntent)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .build()
-    }
-
-    /**
-     * Actualiza el contenido de la notificación
-     */
-    fun updateNotification(title: String?, body: String?) {
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title ?: "Stillwalks")
-            .setContentText(body ?: "Generando Esencia...")
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body ?: "Generando Esencia..."))
-            .setSmallIcon(R.drawable.ic_essence)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-
-        val notification = notificationBuilder.build()
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 }

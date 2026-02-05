@@ -5,11 +5,16 @@ import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.ExistingPeriodicWorkPolicy
+import java.util.concurrent.TimeUnit
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.stillwalks.app/native"
     private lateinit var screenLockTracker: ScreenLockTracker
     private lateinit var stepCounter: StepCounterService
+    private lateinit var notificationManager: StillwalksNotificationManager
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -45,6 +50,55 @@ class MainActivity: FlutterActivity() {
                     startService(serviceIntent)
                     result.success(true)
                 }
+                "showOrbReadyNotification" -> {
+                    val orbType = call.argument<String>("orbType") ?: "Orbe"
+                    notificationManager.showOrbReadyNotification(orbType)
+                    result.success(true)
+                }
+                "showWalkReminderNotification" -> {
+                    notificationManager.showWalkReminderNotification()
+                    result.success(true)
+                }
+                "showMilestoneNotification" -> {
+                    val essence = call.argument<Int>("essence") ?: 0
+                    notificationManager.showMilestoneNotification(essence)
+                    result.success(true)
+                }
+                "showGoalReachedNotification" -> {
+                    val goal = call.argument<Int>("goal") ?: 5000
+                    notificationManager.showGoalReachedNotification(goal)
+                    result.success(true)
+                }
+                "updateWalkReminder" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    val preset = call.argument<String>("preset") ?: "none"
+                    updateWalkReminderSchedule(enabled, preset)
+                    result.success(true)
+                }
+                "pauseTracking" -> {
+                    // Stop tracking service but don't reset state
+                    val serviceIntent = Intent(this, TrackingForegroundService::class.java)
+                    serviceIntent.action = "PAUSE"
+                    stopService(serviceIntent)
+                    result.success("Tracking paused")
+                }
+                "resumeTracking" -> {
+                    // Resume tracking service
+                    val serviceIntent = Intent(this, TrackingForegroundService::class.java)
+                    serviceIntent.action = "RESUME"
+                    startService(serviceIntent)
+                    result.success("Tracking resumed")
+                }
+                "syncLocalization" -> {
+                    val prefs = context.getSharedPreferences("StillwalksNativePrefs", android.content.Context.MODE_PRIVATE)
+                    val editor = prefs.edit()
+                    val args = call.arguments as Map<String, String>
+                    args.forEach { (key, value) ->
+                        editor.putString(key, value)
+                    }
+                    editor.apply()
+                    result.success(true)
+                }
                 else -> {
                     result.notImplemented()
                 }
@@ -54,6 +108,7 @@ class MainActivity: FlutterActivity() {
         // Inicializar servicios
         screenLockTracker = ScreenLockTracker(this, flutterEngine)
         stepCounter = StepCounterService(this, flutterEngine)
+        notificationManager = StillwalksNotificationManager(this)
     }
     
     override fun onResume() {
@@ -84,5 +139,31 @@ class MainActivity: FlutterActivity() {
         
         val serviceIntent = Intent(this, TrackingForegroundService::class.java)
         stopService(serviceIntent)
+    }
+
+    private fun updateWalkReminderSchedule(enabled: Boolean, preset: String) {
+        val workManager = WorkManager.getInstance(this)
+        val workName = "stillwalks_walk_reminder"
+        
+        if (!enabled || preset == "none") {
+            workManager.cancelUniqueWork(workName)
+            return
+        }
+        
+        val intervalHours = when (preset) {
+            "soft" -> 3L
+            "normal" -> 2L
+            else -> 3L
+        }
+        
+        val walkReminderRequest = PeriodicWorkRequestBuilder<WalkReminderWorker>(
+            intervalHours, TimeUnit.HOURS
+        ).build()
+        
+        workManager.enqueueUniquePeriodicWork(
+            workName,
+            ExistingPeriodicWorkPolicy.UPDATE,
+            walkReminderRequest
+        )
     }
 }

@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:stillwalks/models/player_state.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
+import 'package:stillwalks/services/native_bridge.dart';
+import 'package:stillwalks/services/notification_preferences_service.dart';
+import 'package:stillwalks/services/notification_guard_service.dart';
 
 /// Servicio que gestiona la generación de Esencia y el estado del jugador
 class EsenciaService extends ChangeNotifier {
@@ -12,6 +15,21 @@ class EsenciaService extends ChangeNotifier {
 
   PlayerState get playerState => _playerState;
   List<Upgrade> get upgrades => _upgrades;
+
+  // Notification services
+  NativeBridge? _nativeBridge;
+  NotificationPreferencesService? _notificationPrefs;
+  NotificationGuardService? _notificationGuard;
+  int _lastNotifiedMilestone = 0;
+
+  /// Sets the notification services (called from main.dart after initialization)
+  void setNotificationServices(NativeBridge nativeBridge, NotificationPreferencesService notificationPrefs, NotificationGuardService notificationGuard) {
+    _nativeBridge = nativeBridge;
+    _notificationPrefs = notificationPrefs;
+    _notificationGuard = notificationGuard;
+    // Initialize milestone tracking with current essence
+    _lastNotifiedMilestone = (_playerState.totalEsencia ~/ 1000).toInt() * 1000;
+  }
 
   // Constantes de anti-cheat
   static const int maxAccumulableHours = 12;
@@ -110,8 +128,30 @@ class EsenciaService extends ChangeNotifier {
     await _db.updatePlayerState(_playerState.toJson());
     notifyListeners();
 
+    _checkMilestoneNotification();
+
     final source = fromNative ? 'native Android' : 'app calculation';
     debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
+  }
+
+  /// Verifica si se ha alcanzado un nuevo hito de esencia
+  void _checkMilestoneNotification() {
+    if (_nativeBridge == null || _notificationPrefs == null) return;
+    
+    final settings = _notificationPrefs!.settings;
+    if (!settings.eventsNotificationEnabled) return;
+
+    final currentEssence = _playerState.totalEsencia.toInt();
+    final currentMilestone = (currentEssence ~/ 1000) * 1000;
+
+    if (currentMilestone > _lastNotifiedMilestone && currentMilestone >= 1000) {
+      if (_notificationGuard == null || _notificationGuard!.shouldAllowNotification('milestone')) {
+        _nativeBridge!.showMilestoneNotification(currentMilestone);
+        _lastNotifiedMilestone = currentMilestone;
+        _notificationGuard?.markNotified('milestone');
+        debugPrint('💰 EsenciaService: Milestone notification sent for $currentMilestone essence');
+      }
+    }
   }
 
   /// Gasta Esencia (para compras)

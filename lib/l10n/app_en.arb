@@ -1,0 +1,350 @@
+{
+  "@@locale": "en",
+  
+  "appTitle": "Stillwalks",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  
+  "settings": "Settings",
+  "general": "GENERAL",
+  "notifications": "NOTIFICATIONS",
+  "wellbeing": "WELLBEING",
+  "privacySystem": "PRIVACY & SYSTEM",
+  "information": "INFORMATION",
+  
+  "language": "Language",
+  "spanish": "Español",
+  "english": "English",
+  "system": "System",
+  "selectLanguage": "Select Language",
+  
+  "soundVibration": "Sound / vibration",
+  "soundVibrationDesc": "Sound and haptic feedback",
+  "batterySaver": "Battery saver mode",
+  "batterySaverDesc": "Reduce battery consumption",
+  
+  "permanent": "Permanent",
+  "permanentDesc": "Active background tracking",
+  "events": "Events",
+  "eventsDesc": "Orbs and essence milestones",
+  "reminders": "Reminders",
+  "remindersDesc": "Walking invitations",
+  "disabledInBatterySaver": "Disabled in battery saver",
+  
+  "pauseProgress": "Pause progress",
+  "pauseProgressDesc": "Temporarily stop tracking",
+  "doNotDisturb": "Do not disturb hours",
+  "configure": "Configure",
+  "dndTimeRange": "{start} - {end}",
+  "@dndTimeRange": {
+    "placeholders": {
+      "start": {"type": "String"},
+      "end": {"type": "String"}
+    }
+  },
+  "dndStartTime": "START TIME",
+  "dndEndTime": "END TIME",
+  "dailyGoal": "Daily goal",
+  "dailyGoalSteps": "{count} steps",
+  "@dailyGoalSteps": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "selectDailyGoal": "Daily Goal",
+  
+  "permissions": "Permissions",
+  "permissionsDesc": "Manage app access",
+  "sensors": "Sensors",
+  "sensorsDesc": "Pedometer status",
+  "trackingStatus": "Tracking status",
+  "trackingStatusDesc": "View activity log",
+  
+  "help": "Help",
+  "contact": "Contact",
+  "credits": "Credits",
+  "version": "Version v{version}",
+  "@version": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  
+  "essence": "Essence",
+  "orbs": "Orbs",
+  "sanctuary": "Sanctuary",
+  "collection": "Collection",
+  "shop": "Shop",
+  
+  "freeSlot": "Free slot",
+  "activeOrb": "Active orb",
+  "readyToChannel": "Ready to channel!",
+  "channel": "Channel",
+  "channeling": "Channeling...",
+  "selectOrb": "Select Orb",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  
+  "progressSteps": "{current}/{total} steps",
+  "@progressSteps": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  
+  "creature": "Creature",
+  "evolution": "Evolution",
+  "basePower": "Base power",
+  "generation": "Generation",
+  
+  "buy": "Buy",
+  "cost": "Cost",
+  "owned": "Owned",
+  "upgrades": "Upgrades",
+  "items": "Items",
+  
+  "permissionsRequired": "Required Permissions",
+  "permissionsDescription": "Stillwalks needs the following permissions to work:",
+  "activityPermission": "Physical activity",
+  "activityPermissionDesc": "To count steps",
+  "notificationPermission": "Notifications",
+  "notificationPermissionDesc": "To show progress",
+  "requestPermissions": "Request permissions",
+  "continueButton": "Continue",
+  
+  "welcome": "Welcome",
+  "loading": "Loading...",
+  "error": "Error",
+  "retry": "Retry",
+  "close": "Close",
+  "save": "Save",
+  "delete": "Delete",
+  
+  "noCreatures": "No creatures available",
+  "noOrbs": "You have no active orbs",
+  "notEnoughEssence": "Not enough essence",
+  
+  "orbTypes": "ORB TYPES",
+  "mystical": "Mystical",
+  "primal": "Primal",
+  "ethereal": "Ethereal",
+  
+  "sanctuarySlots": "Sanctuary Slots",
+  "availableSlots": "{count} available",
+  "@availableSlots": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  
+  "walkReminder": "Walking reminder",
+  "orbReady": "Orb ready",
+  "milestoneReached": "Milestone reached!",
+  "essenceGenerated": "Essence generated",
+  
+  "locked": "Locked",
+  "unlocked": "Unlocked",
+  "upgrade": "Upgrade",
+  "maxLevel": "Max level",
+  
+  "perHour": "/ hour",
+  "level": "Lv.",
+  "orbsReady": "Orb ready to channel!",
+  "noActiveOrbs": "Active orbs",
+  "idleProduction": "Idle production",
+  
+  "storage": "Storage",
+  "explorerJournal": "Explorer Journal",
+  
+  "sanctuaries": "Sanctuaries",
+  "temporarySanctuaries": "Temporary Sanctuaries",
+  "orbPurchased": "Orb purchased! Check your Bag.",
+  "sanctuaryPurchased": "Sanctuary purchased! Check your Bag.",
+  "upgradeCompleted": "Upgrade \"{name}\" completed!",
+  "@upgradeCompleted": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "sanctuaryUpgraded": "{name} upgraded to Level {level}!",
+  "@sanctuaryUpgraded": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "level": {"type": "int"}
+    }
+  },
+  "checkBag": "Check your Bag",
+  
+  "permanentSanctuaryUpgrades": "Permanent Sanctuary Upgrades",
+  "globalUpgrades": "Global Upgrades",
+  "loadingUpgrades": "Loading upgrades...",
+  
+  "primordialSanctuaries": "Primordial Sanctuaries",
+  "yourBag": "Your Bag",
+  "emptySanctuary": "Empty Sanctuary",
+  "placeOrb": "Place Orb",
+  "channelNow": "Channel Now",
+  "symbiosisReward": "Symbiosis Sanctuary granted you {essence} Essence!",
+  "@symbiosisReward": {
+    "placeholders": {
+      "essence": {"type": "String"}
+    }
+  },
+  "orb": "Orb",
+  "stepsProgress": "{current} / {total} steps",
+  "@stepsProgress": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  
+  "discoveredCount": "{current} / {total} Discovered",
+  "@discoveredCount": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "rarityCommon": "Common",
+  "rarityUncommon": "Uncommon",
+  "rarityRare": "Rare",
+  "rarityEpic": "Epic",
+  "rarityLegendary": "Legendario",
+  
+  "selectSanctuary": "Select Sanctuary",
+  "selectOrbTitle": "Select Orb",
+  "waitingOrbs": "Orbs on Hold",
+  "noOrbsAvailable": "No orbs available",
+  "noOrbsInstructions": "Visit the shop to buy orbs and start channeling creatures",
+  "goToShop": "Go to Shop",
+  "inventoryItems": "Inventory Items",
+  "noItemsAvailable": "No items available",
+  "noItemsInstructions": "Special items will appear here when you get them",
+  "use": "Use",
+  "quantity": "Quantity",
+  
+  "noUnassignedOrbs": "No unassigned orbs",
+  "unknownOrb": "Unknown Orb",
+  "stepsRequired": "{count} steps required",
+  "@stepsRequired": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "assign": "Assign",
+  "inventoryItemsAndSanctuaries": "Items and Sanctuaries",
+  "emptyInventoryBag": "Inventory bag empty",
+  "quantityDisplay": "Quantity: {count}",
+  "@quantityDisplay": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemActivated": "{name} Activated",
+  "@itemActivated": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "tempSanctuaryAlreadyActive": "You already have an active temporary sanctuary",
+  
+  "newCreatureBadge": "NEW!",
+  
+  "useSingular": "use",
+  "usesPlural": "uses",
+  "energyStorage": "Energy Storage",
+  
+  "orbReadyTitle": "✨ Orb Ready",
+  "orbReadyBody": "Your {type} finished channeling",
+  "@orbReadyBody": {
+    "placeholders": {
+      "type": {"type": "String"}
+    }
+  },
+  "walkReminderTitle": "🌿 Time for a Walk",
+  "walkMsg1": "A quiet walk?",
+  "walkMsg2": "Maybe it's a good time for a walk",
+  "walkMsg3": "Fresh air is always good",
+  "walkMsg4": "How about stretching your legs?",
+  
+  "noGoal": "No Goal",
+  "notifyGoal": "Notify on goal reached",
+  "notifyGoalDesc": "Get notified when you reach your daily step goal",
+  "goalReachedTitle": "Goal Reached!",
+  "goalReachedBody": "You reached your daily goal of {goal} steps",
+  
+  "trackingServiceTitle": "Stillwalks Active",
+  "trackingServiceBody": "Generating Essence...",
+  
+  "primordial": "Primordial",
+  "temporary": "Temporary",
+  "ready": "Ready!",
+  "noActiveOrbsStatus": "No active orbs",
+  "orbsAvailableForPurchase": "Orbs available for purchase",
+  
+  "levelAbbr": "Lv.",
+  "channelNow": "Channel now!",
+  "emptySlot": "Empty",
+  "useStorage": "Use Storage",
+  "channelEnergy": "Channel Energy",
+  "chooseEnergyTransfer": "Choose energy to transfer:",
+  "stepsLower": "steps",
+  "storageVsNeeded": "Storage: {stored} | Needed: {needed}",
+  "transfer": "Transfer",
+  "stepsChanneledFromStorage": "{count} steps channeled from storage!",
+  
+  "stats": "Stats:",
+  "typePermanent": "Type: Permanent Sanctuary",
+  "upgradeLevel": "Upgrade Level: {level} (-{percentage}%)",
+  "unlimitedUses": "Uses: Unlimited ♾️",
+  "specialAbility": "Special Ability:",
+  "infiniteChannelingDesc": "Infinite Channeling. Never runs out and allows channeling of any orb type.",
+  "improveSpeedHint": "Upgrade channeling speed in the shop to reduce required steps.",
+  
+  "activateSanctuary": "Activate Sanctuary",
+  "buy": "Buy",
+  "emptyUses": "Empty ({count} uses)",
+  "tapToActivate": "Tap to activate",
+  "goToShop": "Go to Shop",
+  "typeTemporary": "Type: Temporary Sanctuary",
+  "remainingUses": "Remaining uses: {count}",
+  "destroyWarning": "Automatically destroyed after depleting all uses.",
+  
+  "abilityFastFlow": "Reduces required steps by 50% (2x speed multiplier).",
+  "abilitySymbiosis": "Grants 1 Essence for every 10 steps taken during channeling.",
+  "abilityQuietude": "Allows hatching orbs using Essence instead of steps.",
+  "abilityEcho": "Reduces steps by 70% but only generates common/uncommon creatures.",
+  "abilityResonance": "Increases chance of obtaining rare creatures by +10%.",
+  "abilityActive": "Special ability active.",
+  
+  "upgradeIdleName": "Essence Collector",
+  "upgradeIdleDesc": "Increases passive Essence generation speed.",
+  "upgradeIdleBonus": "+2% bonus / level",
+  "upgradeStorageName": "Energy Storage",
+  "upgradeStorageDesc": "Allows storing unused steps when no orbs are active.",
+  "upgradeStorageBonus": "+300 capacity / level",
+  "upgradeSpeedName": "Speed Upgrade",
+  
+  "sancPrimordialName": "Primordial",
+  "sancPrimordialDesc": "The first discovered sanctuary. A peaceful place where Orbs can channel their energy.",
+  "sancFastFlowName": "Fast Flow",
+  "sancFastFlowDesc": "-50% steps required (1 use)",
+  "sancSymbiosisName": "Symbiosis",
+  "sancSymbiosisDesc": "+1 Essence every 10 steps (2 uses)",
+  "sancQuietudeName": "Absolute Quietude",
+  "sancQuietudeDesc": "Hatch with Essence (1 use)",
+  "sancEchoName": "Vital Echo",
+  "sancEchoDesc": "-70% steps | Common/Uncommon only (1 use)",
+  "sancResonanceName": "Resonance",
+  "sancResonanceDesc": "+10% rare chance (1 use)",
+  
+  "orbBasicName": "Basic Orb",
+  "orbBasicDesc": "A common Orb that requires 2000 steps to channel.",
+  
+  "descSpiristone": "A small enchanted stone with tiny hands and legs. Curious and friendly.",
+  "descRadispirit": "A magical radish walking on four legs. Its leaves glow at sunset.",
+  "descSlugrry": "A furry white slug with slow movements but quick thinking."
+}

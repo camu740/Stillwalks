@@ -6,6 +6,9 @@ import 'package:stillwalks/models/creature_instance.dart';
 import 'package:stillwalks/models/sanctuary.dart';
 import 'package:stillwalks/models/inventory_item.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
+import 'package:stillwalks/services/native_bridge.dart';
+import 'package:stillwalks/services/notification_preferences_service.dart';
+import 'package:stillwalks/services/notification_guard_service.dart';
 
 /// Servicio que gestiona la lógica de Orbes, Santuarios e Inventario
 class OrbeService extends ChangeNotifier {
@@ -16,11 +19,23 @@ class OrbeService extends ChangeNotifier {
   List<OrbeType> _orbeTypes = [];
   List<Sanctuary> _sanctuaries = [];
   List<InventoryItem> _inventory = [];
+  
+  // Optional service references for notifications
+  NativeBridge? _nativeBridge;
+  NotificationPreferencesService? _notificationPrefs;
+  NotificationGuardService? _notificationGuard;
 
   List<Orbe> get orbes => _orbes;
   List<OrbeType> get orbeTypes => _orbeTypes;
   List<Sanctuary> get sanctuaries => _sanctuaries;
   List<InventoryItem> get inventory => _inventory;
+  
+  /// Sets the notification services (called from main.dart after initialization)
+  void setNotificationServices(NativeBridge nativeBridge, NotificationPreferencesService notificationPrefs, NotificationGuardService notificationGuard) {
+    _nativeBridge = nativeBridge;
+    _notificationPrefs = notificationPrefs;
+    _notificationGuard = notificationGuard;
+  }
 
   /// Inicializa el servicio
   Future<void> initialize() async {
@@ -149,10 +164,30 @@ class OrbeService extends ChangeNotifier {
 
     final newProgress = (orbe.currentProgress + steps).clamp(0, maxSteps);
     if (newProgress == orbe.currentProgress) return;
+    
+    // Check if orb just completed (wasn't complete before, now is)
+    final wasComplete = orbe.currentProgress >= maxSteps;
+    final isNowComplete = newProgress >= maxSteps;
 
     final updatedOrbe = orbe.copyWith(currentProgress: newProgress);
     await _db.updateOrbe(orbeId, {'currentProgress': updatedOrbe.currentProgress});
     _orbes[orbeIndex] = updatedOrbe;
+    
+    // Trigger notification if orb just completed and notifications are enabled
+    if (!wasComplete && isNowComplete && type != null) {
+      if (_notificationPrefs != null && _nativeBridge != null) {
+        final settings = _notificationPrefs!.settings;
+        if (settings.eventsNotificationEnabled) {
+          // Check cooldown/guard
+          if (_notificationGuard == null || _notificationGuard!.shouldAllowNotification('orb_ready')) {
+            await _nativeBridge!.showOrbReadyNotification(type.name);
+            _notificationGuard?.markNotified('orb_ready');
+            debugPrint('OrbeService: Orb ready notification sent for ${type.name}');
+          }
+        }
+      }
+    }
+    
     notifyListeners();
   }
 
@@ -248,15 +283,16 @@ class OrbeService extends ChangeNotifier {
       debugPrint('OrbeService: Symbiosis sanctuary rewarded $symbiosisEssence essence');
     }
 
+    // Manejar consumibles de santuarios temporales (ANTEs de limpiar el orbe, para poder encontrar el santuario)
+    await _consumeSanctuaryCharge(orbeId);
+
     // Limpiar el orbe del santuario para permitir asignar uno nuevo
+    // (Solo si el santuario aún existe tras consumir la carga)
     final sIdx = _sanctuaries.indexWhere((s) => s.orbeId == orbeId);
     if (sIdx != -1) {
       _sanctuaries[sIdx] = _sanctuaries[sIdx].copyWith(clearOrbe: true);
       await _db.updateSanctuary(_sanctuaries[sIdx].id, _sanctuaries[sIdx].toJson());
     }
-
-    // Manejar consumibles de santuarios temporales (después de canalizar con éxito)
-    await _consumeSanctuaryCharge(orbeId);
 
     notifyListeners();
     

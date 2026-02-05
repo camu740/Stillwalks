@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/models/orbe.dart';
 import 'package:stillwalks/models/inventory_item.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/data_localizations.dart';
 
 class InventoryScreen extends StatelessWidget {
   final bool isSelectionMode;
@@ -30,8 +32,8 @@ class InventoryScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           isSanctuarySelectionMode 
-              ? 'Seleccionar Santuario' 
-              : (isSelectionMode ? 'Seleccionar Orbe' : 'Tu Bolsa')
+              ? AppLocalizations.of(context)!.selectSanctuary
+              : (isSelectionMode ? AppLocalizations.of(context)!.selectOrbTitle : AppLocalizations.of(context)!.yourBag)
         ),
         backgroundColor: Colors.deepPurple,
       ),
@@ -51,7 +53,7 @@ class InventoryScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Orbes en Espera (${availableOrbes.length})',
+                  '${AppLocalizations.of(context)!.waitingOrbs} (${availableOrbes.length})',
                   style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.purpleAccent),
                 ),
               ),
@@ -73,28 +75,27 @@ class InventoryScreen extends StatelessWidget {
                                   color: Colors.white30,
                                 ),
                                 const SizedBox(height: 16),
-                                const Text(
-                                  'No tienes orbes disponibles',
-                                  style: TextStyle(
+                                Text(
+                                  AppLocalizations.of(context)!.noOrbsAvailable,
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  'Visita la tienda para comprar orbes y comenzar a canalizar criaturas',
-                                  style: TextStyle(color: Colors.white54),
+                                Text(
+                                  AppLocalizations.of(context)!.noOrbsInstructions,
+                                  style: const TextStyle(color: Colors.white54),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 24),
                                 ElevatedButton.icon(
                                   onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(context, '/shop');
+                                    Navigator.pushReplacementNamed(context, '/shop');
                                   },
                                   icon: const Icon(Icons.shopping_bag),
-                                  label: const Text('Ir a la Tienda'),
+                                  label: Text(AppLocalizations.of(context)!.goToShop),
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 32,
@@ -107,10 +108,10 @@ class InventoryScreen extends StatelessWidget {
                             ),
                           ),
                         )
-                      : const Center(
+                      : Center(
                           child: Text(
-                            'No tienes orbes sin asignar',
-                            style: TextStyle(color: Colors.white54),
+                            AppLocalizations.of(context)!.noUnassignedOrbs,
+                            style: const TextStyle(color: Colors.white54),
                           ),
                         ),
                 ),
@@ -126,8 +127,13 @@ class InventoryScreen extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
                         leading: const Icon(Icons.circle, color: Colors.purpleAccent, size: 40),
-                        title: Text(type?.name ?? 'Orbe Desconocido', style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('${type?.requiredSteps ?? 0} pasos requeridos'),
+                        title: Text(
+                          type != null 
+                              ? AppLocalizations.of(context)!.getOrbName(type.id, type.name) 
+                              : AppLocalizations.of(context)!.unknownOrb, 
+                          style: const TextStyle(fontWeight: FontWeight.bold)
+                        ),
+                        subtitle: Text(AppLocalizations.of(context)!.stepsRequired(type?.requiredSteps ?? 0)),
                         trailing: isSelectionMode 
                           ? ElevatedButton(
                               onPressed: () async {
@@ -136,7 +142,7 @@ class InventoryScreen extends StatelessWidget {
                                   Navigator.pop(context);
                                 }
                               },
-                              child: const Text('Asignar'),
+                              child: Text(AppLocalizations.of(context)!.assign),
                             )
                           : null,
                       ),
@@ -153,16 +159,16 @@ class InventoryScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Objetos y Santuarios (${inventoryItems.fold<int>(0, (sum, item) => sum + item.quantity)})',
+                    '${AppLocalizations.of(context)!.inventoryItemsAndSanctuaries} (${inventoryItems.fold<int>(0, (sum, item) => sum + item.quantity)})',
                     style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.cyanAccent),
                   ),
                 ),
               ),
               if (inventoryItems.isEmpty)
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),
-                    child: Center(child: Text('Bolsa de objetos vacía', style: TextStyle(color: Colors.white54))),
+                    child: Center(child: Text(AppLocalizations.of(context)!.emptyInventoryBag, style: const TextStyle(color: Colors.white54))),
                   ),
                 )
               else
@@ -170,8 +176,9 @@ class InventoryScreen extends StatelessWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final item = inventoryItems[index];
-                      final name = InventoryItemTypes.getName(item.typeId);
-                      final desc = InventoryItemTypes.getDescription(item.typeId);
+                      // Reutilizamos la lógica de nombres de santuarios porque estos items SON santuarios en potencia
+                      final name = AppLocalizations.of(context)!.getSanctuaryName('', item.typeId, 'Item');
+                      final desc = AppLocalizations.of(context)!.getSanctuaryDescription('', item.typeId, '');
                       
                       return Card(
                         color: Colors.white.withOpacity(0.05),
@@ -183,14 +190,14 @@ class InventoryScreen extends StatelessWidget {
                             size: 40,
                           ),
                           title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('$desc\nCantidad: ${item.quantity}'),
+                          subtitle: Text('$desc\n${AppLocalizations.of(context)!.quantityDisplay(item.quantity)}'),
                           isThreeLine: true,
                           trailing: ElevatedButton(
                             onPressed: () async {
                               final success = await orbeService.activateTemporarySanctuary(item.typeId);
                               if (success && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('$name Activado')),
+                                  SnackBar(content: Text(AppLocalizations.of(context)!.itemActivated(name))),
                                 );
                                 
                                 // Encontrar el santuario temporal recién creado
@@ -218,11 +225,11 @@ class InventoryScreen extends StatelessWidget {
                                 }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Ya tienes un santuario temporal activo')),
+                                  SnackBar(content: Text(AppLocalizations.of(context)!.tempSanctuaryAlreadyActive)),
                                 );
                               }
                             },
-                            child: const Text('Usar'),
+                            child: Text(AppLocalizations.of(context)!.use),
                           ),
                         ),
                       );

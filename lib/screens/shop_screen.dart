@@ -6,6 +6,8 @@ import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/models/orbe.dart';
 import 'package:stillwalks/models/sanctuary.dart';
 import 'package:stillwalks/models/inventory_item.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/data_localizations.dart';
 
 /// Pantalla de la tienda para comprar Orbes y mejoras
 class ShopScreen extends StatefulWidget {
@@ -41,14 +43,14 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     final currentEsencia = esenciaService.playerState.totalEsencia;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tienda'),
+        title: Text(AppLocalizations.of(context)!.shop),
         backgroundColor: Colors.deepPurple.withOpacity(0.8),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.circle), text: 'Orbes'),
-            Tab(icon: Icon(Icons.auto_awesome), text: 'Santuarios'),
-            Tab(icon: Icon(Icons.trending_up), text: 'Mejoras'),
+          tabs: [
+            Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
+            Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
+            Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades),
           ],
         ),
       ),
@@ -81,7 +83,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                     const Icon(Icons.auto_awesome, color: Colors.amberAccent),
                     const SizedBox(width: 8),
                     Text(
-                      'Esencia: ${currentEsencia.toStringAsFixed(0)}',
+                      '${AppLocalizations.of(context)!.essence}: ${currentEsencia.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -118,11 +120,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
-            'Orbes disponibles para comprar',
-            style: TextStyle(
+            AppLocalizations.of(context)!.orbsAvailableForPurchase,
+            style: const TextStyle(
               color: Colors.purpleAccent,
               fontStyle: FontStyle.italic,
               fontSize: 16,
@@ -132,8 +134,8 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         const SizedBox(height: 8),
         _ShopItem(
           icon: Icons.circle_outlined,
-          title: 'Orbe Básico',
-          description: 'Requiere 2.000 pasos para canalizar',
+          title: AppLocalizations.of(context)!.getOrbName('orbe_basic', 'Orbe Básico'),
+          description: AppLocalizations.of(context)!.getOrbDescription('orbe_basic', 'Requiere 2000 pasos'),
           cost: 500.0,
           currentEsencia: currentEsencia,
           onPurchase: () async {
@@ -141,7 +143,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             if (result != null) {
               await esenciaService.spendEsencia(500.0);
               if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('¡Orbe comprado! Revisa tu Bolsa.'))
+                SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
               );
             }
           },
@@ -158,11 +160,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(
-            'Santuarios Temporales',
-            style: TextStyle(
+            AppLocalizations.of(context)!.temporarySanctuaries,
+            style: const TextStyle(
               color: Colors.cyanAccent,
               fontStyle: FontStyle.italic,
               fontSize: 16,
@@ -171,9 +173,9 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         ),
         const SizedBox(height: 8),
         _ShopItem(
-          icon: Icons.flash_on,
-          title: 'Santuario de Flujo Rápido',
-          description: 'Reduce requisito de pasos en 50% (1 uso)',
+          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuaryFastFlow),
+          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuaryFastFlow, 'Fast Flow'),
+          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuaryFastFlow, ''),
           cost: 1200.0,
           currentEsencia: currentEsencia,
           onPurchase: () async {
@@ -186,7 +188,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
               await esenciaService.spendEsencia(1200.0);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('¡Santuario comprado! Revisa tu Bolsa.')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
                 );
               }
             }
@@ -194,9 +196,9 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         ),
         const SizedBox(height: 12),
         _ShopItem(
-          icon: Icons.all_inclusive,
-          title: 'Santuario de Simbiosis',
-          description: 'Otorga esencia al canalizar: 1 esencia / 10 pasos (2 usos)',
+          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuarySymbiosis),
+          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuarySymbiosis, 'Symbiosis'),
+          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuarySymbiosis, ''),
           cost: 2000.0,
           currentEsencia: currentEsencia,
           onPurchase: () async {
@@ -209,7 +211,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
               await esenciaService.spendEsencia(2000.0);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('¡Santuario comprado! Revisa tu Bolsa.')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
                 );
               }
             }
@@ -234,15 +236,15 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
       padding: const EdgeInsets.all(16),
       children: [
         // Sección: Mejoras de Santuarios
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              Icon(Icons.fort, color: Colors.purpleAccent, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.fort, color: Colors.purpleAccent, size: 20),
+              const SizedBox(width: 8),
               Text(
-                'Mejoras de Santuarios Permanentes',
-                style: TextStyle(
+                AppLocalizations.of(context)!.permanentSanctuaryUpgrades,
+                style: const TextStyle(
                   color: Colors.purpleAccent,
                   fontStyle: FontStyle.italic,
                   fontSize: 16,
@@ -264,8 +266,8 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _SanctuaryUpgradeItem(
-              title: sanctuary.name,
-              description: sanctuary.description,
+              title: AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
+              description: AppLocalizations.of(context)!.getSanctuaryDescription(sanctuary.id, sanctuary.typeId, sanctuary.description),
               currentLevel: currentLevel,
               maxLevel: 15,
               cost: cost,
@@ -277,13 +279,16 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                   await esenciaService.spendEsencia(cost);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('¡Mejora de "${sanctuary.name}" a Nivel ${currentLevel + 1}!')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryUpgraded(
+                        AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
+                        currentLevel + 1
+                      ))),
                     );
                   }
                 } else {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No tienes suficiente Esencia')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
                     );
                   }
                 }
@@ -297,15 +302,15 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         const SizedBox(height: 16),
         
         // Sección: Mejoras Globales
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              Icon(Icons.trending_up, color: Colors.greenAccent, size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.trending_up, color: Colors.greenAccent, size: 20),
+              const SizedBox(width: 8),
               Text(
-                'Mejoras Globales',
-                style: TextStyle(
+                AppLocalizations.of(context)!.globalUpgrades,
+                style: const TextStyle(
                   color: Colors.greenAccent,
                   fontStyle: FontStyle.italic,
                   fontSize: 16,
@@ -319,12 +324,12 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         
         // Mostrar mejoras globales
         if (globalUpgrades.isEmpty)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Text(
-                "Cargando mejoras...",
-                style: TextStyle(color: Colors.white54),
+                AppLocalizations.of(context)!.loadingUpgrades,
+                style: const TextStyle(color: Colors.white54),
               ),
             ),
           )
@@ -334,13 +339,13 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
               padding: const EdgeInsets.only(bottom: 12),
               child: _UpgradeItem(
                 icon: _getUpgradeIcon(upgrade.type),
-                title: upgrade.name,
-                description: upgrade.description,
+                title: AppLocalizations.of(context)!.getUpgradeName(upgrade.type),
+                description: AppLocalizations.of(context)!.getUpgradeDescription(upgrade.type),
                 currentLevel: upgrade.currentLevel,
                 maxLevel: upgrade.type.maxLevel,
                 cost: upgrade.calculateNextLevelCost(),
                 currentEsencia: currentEsencia,
-                multiplier: _getUpgradeMultiplierText(upgrade.type),
+                multiplier: AppLocalizations.of(context)!.getUpgradeBonusText(upgrade.type),
                 bonusText: upgrade.type == UpgradeType.energyStorage
                     ? 'Capacidad: ${(upgrade.currentLevel * 300)}'
                     : 'Bono actual: +${(upgrade.currentLevel * 2)}%',
@@ -348,11 +353,13 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                   final success = await esenciaService.purchaseUpgrade(upgrade.id);
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('¡Mejora "${upgrade.name}" realizada!')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
+                        AppLocalizations.of(context)!.getUpgradeName(upgrade.type)
+                      ))),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No tienes suficiente Esencia')),
+                      SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
                     );
                   }
                 },
@@ -451,7 +458,7 @@ class _ShopItem extends StatelessWidget {
               backgroundColor: Colors.deepPurpleAccent,
               disabledBackgroundColor: Colors.grey.withOpacity(0.3),
             ),
-            child: const Text('Comprar'),
+            child: Text(AppLocalizations.of(context)!.buy),
           ),
         ],
       ),
@@ -585,7 +592,7 @@ class _UpgradeItem extends StatelessWidget {
                     foregroundColor: Colors.black,
                     disabledBackgroundColor: Colors.grey.withOpacity(0.3),
                   ),
-                  child: const Text('Mejorar'),
+                  child: Text(AppLocalizations.of(context)!.upgrade),
                 ),
             ],
           ),
@@ -719,7 +726,7 @@ class _SanctuaryUpgradeItem extends StatelessWidget {
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.grey.withOpacity(0.3),
                   ),
-                  child: const Text('Mejorar'),
+                  child: Text(AppLocalizations.of(context)!.upgrade),
                 ),
             ],
           ),

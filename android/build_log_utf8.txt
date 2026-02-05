@@ -1,0 +1,568 @@
+﻿> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+
+> Task :gradle:compileKotlin
+w: file:///C:/flutter/flutter3.38.9-stable/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:11:37 'ApkVariant' is deprecated. Deprecated in Java
+w: file:///C:/flutter/flutter3.38.9-stable/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:609:69 'ApkVariant' is deprecated. Deprecated in Java
+w: file:///C:/flutter/flutter3.38.9-stable/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:186:64 Unchecked cast: NamedDomainObjectContainer<out BuildType> to NamedDomainObjectContainer<BuildType>
+w: file:///C:/flutter/flutter3.38.9-stable/packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt:187:69 Unchecked cast: NamedDomainObjectContainer<out BuildType> to NamedDomainObjectContainer<BuildType>
+
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+> Task :app:DebugMinSdkCheck
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :app:compileFlutterBuildDebug
+./gradlew : 
+lib/main.dart:32:9: 
+Error: Inferred type 
+argument 
+'EsenciaService' 
+doesn't conform to 
+the bound 
+'ChangeNotifier?' of 
+the type variable 'T' 
+on 'ChangeNotifierProv
+ider'.
+En línea: 1 Carácter: 
+1
++ ./gradlew 
+assembleDebug > 
+build_log.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (lib/main.d   
+ art:3...ifierProv    
+ider'.:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+ - 'ChangeNotifier' 
+is from 'package:flutt
+er/src/foundation/chan
+ge_notifier.dart' ('/C
+:/flutter/flutter3.38.
+9-stable/packages/flut
+ter/lib/src/foundation
+/change_notifier.dart'
+).
+Try specifying type 
+arguments explicitly 
+so that they conform 
+to the bounds.
+        ChangeNotifier
+Provider(create: (_) 
+=> EsenciaService()),
+        ^
+../../../../AppData/Lo
+cal/Pub/Cache/hosted/p
+ub.dev/provider-6.1.5+
+1/lib/src/change_notif
+ier_provider.dart:98:3
+0: Context: This is 
+the type variable 
+whose bound isn't 
+conformed to.
+class ChangeNotifierPr
+ovider<T extends 
+ChangeNotifier?>
+                      
+       ^
+lib/main.dart:36:47: 
+Error: The method 'Not
+ificationGuardService'
+ isn't defined for 
+the type 
+'StillwalksApp'.
+ - 'StillwalksApp' is 
+from 'package:stillwal
+ks/main.dart' 
+('lib/main.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'NotificationGua
+rdService'.
+        ChangeNotifier
+Provider(create: (_) 
+=> NotificationGuardSe
+rvice()),
+                      
+                      
+  ^^^^^^^^^^^^^^^^^^^^
+^^^^
+lib/main.dart:36:9: 
+Error: Inferred type 
+argument 'dynamic' 
+doesn't conform to 
+the bound 
+'ChangeNotifier?' of 
+the type variable 'T' 
+on 'ChangeNotifierProv
+ider'.
+ - 'ChangeNotifier' 
+is from 'package:flutt
+er/src/foundation/chan
+ge_notifier.dart' ('/C
+:/flutter/flutter3.38.
+9-stable/packages/flut
+ter/lib/src/foundation
+/change_notifier.dart'
+).
+Try specifying type 
+arguments explicitly 
+so that they conform 
+to the bounds.
+        ChangeNotifier
+Provider(create: (_) 
+=> NotificationGuardSe
+rvice()),
+        ^
+../../../../AppData/Lo
+cal/Pub/Cache/hosted/p
+ub.dev/provider-6.1.5+
+1/lib/src/change_notif
+ier_provider.dart:98:3
+0: Context: This is 
+the type variable 
+whose bound isn't 
+conformed to.
+class ChangeNotifierPr
+ovider<T extends 
+ChangeNotifier?>
+                      
+       ^
+lib/main.dart:60:26: 
+Error: The method 
+'addListener' isn't 
+defined for the type 
+'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'addListener'.
+          esenciaServi
+ce.addListener(updateW
+idget);
+                      
+   ^^^^^^^^^^^
+lib/main.dart:143:45: 
+Error: 'NotificationGu
+ardService' isn't a 
+type.
+      final 
+notificationGuard = Pr
+ovider.of<Notification
+GuardService>(context,
+ listen: false);
+                      
+                      
+^^^^^^^^^^^^^^^^^^^^^^
+^^
+lib/main.dart:175:45: 
+Error: 'NotificationGu
+ardService' isn't a 
+type.
+      final 
+notificationGuard = Pr
+ovider.of<Notification
+GuardService>(context,
+ listen: false);
+                      
+                      
+^^^^^^^^^^^^^^^^^^^^^^
+^^
+lib/services/notificat
+ion_preferences_servic
+e.dart:11:3: Error: 
+Type 'NativeBridge' 
+not found.
+  NativeBridge? 
+_nativeBridge;
+  ^^^^^^^^^^^^
+lib/services/notificat
+ion_preferences_servic
+e.dart:16:24: Error: 
+Type 'NativeBridge' 
+not found.
+  void setNativeBridge
+(NativeBridge bridge) 
+{
+                      
+ ^^^^^^^^^^^^
+lib/services/notificat
+ion_preferences_servic
+e.dart:11:3: Error: 
+'NativeBridge' isn't 
+a type.
+  NativeBridge? 
+_nativeBridge;
+  ^^^^^^^^^^^^
+lib/services/notificat
+ion_preferences_servic
+e.dart:16:24: Error: 
+'NativeBridge' isn't 
+a type.
+  void setNativeBridge
+(NativeBridge bridge) 
+{
+                      
+ ^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:9:30: 
+Error: Type 
+'ChangeNotifier' not 
+found.
+class EsenciaService 
+extends 
+ChangeNotifier {
+                      
+       ^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:63:7: 
+Error: The method 
+'debugPrint' isn't 
+defined for the type 
+'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'debugPrint'.
+      debugPrint('? 
+EsenciaService: 
+Upgrade "Energy 
+Storage" inserted 
+because it was 
+missing.');
+      ^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:69:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:115:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:128:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:133:5: 
+Error: The method 
+'debugPrint' isn't 
+defined for the type 
+'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'debugPrint'.
+    debugPrint('? 
+EsenciaService: Added 
+$amount Esencia from 
+$source. Total: ${_pla
+yerState.totalEsencia}
+');
+    ^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:151:9: 
+Error: The method 
+'debugPrint' isn't 
+defined for the type 
+'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'debugPrint'.
+        debugPrint('? 
+EsenciaService: 
+Milestone 
+notification sent for 
+$currentMilestone 
+essence');
+        ^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:167:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:204:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:215:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:249:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:250:5: 
+Error: The method 
+'debugPrint' isn't 
+defined for the type 
+'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'debugPrint'.
+    debugPrint('? 
+EsenciaService: 
+Stored $stepsToAdd 
+steps. Total: ${_playe
+rState.storedSteps}/$c
+apacity');
+    ^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:265:5: 
+Error: The method 
+'notifyListeners' 
+isn't defined for the 
+type 'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 
+'notifyListeners'.
+    notifyListeners();
+    ^^^^^^^^^^^^^^^
+lib/services/esencia_s
+ervice.dart:266:5: 
+Error: The method 
+'debugPrint' isn't 
+defined for the type 
+'EsenciaService'.
+ - 'EsenciaService' 
+is from 'package:still
+walks/services/esencia
+_service.dart' ('lib/s
+ervices/esencia_servic
+e.dart').
+Try correcting the 
+name to the name of 
+an existing method, 
+or defining a method 
+named 'debugPrint'.
+    debugPrint('? 
+EsenciaService: 
+Consumed $consumed 
+stored steps. 
+Remaining: ${_playerSt
+ate.storedSteps}');
+    ^^^^^^^^^^
+Target kernel_snapshot
+_program failed: 
+Exception
+
+
+> Task :app:compileFlutterBuildDebug FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/adria/.gemini/antigravity/scratch/stillwalks/build/reports/problems/problems-report.html
+
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':app:compileFlut
+terBuildDebug'.
+> Process 'command 'C:
+\flutter\flutter3.38.9
+-stable\bin\flutter.ba
+t'' finished with 
+non-zero exit value 1
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 9s
+6 actionable tasks: 3 executed, 3 up-to-date
