@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:stillwalks/data/seeds/initial_data.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -24,7 +25,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -67,7 +68,8 @@ class DatabaseHelper {
         requiredSteps INTEGER NOT NULL,
         name TEXT NOT NULL,
         description TEXT NOT NULL,
-        lootTable TEXT NOT NULL
+        lootTable TEXT NOT NULL,
+        mechanics TEXT
       )
     ''');
 
@@ -211,6 +213,14 @@ class DatabaseHelper {
         'name': 'Almacén de Energía',
         'description': 'Permite almacenar pasos no usados cuando no hay orbes activos.',
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    // V8: Añadir columna mechanics a orbe_types
+    if (oldVersion < 8) {
+      try {
+        await db.execute('ALTER TABLE orbe_types ADD COLUMN mechanics TEXT');
+      } catch (e) {
+        // Ignorar si ya existe
+      }
     }
   }
 
@@ -428,6 +438,10 @@ class DatabaseHelper {
 
   Future<void> resetDatabase() async {
     final db = await database;
+    
+    // Delete all orbe types first (will cascade delete orbes)
+    await db.delete('orbe_types');
+    
     await db.delete('creature_instances');
     await db.delete('orbes');
     await db.delete('upgrades');
@@ -443,8 +457,9 @@ class DatabaseHelper {
       'speedMultiplier': 1.0,
     }, where: 'isTemporary = ?', whereArgs: [0]);
     
-    // Restaurar mejoras por defecto
-    await _seedGlobalUpgrades(db);
+    // Restore seeds directly to avoid isSeeded() check
+    await InitialData.seedOrbeTypes();
+    await InitialData.seedUpgrades();
     
     await db.update('player_state', {
       'totalEsencia': 0,

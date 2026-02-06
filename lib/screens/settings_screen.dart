@@ -4,6 +4,11 @@ import 'package:stillwalks/services/notification_preferences_service.dart';
 import 'package:stillwalks/providers/locale_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/screens/permissions_status_screen.dart';
+import 'package:stillwalks/screens/sensors_screen.dart';
+import 'package:stillwalks/screens/tracking_status_screen.dart';
+import 'package:stillwalks/screens/help_screen.dart';
+import 'package:stillwalks/screens/credits_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -159,7 +164,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: AppLocalizations.of(context)!.permissions,
             subtitle: AppLocalizations.of(context)!.permissionsDesc,
             onTap: () {
-              // TODO: Abrir ajustes de permisos
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PermissionsStatusScreen()),
+              );
             },
           ),
           _buildSettingTile(
@@ -168,7 +176,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: AppLocalizations.of(context)!.sensors,
             subtitle: AppLocalizations.of(context)!.sensorsDesc,
             onTap: () {
-              // TODO: Mostrar estado de sensores
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SensorsScreen()),
+              );
             },
           ),
           _buildSettingTile(
@@ -177,7 +188,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: AppLocalizations.of(context)!.trackingStatus,
             subtitle: AppLocalizations.of(context)!.trackingStatusDesc,
             onTap: () {
-              // TODO: Mostrar log técnico
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TrackingStatusScreen()),
+              );
             },
           ),
 
@@ -188,15 +202,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             iconColor: Colors.white54,
             title: AppLocalizations.of(context)!.help,
             onTap: () {
-              // TODO: Abrir guía de uso
-            },
-          ),
-          _buildSettingTile(
-            icon: Icons.mail_outline,
-            iconColor: Colors.white54,
-            title: AppLocalizations.of(context)!.contact,
-            onTap: () {
-              // TODO: Abrir email de soporte
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HelpScreen()),
+              );
             },
           ),
           _buildSettingTile(
@@ -205,7 +214,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: AppLocalizations.of(context)!.credits,
             subtitle: AppLocalizations.of(context)!.version(_appVersion),
             onTap: () {
-              // TODO: Mostrar créditos
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CreditsScreen()),
+              );
             },
           ),
 

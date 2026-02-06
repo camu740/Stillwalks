@@ -7,6 +7,7 @@ class OrbeType {
   final String name;
   final String description;
   final Map<String, double> lootTable; // speciesId -> probability
+  final Map<String, dynamic> mechanics; // Configuración flexible de comportamientos
 
   OrbeType({
     required this.id,
@@ -14,6 +15,7 @@ class OrbeType {
     required this.name,
     required this.description,
     required this.lootTable,
+    this.mechanics = const {},
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +25,7 @@ class OrbeType {
       'name': name,
       'description': description,
       'lootTable': jsonEncode(lootTable),
+      'mechanics': jsonEncode(mechanics),
     };
   }
 
@@ -35,6 +38,9 @@ class OrbeType {
       lootTable: Map<String, double>.from(
         jsonDecode(json['lootTable'] as String),
       ),
+      mechanics: json['mechanics'] != null 
+          ? jsonDecode(json['mechanics'] as String) 
+          : {},
     );
   }
 }

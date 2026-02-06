@@ -41,6 +41,12 @@ class InventoryItemTypes {
   static const String tempSanctuaryEcho = 'temp_sanctuary_echo';
   static const String tempSanctuaryResonance = 'temp_sanctuary_resonance';
   
+  static const List<String> allTypes = [
+    tempSanctuaryFastFlow,
+    tempSanctuarySymbiosis,
+    tempSanctuaryQuietude,
+  ];
+
   static String getName(String typeId) {
     switch (typeId) {
       case tempSanctuaryFastFlow: return 'Santuario de Flujo Rápido';
@@ -78,7 +84,7 @@ class InventoryItemTypes {
     switch (typeId) {
       case tempSanctuaryFastFlow: return Icons.flash_on;
       case tempSanctuarySymbiosis: return Icons.all_inclusive;
-      case tempSanctuaryQuietude: return Icons.self_improvement;
+      case tempSanctuaryQuietude: return Icons.spa; // Changed to match shop
       case tempSanctuaryEcho: return Icons.graphic_eq;
       case tempSanctuaryResonance: return Icons.blur_circular;
       default: return Icons.auto_awesome;

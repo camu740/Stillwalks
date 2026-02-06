@@ -185,7 +185,7 @@ class NativeBridge {
     try {
       await platform.invokeMethod('syncLocalization', {
         'orbReadyTitle': l10n.orbReadyTitle,
-        'orbReadyBody': l10n.orbReadyBody,
+        // orbReadyBody is parameterized - handled at notification time
         'walkReminderTitle': l10n.walkReminderTitle,
         'walkMsg1': l10n.walkMsg1,
         'walkMsg2': l10n.walkMsg2,
@@ -194,7 +194,7 @@ class NativeBridge {
         'trackingServiceTitle': l10n.trackingServiceTitle,
         'trackingServiceBody': l10n.trackingServiceBody,
         'goalReachedTitle': l10n.goalReachedTitle,
-        'goalReachedBody': l10n.goalReachedBody,
+        // goalReachedBody is parameterized - handled at notification time
       });
       debugPrint('NativeBridge: Localization synced');
     } on PlatformException catch (e) {

@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackingStatusDesc.
   ///
   /// In es, this message translates to:
-  /// **'Ver log de actividad'**
+  /// **'Resumen del sistema'**
   String get trackingStatusDesc;
 
   /// No description provided for @help.
@@ -439,6 +439,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{current}/{total} pasos'**
   String progressSteps(int current, int total);
+
+  /// No description provided for @progressEssence.
+  ///
+  /// In es, this message translates to:
+  /// **'{current}/{total} esencia'**
+  String progressEssence(int current, int total);
 
   /// No description provided for @creature.
   ///
@@ -637,6 +643,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{count} disponibles'**
   String availableSlots(int count);
+
+  /// No description provided for @standardOrbs.
+  ///
+  /// In es, this message translates to:
+  /// **'Orbes Estándar'**
+  String get standardOrbs;
+
+  /// No description provided for @specialOrbs.
+  ///
+  /// In es, this message translates to:
+  /// **'Orbes Especiales'**
+  String get specialOrbs;
 
   /// No description provided for @walkReminder.
   ///
@@ -986,6 +1004,12 @@ abstract class AppLocalizations {
   /// **'{name} Activado'**
   String itemActivated(String name);
 
+  /// No description provided for @steps.
+  ///
+  /// In es, this message translates to:
+  /// **'pasos'**
+  String get steps;
+
   /// No description provided for @tempSanctuaryAlreadyActive.
   ///
   /// In es, this message translates to:
@@ -1292,11 +1316,29 @@ abstract class AppLocalizations {
   /// **'Aumenta la probabilidad de obtener criaturas raras en +10%.'**
   String get abilityResonance;
 
+  /// No description provided for @sanctuary_temp_sanctuary_symbiosis_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Genera Esencia extra al completar el orbe.'**
+  String get sanctuary_temp_sanctuary_symbiosis_desc;
+
   /// No description provided for @abilityActive.
   ///
   /// In es, this message translates to:
   /// **'Habilidad especial activa.'**
   String get abilityActive;
+
+  /// No description provided for @sanctuary_temp_sanctuary_quietude_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Santuario de Quietud'**
+  String get sanctuary_temp_sanctuary_quietude_name;
+
+  /// No description provided for @sanctuary_temp_sanctuary_quietude_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Convierte la Esencia obtenida en pasos para el orbe.'**
+  String get sanctuary_temp_sanctuary_quietude_desc;
 
   /// No description provided for @upgradeIdleName.
   ///
@@ -1421,8 +1463,74 @@ abstract class AppLocalizations {
   /// No description provided for @orbBasicDesc.
   ///
   /// In es, this message translates to:
-  /// **'Un Orbe común que requiere 2000 pasos para canalizar.'**
+  /// **'Un Orbe común. Requiere 2000 pasos.'**
   String get orbBasicDesc;
+
+  /// No description provided for @orbAdvancedName.
+  ///
+  /// In es, this message translates to:
+  /// **'Orbe Avanzado'**
+  String get orbAdvancedName;
+
+  /// No description provided for @orbAdvancedDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.'**
+  String get orbAdvancedDesc;
+
+  /// No description provided for @orbExpertName.
+  ///
+  /// In es, this message translates to:
+  /// **'Orbe Experto'**
+  String get orbExpertName;
+
+  /// No description provided for @orbExpertDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejora probabilidad de Raros. Requiere 10000 pasos.'**
+  String get orbExpertDesc;
+
+  /// No description provided for @orbQuietudeName.
+  ///
+  /// In es, this message translates to:
+  /// **'Orbe de Quietud'**
+  String get orbQuietudeName;
+
+  /// No description provided for @orbQuietudeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Permite usar Esencia para avanzar. Ideal para días tranquilos.'**
+  String get orbQuietudeDesc;
+
+  /// No description provided for @orbEssenceName.
+  ///
+  /// In es, this message translates to:
+  /// **'Orbe Esencial'**
+  String get orbEssenceName;
+
+  /// No description provided for @orbEssenceDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Genera Esencia extra al caminar. No acelera canalización.'**
+  String get orbEssenceDesc;
+
+  /// No description provided for @infuseEssence.
+  ///
+  /// In es, this message translates to:
+  /// **'Infundir Esencia'**
+  String get infuseEssence;
+
+  /// No description provided for @infuseEssenceDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Convierte {essence} Esencia en {steps} pasos'**
+  String infuseEssenceDesc(Object essence, Object steps);
+
+  /// No description provided for @essenceInfused.
+  ///
+  /// In es, this message translates to:
+  /// **'¡{steps} pasos obtenidos!'**
+  String essenceInfused(Object steps);
 
   /// No description provided for @descSpiristone.
   ///
@@ -1441,6 +1549,156 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.'**
   String get descSlugrry;
+
+  /// No description provided for @physicalActivity.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad física'**
+  String get physicalActivity;
+
+  /// No description provided for @notificationsPermission.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones'**
+  String get notificationsPermission;
+
+  /// No description provided for @backgroundExecution.
+  ///
+  /// In es, this message translates to:
+  /// **'Ejecución en segundo plano'**
+  String get backgroundExecution;
+
+  /// No description provided for @granted.
+  ///
+  /// In es, this message translates to:
+  /// **'Concedido'**
+  String get granted;
+
+  /// No description provided for @denied.
+  ///
+  /// In es, this message translates to:
+  /// **'Denegado'**
+  String get denied;
+
+  /// No description provided for @permissionsMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin estos permisos el juego funciona, pero con menos precisión.'**
+  String get permissionsMessage;
+
+  /// No description provided for @openSystemSettings.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir ajustes del sistema'**
+  String get openSystemSettings;
+
+  /// No description provided for @stepCounter.
+  ///
+  /// In es, this message translates to:
+  /// **'Contador de pasos'**
+  String get stepCounter;
+
+  /// No description provided for @lastUpdate.
+  ///
+  /// In es, this message translates to:
+  /// **'Última actualización'**
+  String get lastUpdate;
+
+  /// No description provided for @dataSource.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuente de datos'**
+  String get dataSource;
+
+  /// No description provided for @deviceSensor.
+  ///
+  /// In es, this message translates to:
+  /// **'Sensor del dispositivo'**
+  String get deviceSensor;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {minutes} min'**
+  String minutesAgo(int minutes);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {hours} h'**
+  String hoursAgo(int hours);
+
+  /// No description provided for @sensorActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Activo'**
+  String get sensorActive;
+
+  /// No description provided for @sensorInactive.
+  ///
+  /// In es, this message translates to:
+  /// **'Inactivo'**
+  String get sensorInactive;
+
+  /// No description provided for @systemStatus.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado del sistema'**
+  String get systemStatus;
+
+  /// No description provided for @trackingActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguimiento activo'**
+  String get trackingActive;
+
+  /// No description provided for @trackingPaused.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguimiento pausado'**
+  String get trackingPaused;
+
+  /// No description provided for @activeNotifications.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificaciones activas'**
+  String get activeNotifications;
+
+  /// No description provided for @sanctuariesInProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'Santuarios en progreso'**
+  String get sanctuariesInProgress;
+
+  /// No description provided for @lastSync.
+  ///
+  /// In es, this message translates to:
+  /// **'Última sincronización'**
+  String get lastSync;
+
+  /// No description provided for @systemHealthy.
+  ///
+  /// In es, this message translates to:
+  /// **'Sistema funcionando correctamente'**
+  String get systemHealthy;
+
+  /// No description provided for @noIssues.
+  ///
+  /// In es, this message translates to:
+  /// **'No se detectaron problemas'**
+  String get noIssues;
+
+  /// No description provided for @none.
+  ///
+  /// In es, this message translates to:
+  /// **'Ninguno'**
+  String get none;
+
+  /// No description provided for @justNow.
+  ///
+  /// In es, this message translates to:
+  /// **'Justo ahora'**
+  String get justNow;
 }
 
 class _AppLocalizationsDelegate

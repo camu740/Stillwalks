@@ -116,118 +116,59 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     final orbeService = Provider.of<OrbeService>(context);
     final esenciaService = Provider.of<EsenciaService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
+    
+    // Get all orb types and sort by required steps
+    final allOrbes = orbeService.orbeTypes;
+    allOrbes.sort((a, b) => a.requiredSteps.compareTo(b.requiredSteps));
 
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            AppLocalizations.of(context)!.orbsAvailableForPurchase,
-            style: const TextStyle(
-              color: Colors.purpleAccent,
-              fontStyle: FontStyle.italic,
-              fontSize: 16,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        _ShopItem(
+      children: allOrbes.map((type) => _buildOrbItem(type, currentEsencia, orbeService, esenciaService)).toList(),
+    );
+  }
+
+  Widget _buildOrbItem(OrbeType type, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService) {
+      final cost = orbeService.getOrbeCost(type.id);
+      
+      // Determine color based on rarity/difficulty
+      Color iconColor = Colors.grey; // Default for basic
+      if (type.id == 'orbe_advanced') iconColor = Colors.green;
+      else if (type.id == 'orbe_expert') iconColor = Colors.blue;
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12.0),
+        child: _ShopItem(
           icon: Icons.circle_outlined,
-          title: AppLocalizations.of(context)!.getOrbName('orbe_basic', 'Orbe Básico'),
-          description: AppLocalizations.of(context)!.getOrbDescription('orbe_basic', 'Requiere 2000 pasos'),
-          cost: 500.0,
+          iconColor: iconColor,
+          title: AppLocalizations.of(context)!.getOrbName(type.id, type.name),
+          description: AppLocalizations.of(context)!.getOrbDescription(type.id, type.description),
+          cost: cost,
           currentEsencia: currentEsencia,
           onPurchase: () async {
-            final result = await orbeService.purchaseOrbe('orbe_basic', currentEsencia);
+            final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
             if (result != null) {
-              await esenciaService.spendEsencia(500.0);
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
-              );
+              await esenciaService.spendEsencia(cost);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
+                );
+              }
+            } else {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
+                );
+              }
             }
           },
         ),
-      ],
-    );
+      );
   }
 
   Widget _buildSanctuariesTab() {
     final orbeService = Provider.of<OrbeService>(context);
     final esenciaService = Provider.of<EsenciaService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            AppLocalizations.of(context)!.temporarySanctuaries,
-            style: const TextStyle(
-              color: Colors.cyanAccent,
-              fontStyle: FontStyle.italic,
-              fontSize: 16,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        _ShopItem(
-          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuaryFastFlow),
-          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuaryFastFlow, 'Fast Flow'),
-          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuaryFastFlow, ''),
-          cost: 1200.0,
-          currentEsencia: currentEsencia,
-          onPurchase: () async {
-            final success = await orbeService.purchaseInventoryItem(
-              InventoryItemTypes.tempSanctuaryFastFlow,
-              1200.0,
-              currentEsencia,
-            );
-            if (success) {
-              await esenciaService.spendEsencia(1200.0);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
-                );
-              }
-            }
-          },
-        ),
-        const SizedBox(height: 12),
-        _ShopItem(
-          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuarySymbiosis),
-          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuarySymbiosis, 'Symbiosis'),
-          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuarySymbiosis, ''),
-          cost: 2000.0,
-          currentEsencia: currentEsencia,
-          onPurchase: () async {
-            final success = await orbeService.purchaseInventoryItem(
-              InventoryItemTypes.tempSanctuarySymbiosis,
-              2000.0,
-              currentEsencia,
-            );
-            if (success) {
-              await esenciaService.spendEsencia(2000.0);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
-                );
-              }
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUpgradesTab() {
-    final esenciaService = Provider.of<EsenciaService>(context);
-    final orbeService = Provider.of<OrbeService>(context);
-    final currentEsencia = esenciaService.playerState.totalEsencia;
-    
-    // Obtener mejoras globales
-    final globalUpgrades = esenciaService.upgrades;
     
     // Obtener santuarios permanentes
     final permanentSanctuaries = orbeService.sanctuaries.where((s) => !s.isTemporary).toList();
@@ -235,7 +176,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Sección: Mejoras de Santuarios
+        // Sección: Santuarios Permanentes (Mejoras)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -256,9 +197,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         ),
         const SizedBox(height: 8),
         
-        // Mostrar una tarjeta por cada santuario permanente
         ...permanentSanctuaries.map((sanctuary) {
-          final canUpgrade = sanctuary.canUpgrade();
           final cost = Sanctuary.getUpgradeCost(sanctuary.speedUpgradeLevel);
           final currentLevel = sanctuary.speedUpgradeLevel;
           final reductionPercent = (currentLevel * 2);
@@ -300,7 +239,105 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         const SizedBox(height: 24),
         const Divider(color: Colors.white24),
         const SizedBox(height: 16),
-        
+
+        // Sección: Santuarios Temporales (Compra)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            AppLocalizations.of(context)!.temporarySanctuaries,
+            style: const TextStyle(
+              color: Colors.cyanAccent,
+              fontStyle: FontStyle.italic,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        _ShopItem(
+          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuaryFastFlow),
+          iconColor: Colors.tealAccent, // Unified color
+          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuaryFastFlow, 'Fast Flow'),
+          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuaryFastFlow, ''),
+          cost: 1200.0,
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+            final success = await orbeService.purchaseInventoryItem(
+              InventoryItemTypes.tempSanctuaryFastFlow,
+              1200.0,
+              currentEsencia,
+            );
+            if (success) {
+              await esenciaService.spendEsencia(1200.0);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
+                );
+              }
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        _ShopItem(
+          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuarySymbiosis),
+          iconColor: Colors.tealAccent, // Unified color
+          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuarySymbiosis, 'Symbiosis'),
+          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuarySymbiosis, ''),
+          cost: 2000.0,
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+            final success = await orbeService.purchaseInventoryItem(
+              InventoryItemTypes.tempSanctuarySymbiosis,
+              2000.0,
+              currentEsencia,
+            );
+            if (success) {
+              await esenciaService.spendEsencia(2000.0);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
+                );
+              }
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        _ShopItem(
+          icon: Icons.spa, // Quietude icon (Lotus/Spa)
+          iconColor: Colors.tealAccent,
+          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuaryQuietude, 'Quietude'),
+          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuaryQuietude, ''),
+          cost: 4000.0, // High cost as requested
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+            final success = await orbeService.purchaseInventoryItem(
+              InventoryItemTypes.tempSanctuaryQuietude,
+              4000.0,
+              currentEsencia,
+            );
+            if (success) {
+              await esenciaService.spendEsencia(4000.0);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
+                );
+              }
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUpgradesTab() {
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final currentEsencia = esenciaService.playerState.totalEsencia;
+    
+    // Obtener mejoras globales
+    final globalUpgrades = esenciaService.upgrades;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
         // Sección: Mejoras Globales
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -385,6 +422,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
 class _ShopItem extends StatelessWidget {
   final IconData icon;
+  final Color? iconColor;
   final String title;
   final String description;
   final double cost;
@@ -393,6 +431,7 @@ class _ShopItem extends StatelessWidget {
 
   const _ShopItem({
     required this.icon,
+    this.iconColor,
     required this.title,
     required this.description,
     required this.cost,
@@ -413,7 +452,7 @@ class _ShopItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 48, color: Colors.deepPurpleAccent),
+          Icon(icon, size: 48, color: iconColor ?? Colors.deepPurpleAccent),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

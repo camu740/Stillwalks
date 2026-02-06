@@ -188,6 +188,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String progressEssence(int current, int total) {
+    return '$current/$total essence';
+  }
+
+  @override
   String get creature => 'Creature';
 
   @override
@@ -288,6 +293,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String availableSlots(int count) {
     return '$count available';
   }
+
+  @override
+  String get standardOrbs => 'Standard Orbs';
+
+  @override
+  String get specialOrbs => 'Special Orbs';
 
   @override
   String get walkReminder => 'Walking reminder';
@@ -482,6 +493,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get steps => 'steps';
+
+  @override
   String get tempSanctuaryAlreadyActive =>
       'You already have an active temporary sanctuary';
 
@@ -659,7 +673,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Increases chance of obtaining rare creatures by +10%.';
 
   @override
+  String get sanctuary_temp_sanctuary_symbiosis_desc =>
+      'Generates extra Essence upon orb completion.';
+
+  @override
   String get abilityActive => 'Special ability active.';
+
+  @override
+  String get sanctuary_temp_sanctuary_quietude_name => 'Quietude Sanctuary';
+
+  @override
+  String get sanctuary_temp_sanctuary_quietude_desc =>
+      'Converts obtained Essence into steps for the orb.';
 
   @override
   String get upgradeIdleName => 'Essence Collector';
@@ -724,8 +749,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orbBasicName => 'Basic Orb';
 
   @override
-  String get orbBasicDesc =>
-      'A common Orb that requires 2000 steps to channel.';
+  String get orbBasicDesc => 'A common Orb. Requires 2000 steps.';
+
+  @override
+  String get orbAdvancedName => 'Advanced Orb';
+
+  @override
+  String get orbAdvancedDesc =>
+      'Better chance for Uncommon. Requires 5000 steps.';
+
+  @override
+  String get orbExpertName => 'Expert Orb';
+
+  @override
+  String get orbExpertDesc => 'Better chance for Rare. Requires 10000 steps.';
+
+  @override
+  String get orbQuietudeName => 'Quietude Orb';
+
+  @override
+  String get orbQuietudeDesc =>
+      'Allows using Essence to progress. Ideal for quiet days.';
+
+  @override
+  String get orbEssenceName => 'Essence Orb';
+
+  @override
+  String get orbEssenceDesc => 'Generates extra Essence while walking.';
+
+  @override
+  String get infuseEssence => 'Infuse Essence';
+
+  @override
+  String infuseEssenceDesc(Object essence, Object steps) {
+    return 'Convert $essence Essence into $steps steps';
+  }
+
+  @override
+  String essenceInfused(Object steps) {
+    return '$steps steps gained!';
+  }
 
   @override
   String get descSpiristone =>
@@ -738,4 +801,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get descSlugrry =>
       'A furry white slug with slow movements but quick thinking.';
+
+  @override
+  String get physicalActivity => 'Physical activity';
+
+  @override
+  String get notificationsPermission => 'Notifications';
+
+  @override
+  String get backgroundExecution => 'Background execution';
+
+  @override
+  String get granted => 'Granted';
+
+  @override
+  String get denied => 'Denied';
+
+  @override
+  String get permissionsMessage =>
+      'Without these permissions the game works, but with less accuracy.';
+
+  @override
+  String get openSystemSettings => 'Open system settings';
+
+  @override
+  String get stepCounter => 'Step counter';
+
+  @override
+  String get lastUpdate => 'Last update';
+
+  @override
+  String get dataSource => 'Data source';
+
+  @override
+  String get deviceSensor => 'Device sensor';
+
+  @override
+  String minutesAgo(int minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String hoursAgo(int hours) {
+    return '$hours h ago';
+  }
+
+  @override
+  String get sensorActive => 'Active';
+
+  @override
+  String get sensorInactive => 'Inactive';
+
+  @override
+  String get systemStatus => 'System status';
+
+  @override
+  String get trackingActive => 'Tracking active';
+
+  @override
+  String get trackingPaused => 'Tracking paused';
+
+  @override
+  String get activeNotifications => 'Active notifications';
+
+  @override
+  String get sanctuariesInProgress => 'Sanctuaries in progress';
+
+  @override
+  String get lastSync => 'Last synchronization';
+
+  @override
+  String get systemHealthy => 'System working correctly';
+
+  @override
+  String get noIssues => 'No issues detected';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String get justNow => 'Just now';
 }

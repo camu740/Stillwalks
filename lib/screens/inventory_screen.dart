@@ -122,11 +122,17 @@ class InventoryScreen extends StatelessWidget {
                   (context, index) {
                     final orbe = availableOrbes[index];
                     final type = orbeService.getOrbeType(orbe.orbeTypeId);
+                    
+                    // Determine color based on rarity/difficulty (same as Shop)
+                    Color iconColor = Colors.grey; // Default for basic
+                    if (type?.id == 'orbe_advanced') iconColor = Colors.green;
+                    else if (type?.id == 'orbe_expert') iconColor = Colors.blue;
+
                     return Card(
                       color: Colors.white.withOpacity(0.05),
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
-                        leading: const Icon(Icons.circle, color: Colors.purpleAccent, size: 40),
+                        leading: Icon(Icons.circle_outlined, color: iconColor, size: 40),
                         title: Text(
                           type != null 
                               ? AppLocalizations.of(context)!.getOrbName(type.id, type.name) 

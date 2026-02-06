@@ -94,6 +94,14 @@
     }
   },
   
+  "progressEssence": "{current}/{total} essence",
+  "@progressEssence": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  
   "creature": "Creature",
   "evolution": "Evolution",
   "basePower": "Base power",
@@ -138,6 +146,8 @@
       "count": {"type": "int"}
     }
   },
+  "standardOrbs": "Standard Orbs",
+  "specialOrbs": "Special Orbs",
   
   "walkReminder": "Walking reminder",
   "orbReady": "Orb ready",
@@ -249,6 +259,7 @@
       "name": {"type": "String"}
     }
   },
+  "steps": "steps",
   "tempSanctuaryAlreadyActive": "You already have an active temporary sanctuary",
   
   "newCreatureBadge": "NEW!",
@@ -318,6 +329,11 @@
   "abilityQuietude": "Allows hatching orbs using Essence instead of steps.",
   "abilityEcho": "Reduces steps by 70% but only generates common/uncommon creatures.",
   "abilityResonance": "Increases chance of obtaining rare creatures by +10%.",
+  "sanctuary_temp_sanctuary_symbiosis_desc": "Generates extra Essence upon orb completion.",
+
+  "sanctuary_temp_sanctuary_quietude_name": "Quietude Sanctuary",
+  "sanctuary_temp_sanctuary_quietude_desc": "Converts obtained Essence into steps for the orb.",
+  
   "abilityActive": "Special ability active.",
   
   "upgradeIdleName": "Essence Collector",
@@ -342,9 +358,58 @@
   "sancResonanceDesc": "+10% rare chance (1 use)",
   
   "orbBasicName": "Basic Orb",
-  "orbBasicDesc": "A common Orb that requires 2000 steps to channel.",
+  "orbBasicDesc": "A common Orb. Requires 2000 steps.",
+  "orbAdvancedName": "Advanced Orb",
+  "orbAdvancedDesc": "Better chance for Uncommon. Requires 5000 steps.",
+  "orbExpertName": "Expert Orb",
+  "orbExpertDesc": "Better chance for Rare. Requires 10000 steps.",
+  "orbQuietudeName": "Quietude Orb",
+  "orbQuietudeDesc": "Allows using Essence to progress. Ideal for quiet days.",
+  "orbEssenceName": "Essence Orb",
+  "orbEssenceDesc": "Generates extra Essence while walking.",
+  "infuseEssence": "Infuse Essence",
+  "infuseEssenceDesc": "Convert {essence} Essence into {steps} steps",
+  "essenceInfused": "{steps} steps gained!",
   
   "descSpiristone": "A small enchanted stone with tiny hands and legs. Curious and friendly.",
   "descRadispirit": "A magical radish walking on four legs. Its leaves glow at sunset.",
-  "descSlugrry": "A furry white slug with slow movements but quick thinking."
+  "descSlugrry": "A furry white slug with slow movements but quick thinking.",
+  
+  "physicalActivity": "Physical activity",
+  "notificationsPermission": "Notifications",
+  "backgroundExecution": "Background execution",
+  "granted": "Granted",
+  "denied": "Denied",
+  "permissionsMessage": "Without these permissions the game works, but with less accuracy.",
+  "openSystemSettings": "Open system settings",
+  
+  "stepCounter": "Step counter",
+  "lastUpdate": "Last update",
+  "dataSource": "Data source",
+  "deviceSensor": "Device sensor",
+  "minutesAgo": "{minutes} min ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "hoursAgo": "{hours} h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "sensorActive": "Active",
+  "sensorInactive": "Inactive",
+  
+  "systemStatus": "System status",
+  "trackingActive": "Tracking active",
+  "trackingPaused": "Tracking paused",
+  "activeNotifications": "Active notifications",
+  "sanctuariesInProgress": "Sanctuaries in progress",
+  "lastSync": "Last synchronization",
+  "systemHealthy": "System working correctly",
+  "noIssues": "No issues detected",
+  "none": "None",
+  "justNow": "Just now"
 }

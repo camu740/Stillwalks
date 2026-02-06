@@ -11,12 +11,14 @@ class InitialData {
   /// Inicializa todos los datos semilla del juego
   static Future<void> seedDatabase() async {
     if (await isSeeded()) {
+      // Ensure new orbs types are updated/added
+      await seedOrbeTypes();
       return;
     }
     await _seedCreatureSpecies();
-    await _seedOrbeTypes();
+    await seedOrbeTypes();
     await _seedSanctuaries();
-    await _seedUpgrades();
+    await seedUpgrades();
   }
 
   /// Verifica si la base de datos ya fue inicializada
@@ -62,7 +64,7 @@ class InitialData {
 
   // ==================== ORBE TYPES ====================
 
-  static Future<void> _seedOrbeTypes() async {
+  static Future<void> seedOrbeTypes() async {
     final orbeType = OrbeType(
       id: 'orbe_basic',
       requiredSteps: 2000,
@@ -75,7 +77,35 @@ class InitialData {
       },
     );
 
+    final orbeAdvanced = OrbeType(
+      id: 'orbe_advanced',
+      requiredSteps: 5000,
+      name: 'Orbe Avanzado',
+      description: 'Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.',
+      lootTable: {
+        'spiristone': 0.30,  // 30%
+        'radispirit': 0.50,  // 50%
+        'slugrry': 0.20,     // 20%
+      },
+    );
+
+    final orbeExpert = OrbeType(
+      id: 'orbe_expert',
+      requiredSteps: 10000,
+      name: 'Orbe Experto',
+      description: 'Mejora probabilidad de Raros. Requiere 10000 pasos.',
+      lootTable: {
+        'spiristone': 0.10,  // 10%
+        'radispirit': 0.40,  // 40%
+        'slugrry': 0.50,     // 50%
+      },
+    );
+
+    // Special orbs removed - keeping only standard progression orbs
+
     await _db.insertOrbeType(orbeType.toJson());
+    await _db.insertOrbeType(orbeAdvanced.toJson());
+    await _db.insertOrbeType(orbeExpert.toJson());
   }
 
   // ==================== SANCTUARIES ====================
@@ -93,7 +123,7 @@ class InitialData {
 
   // ==================== UPGRADES ====================
 
-  static Future<void> _seedUpgrades() async {
+  static Future<void> seedUpgrades() async {
     final upgrades = [
       Upgrade(
         id: 'upgrade_idle_multiplier',

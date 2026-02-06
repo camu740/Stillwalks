@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:stillwalks/models/player_state.dart';
 import 'package:stillwalks/models/upgrade.dart';
@@ -15,6 +16,7 @@ class EsenciaService extends ChangeNotifier {
 
   PlayerState get playerState => _playerState;
   List<Upgrade> get upgrades => _upgrades;
+  DateTime get lastUpdate => _playerState.lastActiveTimestamp;
 
   // Notification services
   NativeBridge? _nativeBridge;
@@ -106,14 +108,21 @@ class EsenciaService extends ChangeNotifier {
     final hoursElapsed = cappedMinutes / 60.0;
     final esenciaGenerated = _playerState.esenciaPerHour * hoursElapsed;
 
-    // Actualizar estado
-    _playerState = _playerState.copyWith(
-      totalEsencia: _playerState.totalEsencia + esenciaGenerated,
-      lastActiveTimestamp: now,
-    );
+    // Use addEsencia to trigger stream events for game mechanics
+    if (esenciaGenerated > 0) {
+      await addEsencia(esenciaGenerated);
+      debugPrint('💰 EsenciaService: Calculated $esenciaGenerated pending essence from $hoursElapsed hours offline');
+    }
+  }
 
-    await _db.updatePlayerState(_playerState.toJson());
-    notifyListeners();
+  // Stream for notifying when essence is earned
+  final _essenceEarnedController = StreamController<double>.broadcast();
+  Stream<double> get onEssenceEarned => _essenceEarnedController.stream;
+
+  @override
+  void dispose() {
+    _essenceEarnedController.close();
+    super.dispose();
   }
 
   /// Añade Esencia (desde nativo o cálculo local)
@@ -126,7 +135,13 @@ class EsenciaService extends ChangeNotifier {
     );
 
     await _db.updatePlayerState(_playerState.toJson());
+    
+    // Notify general listeners (UI updates)
     notifyListeners();
+    
+    // Notify specific event listeners (Game mechanics)
+    debugPrint('💰 EsenciaService: Broadcasting $amount essence to stream listeners...');
+    _essenceEarnedController.add(amount);
 
     _checkMilestoneNotification();
 

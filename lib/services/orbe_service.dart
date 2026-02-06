@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:stillwalks/models/orbe.dart';
 import 'package:stillwalks/models/creature_species.dart';
@@ -24,6 +25,9 @@ class OrbeService extends ChangeNotifier {
   NativeBridge? _nativeBridge;
   NotificationPreferencesService? _notificationPrefs;
   NotificationGuardService? _notificationGuard;
+  
+  // Stream subscription for essence events
+  StreamSubscription<double>? _essenceSubscription;
 
   List<Orbe> get orbes => _orbes;
   List<OrbeType> get orbeTypes => _orbeTypes;
@@ -40,6 +44,37 @@ class OrbeService extends ChangeNotifier {
   /// Inicializa el servicio
   Future<void> initialize() async {
     await loadData();
+  }
+
+  /// Listens to another service (EsenciaService) to trigger game mechanics
+  void listenToEssenceService(Stream<double> essenceStream) {
+    debugPrint('🕊️ OrbeService: Setting up essence stream listener...');
+    _essenceSubscription?.cancel(); // Cancel any existing subscription
+    _essenceSubscription = essenceStream.listen((amount) {
+      debugPrint('🕊️ OrbeService: Received essence event: $amount');
+      _applyEssenceToStepsConversion(amount);
+    });
+    debugPrint('🕊️ OrbeService: Essence stream listener active');
+  }
+
+  /// Converts earned essence into steps for valid sanctuaries
+  Future<void> _applyEssenceToStepsConversion(double essenceAmount) async {
+    if (essenceAmount <= 0) return;
+    
+    int convertedSteps = essenceAmount.floor(); // 1 Essence = 1 Step
+    debugPrint('🕊️ OrbeService: Checking for Quietude sanctuaries to apply $convertedSteps essence...');
+    
+    for (var sanctuary in _sanctuaries) {
+      debugPrint('🕊️   Sanctuary: ${sanctuary.name}, isTemp=${sanctuary.isTemporary}, typeId=${sanctuary.typeId}, hasOrb=${sanctuary.orbeId != null}, uses=${sanctuary.remainingUses}');
+      if (sanctuary.isTemporary && 
+          sanctuary.typeId == InventoryItemTypes.tempSanctuaryQuietude && 
+          sanctuary.orbeId != null &&
+          sanctuary.remainingUses > 0) {
+            
+        debugPrint('🕊️ Quietude Sanctuary: Converting $convertedSteps essence to steps for orb ${sanctuary.orbeId}');
+        await updateOrbeProgress(sanctuary.orbeId!, convertedSteps);
+      }
+    }
   }
 
   /// Carga todos los datos desde la base de datos
@@ -88,7 +123,7 @@ class OrbeService extends ChangeNotifier {
     final type = getOrbeType(orbeTypeId);
     if (type == null) return null;
 
-    final cost = type.requiredSteps * 0.05; // Ejemplo de costo basado en pasos o fijo
+    final cost = getOrbeCost(orbeTypeId);
 
     if (esenciaAvailable < cost) {
       return null;
@@ -106,6 +141,30 @@ class OrbeService extends ChangeNotifier {
     notifyListeners();
 
     return newOrbe;
+  }
+
+  /// getOrbeCost returns the essence cost for a given orb type
+  double getOrbeCost(String orbeTypeId) {
+    // Definición de precios fijos por tipo
+    switch (orbeTypeId) {
+      case 'orbe_basic':
+        return 500.0;
+      case 'orbe_advanced':
+        return 1200.0;
+      case 'orbe_expert':
+        return 2500.0;
+      case 'orbe_quietude':
+        return 800.0;
+      case 'orbe_essence':
+        return 1500.0;
+      default:
+        // Fallback genérico para futuros orbes (5% de los pasos)
+        final type = getOrbeType(orbeTypeId);
+        if (type != null) {
+          return type.requiredSteps * 0.05;
+        }
+        return 999999.0; // Precio prohibitivo si no existe
+    }
   }
 
   /// Compra un objeto de inventario
@@ -153,17 +212,20 @@ class OrbeService extends ChangeNotifier {
     }
   }
 
+
+
   /// Actualiza el progreso de un Orbe con pasos
-  Future<void> updateOrbeProgress(String orbeId, int steps) async {
+  /// Retorna la cantidad de Esencia generada (si el orbe tiene esa mecánica)
+  Future<double> updateOrbeProgress(String orbeId, int steps) async {
     final orbeIndex = _orbes.indexWhere((o) => o.id == orbeId);
-    if (orbeIndex == -1) return;
+    if (orbeIndex == -1) return 0.0;
 
     final orbe = _orbes[orbeIndex];
     final type = getOrbeType(orbe.orbeTypeId);
     final maxSteps = type?.requiredSteps ?? 2000; 
 
     final newProgress = (orbe.currentProgress + steps).clamp(0, maxSteps);
-    if (newProgress == orbe.currentProgress) return;
+    if (newProgress == orbe.currentProgress) return 0.0;
     
     // Check if orb just completed (wasn't complete before, now is)
     final wasComplete = orbe.currentProgress >= maxSteps;
@@ -189,14 +251,29 @@ class OrbeService extends ChangeNotifier {
     }
     
     notifyListeners();
+
+    // Calcular esencia bonus si aplica (Orbe Esencial)
+    if (type?.mechanics != null && type!.mechanics.containsKey('bonusEssencePerStep')) {
+      final double bonus = (type.mechanics['bonusEssencePerStep'] as num).toDouble();
+      return steps * bonus;
+    }
+
+    return 0.0;
   }
 
   /// Actualiza SOLO los Orbes asignados a santuarios
-  /// Retorna el número de orbes actualizados
-  Future<int> addStepsToActiveOrbes(int newSteps) async {
+  /// Retorna un objeto con { count: int, essenceEarned: double }
+  Future<Map<String, dynamic>> addStepsToActiveOrbes(int newSteps) async {
     int updatedCount = 0;
+    double totalEssenceEarned = 0.0;
+
     for (var sanctuary in _sanctuaries) {
       if (sanctuary.orbeId != null) {
+        // Skip Quietude sanctuaries - they only progress with essence
+        if (sanctuary.typeId == InventoryItemTypes.tempSanctuaryQuietude) {
+          continue;
+        }
+        
         final orbeIndex = _orbes.indexWhere((o) => o.id == sanctuary.orbeId);
         if (orbeIndex != -1) {
           final orbe = _orbes[orbeIndex];
@@ -206,7 +283,8 @@ class OrbeService extends ChangeNotifier {
              final effectiveRequiredSteps = (type.requiredSteps / sanctuary.speedMultiplier).round();
              if (orbe.currentProgress < effectiveRequiredSteps) {
                // Aún necesita pasos
-               await updateOrbeProgress(sanctuary.orbeId!, newSteps);
+               final essence = await updateOrbeProgress(sanctuary.orbeId!, newSteps);
+               totalEssenceEarned += essence;
                updatedCount++;
              }
           }
@@ -215,11 +293,14 @@ class OrbeService extends ChangeNotifier {
     }
 
     if (updatedCount > 0) {
-      debugPrint('OrbeService: Added steps to $updatedCount orbes in sanctuaries');
+      debugPrint('OrbeService: Added steps to $updatedCount orbes. Earned $totalEssenceEarned essence.');
       notifyListeners();
     }
     
-    return updatedCount;
+    return {
+      'count': updatedCount,
+      'essenceEarned': totalEssenceEarned
+    };
   }
 
   /// Canaliza un Orbe completado
@@ -349,6 +430,10 @@ class OrbeService extends ChangeNotifier {
       case InventoryItemTypes.tempSanctuarySymbiosis:
         speed = 1.0;
         uses = 2;
+        break;
+      case InventoryItemTypes.tempSanctuaryQuietude:
+        speed = 1.0;
+        uses = 1; // 1 Channeling duration
         break;
       // ... otros tipos
     }

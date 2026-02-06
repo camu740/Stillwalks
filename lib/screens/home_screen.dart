@@ -225,29 +225,16 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 FloatingActionButton.extended(
                   heroTag: 'essence_btn',
-                  onPressed: () {
+                  onPressed: () async {
                     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
 
-                    // EsenciaService no tiene addEsencia público que sume arbitrariamente, pero tiene updateSteps que da esencia.
-                    // O podemos hackearlo simulando pasos también.
-                    // Pero el usuario pidió botón dedicado.
-                    // Revisando EsenciaService... updateSteps(steps) -> add(steps * rate).
-                    // Vamos a simular pasos "invisibles" para esencia, o mejor, añadir un método debug en EsenciaService si no existe.
-                    // Como no quiero editar EsenciaService ahora por el límite de contexto, usaré updateSteps con un numero alto de pasos PERO solo para esencia, sin afectar orbes?
-                    // No, el usuario pidió BOTON DE ESENCIA. Si llamo updateSteps, afecta a ambos si lo llamo desde UI incorrectamente.
-                    // El botón anterior llamaba a AMBOS servicios.
-                    // Este boton llamará solo a EsenciaService.updateSteps(5000) por ejemplo.
-                    // Pero updateSteps calcula basado en rate.
-                    // Mejor: llamar a updateSteps(0) y modificar state manual? No.
-                    // Asumiremos que updateSteps(500) da esencia correspondiente.
-                    // Pero espera, el usuario quiere botón de "+Esencia".
-                    // Voy a simular una "recompensa" usando spendEsencia(-500)?
-                    // spendEsencia resta. Si paso negativo, suma. hacky pero funciona.
-                    esenciaService.spendEsencia(-1000.0);
+                    await esenciaService.addEsencia(1000.0);
                     
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
-                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.flash_on),
                   label: const Text('+1000 Esencia'),

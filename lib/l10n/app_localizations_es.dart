@@ -127,7 +127,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get trackingStatus => 'Estado de seguimiento';
 
   @override
-  String get trackingStatusDesc => 'Ver log de actividad';
+  String get trackingStatusDesc => 'Resumen del sistema';
 
   @override
   String get help => 'Ayuda';
@@ -185,6 +185,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String progressSteps(int current, int total) {
     return '$current/$total pasos';
+  }
+
+  @override
+  String progressEssence(int current, int total) {
+    return '$current/$total esencia';
   }
 
   @override
@@ -288,6 +293,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String availableSlots(int count) {
     return '$count disponibles';
   }
+
+  @override
+  String get standardOrbs => 'Orbes Estándar';
+
+  @override
+  String get specialOrbs => 'Orbes Especiales';
 
   @override
   String get walkReminder => 'Recordatorio para caminar';
@@ -482,6 +493,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get steps => 'pasos';
+
+  @override
   String get tempSanctuaryAlreadyActive =>
       'Ya tienes un santuario temporal activo';
 
@@ -659,7 +673,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Aumenta la probabilidad de obtener criaturas raras en +10%.';
 
   @override
+  String get sanctuary_temp_sanctuary_symbiosis_desc =>
+      'Genera Esencia extra al completar el orbe.';
+
+  @override
   String get abilityActive => 'Habilidad especial activa.';
+
+  @override
+  String get sanctuary_temp_sanctuary_quietude_name => 'Santuario de Quietud';
+
+  @override
+  String get sanctuary_temp_sanctuary_quietude_desc =>
+      'Convierte la Esencia obtenida en pasos para el orbe.';
 
   @override
   String get upgradeIdleName => 'Recolector de Esencia';
@@ -725,8 +750,48 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orbBasicName => 'Orbe Básico';
 
   @override
-  String get orbBasicDesc =>
-      'Un Orbe común que requiere 2000 pasos para canalizar.';
+  String get orbBasicDesc => 'Un Orbe común. Requiere 2000 pasos.';
+
+  @override
+  String get orbAdvancedName => 'Orbe Avanzado';
+
+  @override
+  String get orbAdvancedDesc =>
+      'Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.';
+
+  @override
+  String get orbExpertName => 'Orbe Experto';
+
+  @override
+  String get orbExpertDesc =>
+      'Mejora probabilidad de Raros. Requiere 10000 pasos.';
+
+  @override
+  String get orbQuietudeName => 'Orbe de Quietud';
+
+  @override
+  String get orbQuietudeDesc =>
+      'Permite usar Esencia para avanzar. Ideal para días tranquilos.';
+
+  @override
+  String get orbEssenceName => 'Orbe Esencial';
+
+  @override
+  String get orbEssenceDesc =>
+      'Genera Esencia extra al caminar. No acelera canalización.';
+
+  @override
+  String get infuseEssence => 'Infundir Esencia';
+
+  @override
+  String infuseEssenceDesc(Object essence, Object steps) {
+    return 'Convierte $essence Esencia en $steps pasos';
+  }
+
+  @override
+  String essenceInfused(Object steps) {
+    return '¡$steps pasos obtenidos!';
+  }
 
   @override
   String get descSpiristone =>
@@ -739,4 +804,84 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get descSlugrry =>
       'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.';
+
+  @override
+  String get physicalActivity => 'Actividad física';
+
+  @override
+  String get notificationsPermission => 'Notificaciones';
+
+  @override
+  String get backgroundExecution => 'Ejecución en segundo plano';
+
+  @override
+  String get granted => 'Concedido';
+
+  @override
+  String get denied => 'Denegado';
+
+  @override
+  String get permissionsMessage =>
+      'Sin estos permisos el juego funciona, pero con menos precisión.';
+
+  @override
+  String get openSystemSettings => 'Abrir ajustes del sistema';
+
+  @override
+  String get stepCounter => 'Contador de pasos';
+
+  @override
+  String get lastUpdate => 'Última actualización';
+
+  @override
+  String get dataSource => 'Fuente de datos';
+
+  @override
+  String get deviceSensor => 'Sensor del dispositivo';
+
+  @override
+  String minutesAgo(int minutes) {
+    return 'Hace $minutes min';
+  }
+
+  @override
+  String hoursAgo(int hours) {
+    return 'Hace $hours h';
+  }
+
+  @override
+  String get sensorActive => 'Activo';
+
+  @override
+  String get sensorInactive => 'Inactivo';
+
+  @override
+  String get systemStatus => 'Estado del sistema';
+
+  @override
+  String get trackingActive => 'Seguimiento activo';
+
+  @override
+  String get trackingPaused => 'Seguimiento pausado';
+
+  @override
+  String get activeNotifications => 'Notificaciones activas';
+
+  @override
+  String get sanctuariesInProgress => 'Santuarios en progreso';
+
+  @override
+  String get lastSync => 'Última sincronización';
+
+  @override
+  String get systemHealthy => 'Sistema funcionando correctamente';
+
+  @override
+  String get noIssues => 'No se detectaron problemas';
+
+  @override
+  String get none => 'Ninguno';
+
+  @override
+  String get justNow => 'Justo ahora';
 }

@@ -82,7 +82,15 @@ class StillwalksApp extends StatelessWidget {
           };
           
           nativeBridge.onStepsUpdated = (newSteps, totalSteps) async {
-            final activeOrbs = await orbeService.addStepsToActiveOrbes(newSteps);
+            final result = await orbeService.addStepsToActiveOrbes(newSteps);
+            final activeOrbs = result['count'] as int;
+            final bonusEssence = result['essenceEarned'] as double;
+
+            if (bonusEssence > 0) {
+              await esenciaService.addEsencia(bonusEssence);
+              debugPrint('✨ Main: Bonus essence earned from orbs: $bonusEssence');
+            }
+
             if (activeOrbs == 0) {
               await esenciaService.addStoredSteps(newSteps);
             }
@@ -223,6 +231,9 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       notificationGuard.setNativeBridge(nativeBridge);
       orbeService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
       esenciaService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
+      
+      // Wire game mechanics listeners
+      orbeService.listenToEssenceService(esenciaService.onEssenceEarned);
       
       // Calculate pending Esencia from offline time
       await esenciaService.calculatePendingEsencia();

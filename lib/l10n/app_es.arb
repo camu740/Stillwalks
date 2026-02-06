@@ -94,6 +94,14 @@
     }
   },
   
+  "progressEssence": "{current}/{total} esencia",
+  "@progressEssence": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  
   "creature": "Criatura",
   "evolution": "Evolución",
   "basePower": "Poder base",
@@ -138,6 +146,8 @@
       "count": {"type": "int"}
     }
   },
+  "standardOrbs": "Orbes Estándar",
+  "specialOrbs": "Orbes Especiales",
   
   "walkReminder": "Recordatorio para caminar",
   "orbReady": "Orbe listo",
@@ -249,6 +259,7 @@
       "name": {"type": "String"}
     }
   },
+  "steps": "pasos",
   "tempSanctuaryAlreadyActive": "Ya tienes un santuario temporal activo",
   
   "newCreatureBadge": "¡NUEVO!",
@@ -345,8 +356,12 @@
   "abilityQuietude": "Permite eclosionar orbes usando Esencia en lugar de pasos.",
   "abilityEcho": "Reduce pasos en 70% pero solo genera criaturas comunes/inusuales.",
   "abilityResonance": "Aumenta la probabilidad de obtener criaturas raras en +10%.", 
+  "sanctuary_temp_sanctuary_symbiosis_desc": "Genera Esencia extra al completar el orbe.",
   "abilityActive": "Habilidad especial activa.",
-  
+
+  "sanctuary_temp_sanctuary_quietude_name": "Santuario de Quietud",
+  "sanctuary_temp_sanctuary_quietude_desc": "Convierte la Esencia obtenida en pasos para el orbe.",
+
   "upgradeIdleName": "Recolector de Esencia",
   "upgradeIdleDesc": "Aumenta la velocidad de generación pasiva de Esencia.",
   "upgradeIdleBonus": "+2% bono / nivel",
@@ -369,9 +384,59 @@
   "sancResonanceDesc": "+10% prob. criatura rara (1 uso)",
   
   "orbBasicName": "Orbe Básico",
-  "orbBasicDesc": "Un Orbe común que requiere 2000 pasos para canalizar.",
+  "orbBasicDesc": "Un Orbe común. Requiere 2000 pasos.",
+  "orbAdvancedName": "Orbe Avanzado",
+  "orbAdvancedDesc": "Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.",
+  "orbExpertName": "Orbe Experto",
+  "orbExpertDesc": "Mejora probabilidad de Raros. Requiere 10000 pasos.",
+  "orbQuietudeName": "Orbe de Quietud",
+  "orbQuietudeDesc": "Permite usar Esencia para avanzar. Ideal para días tranquilos.",
+  "orbEssenceName": "Orbe Esencial",
+  "orbEssenceDesc": "Genera Esencia extra al caminar. No acelera canalización.",
+  "infuseEssence": "Infundir Esencia",
+  "infuseEssenceDesc": "Convierte {essence} Esencia en {steps} pasos",
+  "essenceInfused": "¡{steps} pasos obtenidos!",
   
   "descSpiristone": "Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.",
   "descRadispirit": "Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.",
-  "descSlugrry": "Una babosa peluda blanca de movimientos lentos pero pensamiento rápido."
+  "descSlugrry": "Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.",
+  
+  "physicalActivity": "Actividad física",
+  "notificationsPermission": "Notificaciones",
+  "backgroundExecution": "Ejecución en segundo plano",
+  "granted": "Concedido",
+  "denied": "Denegado",
+  "permissionsMessage": "Sin estos permisos el juego funciona, pero con menos precisión.",
+  "openSystemSettings": "Abrir ajustes del sistema",
+  
+  "stepCounter": "Contador de pasos",
+  "lastUpdate": "Última actualización",
+  "dataSource": "Fuente de datos",
+  "deviceSensor": "Sensor del dispositivo",
+  "minutesAgo": "Hace {minutes} min",
+  "@minutesAgo": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "hoursAgo": "Hace {hours} h",
+  "@hoursAgo": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+  "sensorActive": "Activo",
+  "sensorInactive": "Inactivo",
+  
+  "trackingStatusDesc": "Resumen del sistema",
+  "systemStatus": "Estado del sistema",
+  "trackingActive": "Seguimiento activo",
+  "trackingPaused": "Seguimiento pausado",
+  "activeNotifications": "Notificaciones activas",
+  "sanctuariesInProgress": "Santuarios en progreso",
+  "lastSync": "Última sincronización",
+  "systemHealthy": "Sistema funcionando correctamente",
+  "noIssues": "No se detectaron problemas",
+  "none": "Ninguno",
+  "justNow": "Justo ahora"
 }

@@ -98,15 +98,31 @@ extension DataLocalizations on AppLocalizations {
     switch (orbeTypeId) {
       case 'orbe_basic':
         return orbBasicName;
+      case 'orbe_advanced':
+        return orbAdvancedName;
+      case 'orbe_expert':
+        return orbExpertName;
+      case 'orbe_quietude':
+        return orbQuietudeName;
+      case 'orbe_essence':
+        return orbEssenceName;
       default:
         return defaultName;
     }
   }
 
   String getOrbDescription(String orbeTypeId, String defaultDesc) {
-     switch (orbeTypeId) {
+    switch (orbeTypeId) {
       case 'orbe_basic':
         return orbBasicDesc;
+      case 'orbe_advanced':
+        return orbAdvancedDesc;
+      case 'orbe_expert':
+        return orbExpertDesc;
+      case 'orbe_quietude':
+        return orbQuietudeDesc;
+      case 'orbe_essence':
+        return orbEssenceDesc;
       default:
         return defaultDesc;
     }
