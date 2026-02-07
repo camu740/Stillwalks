@@ -1253,8 +1253,14 @@ abstract class AppLocalizations {
   /// No description provided for @activateSanctuary.
   ///
   /// In es, this message translates to:
-  /// **'Activar Santuario'**
+  /// **'Activar'**
   String get activateSanctuary;
+
+  /// No description provided for @tapToSelectSanctuary.
+  ///
+  /// In es, this message translates to:
+  /// **'Toca para seleccionar santuario'**
+  String get tapToSelectSanctuary;
 
   /// No description provided for @emptyUses.
   ///
@@ -1274,6 +1280,12 @@ abstract class AppLocalizations {
   /// **'Tipo: Santuario Temporal'**
   String get typeTemporary;
 
+  /// No description provided for @noSanctuariesInBag.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin santuarios disponibles'**
+  String get noSanctuariesInBag;
+
   /// No description provided for @remainingUses.
   ///
   /// In es, this message translates to:
@@ -1289,7 +1301,7 @@ abstract class AppLocalizations {
   /// No description provided for @abilityFastFlow.
   ///
   /// In es, this message translates to:
-  /// **'Reduce los pasos requeridos en un 50% (multiplicador 2x de velocidad).'**
+  /// **'Reduce los pasos requeridos en un 10% (multiplicador 1.11x de velocidad).'**
   String get abilityFastFlow;
 
   /// No description provided for @abilitySymbiosis.
@@ -1403,7 +1415,7 @@ abstract class AppLocalizations {
   /// No description provided for @sancFastFlowDesc.
   ///
   /// In es, this message translates to:
-  /// **'-50% pasos requeridos (1 uso)'**
+  /// **'Reduce en un 10% los pasos requeridos (1 uso)'**
   String get sancFastFlowDesc;
 
   /// No description provided for @sancSymbiosisName.
@@ -1699,6 +1711,78 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Justo ahora'**
   String get justNow;
+
+  /// No description provided for @tutorialWelcome.
+  ///
+  /// In es, this message translates to:
+  /// **'BIENVENIDO A STILLWALKS'**
+  String get tutorialWelcome;
+
+  /// No description provided for @tutorialWelcomeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Descubre criaturas mágicas caminando en el mundo real y usando menos el móvil.\n\nCuando el teléfono está bloqueado,\ngeneras Esencia automáticamente.\n\nLa Esencia te ayuda a avanzar y a descubrir nuevas criaturas.\n\nPara empezar tu aventura,\nte regalamos Esencia suficiente\npara comprar tu primer Orbe.'**
+  String get tutorialWelcomeDesc;
+
+  /// No description provided for @startAdventure.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Empezar Aventura!'**
+  String get startAdventure;
+
+  /// No description provided for @essenceGrant.
+  ///
+  /// In es, this message translates to:
+  /// **'+{amount} Esencia recibida'**
+  String essenceGrant(Object amount);
+
+  /// No description provided for @energyTutorialTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡ENERGÍA NECESARIA!'**
+  String get energyTutorialTitle;
+
+  /// No description provided for @energyTutorialDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Los Orbes se canalizan en los Santuarios.\n\nAl caminar, generas Energía.\nLa Energía canaliza el Orbe hasta estar listo para descubrir el stillwalk que contiene.\n\nComo es tu primera vez,\nvamos a acelerar un poco el proceso.'**
+  String get energyTutorialDesc;
+
+  /// No description provided for @walkingSim.
+  ///
+  /// In es, this message translates to:
+  /// **'Caminando...'**
+  String get walkingSim;
+
+  /// No description provided for @letsGo.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Vamos!'**
+  String get letsGo;
+
+  /// No description provided for @tutorialCompleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Tutorial Completado!'**
+  String get tutorialCompleteTitle;
+
+  /// No description provided for @tutorialCompleteDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Felicidades! Ahora eres libre de explorar el mundo real para encontrar más criaturas.\n\nRecuerda: ¡Tienes que moverte para conseguir Esencia!'**
+  String get tutorialCompleteDesc;
+
+  /// No description provided for @tutorialConclusionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'TU AVENTURA CONTINÚA'**
+  String get tutorialConclusionTitle;
+
+  /// No description provided for @tutorialConclusionDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Utiliza la Esencia que consigues al descansar para comprar orbes, mejorar santuarios y avanzar. Recuerda salir a caminar para seguir canalizando orbes y descubrir a todas las criaturas!\n\nStillwalks avanza contigo,\na tu ritmo.'**
+  String get tutorialConclusionDesc;
 }
 
 class _AppLocalizationsDelegate

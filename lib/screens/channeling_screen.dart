@@ -5,7 +5,9 @@ import 'dart:math' show pi;
 import 'package:stillwalks/models/creature_instance.dart';
 import 'package:stillwalks/models/creature_species.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
-import 'package:stillwalks/l10n/app_localizations.dart';
+
+import 'package:provider/provider.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 
 /// Pantalla de animación de canalización (cuando el Orbe está completo)
 class ChannelingScreen extends StatefulWidget {
@@ -79,7 +81,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
         decoration: BoxDecoration(
           gradient: RadialGradient(
             colors: [
-              Colors.purple.withOpacity(0.8),
+              Colors.purple.withAlpha(204),
               Colors.black,
             ],
           ),
@@ -106,12 +108,12 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                               gradient: RadialGradient(
                                 colors: [
                                   Colors.purpleAccent,
-                                  Colors.deepPurple.withOpacity(0.5),
+                                  Colors.deepPurple.withAlpha(128),
                                 ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.purpleAccent.withOpacity(0.8),
+                                  color: Colors.purpleAccent.withAlpha(204),
                                   blurRadius: 60,
                                   spreadRadius: 20,
                                 ),
@@ -137,7 +139,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withAlpha(77),
                                 blurRadius: 30,
                                 spreadRadius: 10,
                               ),
@@ -172,7 +174,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.amberAccent.withOpacity(0.2),
+                              color: Colors.amberAccent.withAlpha(51),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: Colors.amberAccent),
                             ),
@@ -197,9 +199,21 @@ class _ChannelingScreenState extends State<ChannelingScreen>
 
                         // Botón para continuar
                         ElevatedButton(
-                          onPressed: () {
-                            // Volver a home
-                            Navigator.of(context).popUntil((route) => route.isFirst);
+                          onPressed: () async {
+                            // Tutorial completion check
+                            final tutorialService = Provider.of<TutorialService>(context, listen: false);
+                            
+                            if (context.mounted) {
+                              // Volver a home primero
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            }
+
+                            if (tutorialService.currentStep == TutorialStep.hatch) {
+                                // Short delay to ensure transition is seemingly done or at least stack is cleared
+                                // This ensures the dialog from nextStep() is pushed onto the Home screen, not wiped by popUntil
+                                await Future.delayed(const Duration(milliseconds: 100));
+                                await tutorialService.nextStep();
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurpleAccent,

@@ -55,6 +55,14 @@ class InitialData {
         assetPath: 'assets/creatures/slugrry.png',
         dexNumber: 3,
       ),
+      CreatureSpecies(
+        id: 'stillwalk',
+        name: 'Stillwalk',
+        description: 'El espíritu del camino. Acompaña a quienes dan el primer paso.',
+        rarity: 'special',
+        assetPath: 'assets/creatures/stillwalk.png',
+        dexNumber: 0,
+      ),
     ];
 
     for (final s in species) {

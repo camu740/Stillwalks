@@ -11,6 +11,7 @@ import 'services/native_bridge.dart';
 import 'services/widget_service.dart';
 import 'services/notification_preferences_service.dart';
 import 'services/notification_guard_service.dart';
+import 'services/tutorial_service.dart';
 import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -38,6 +39,7 @@ class StillwalksApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CollectionService()),
         ChangeNotifierProvider(create: (_) => NotificationPreferencesService()),
         ChangeNotifierProvider(create: (_) => NotificationGuardService()),
+        ChangeNotifierProvider(create: (_) => TutorialService()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         Provider(create: (_) => NativeBridge()),
         Provider(create: (_) => WidgetService()),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/models/orbe.dart';
 import 'package:stillwalks/models/inventory_item.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/l10n/data_localizations.dart';
 
@@ -21,7 +22,14 @@ class InventoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final orbeService = Provider.of<OrbeService>(context);
-    final availableOrbes = orbeService.getAvailableOrbes();
+    final tutorialService = Provider.of<TutorialService>(context);
+    
+    var availableOrbes = orbeService.getAvailableOrbes();
+    // Tutorial: Filter to only show basic orb if in sanctuary step
+    if (tutorialService.currentStep == TutorialStep.sanctuary) {
+      availableOrbes = availableOrbes.where((o) => o.orbeTypeId == 'orbe_basic').toList();
+    }
+    
     final inventoryItems = orbeService.inventory;
 
     // Determinar qué mostrar según el modo
@@ -91,9 +99,19 @@ class InventoryScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 24),
                                 ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.pushReplacementNamed(context, '/shop');
-                                  },
+                                    onPressed: () async {
+                                      await Navigator.pushNamed(context, '/shop');
+                                      
+                                      if (context.mounted) {
+                                        final orbeService = Provider.of<OrbeService>(context, listen: false);
+                                        // If still no orbs available after returning from shop, go back to previous screen (Home)
+                                        // logic: if user bought something, we stay here to let them select it.
+                                        // if user didn't buy anything, we go back to home as if we never entered inventory.
+                                        if (orbeService.getAvailableOrbes().isEmpty) {
+                                          Navigator.pop(context);
+                                        }
+                                      }
+                                    },
                                   icon: const Icon(Icons.shopping_bag),
                                   label: Text(AppLocalizations.of(context)!.goToShop),
                                   style: ElevatedButton.styleFrom(
@@ -145,7 +163,18 @@ class InventoryScreen extends StatelessWidget {
                               onPressed: () async {
                                 if (sanctuaryId != null) {
                                   await orbeService.assignOrbeToSanctuary(orbe.id, sanctuaryId!);
-                                  Navigator.pop(context);
+                                  
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                  
+                                  if (tutorialService.currentStep == TutorialStep.sanctuary) {
+                                    // Small delay to ensure Home Screen is visible
+                                    debugPrint('TUTORIAL_DEBUG: Inventory popping, waiting 300ms...');
+                                    await Future.delayed(const Duration(milliseconds: 300));
+                                    debugPrint('TUTORIAL_DEBUG: Calling nextStep() from Inventory (Sanctuary -> EnergyIntro)');
+                                    await tutorialService.nextStep();
+                                  }
                                 }
                               },
                               child: Text(AppLocalizations.of(context)!.assign),

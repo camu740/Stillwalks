@@ -21,6 +21,12 @@ class OrbeService extends ChangeNotifier {
   List<Sanctuary> _sanctuaries = [];
   List<InventoryItem> _inventory = [];
   
+  // Tutorial specific: Override next hatch result
+  String? _nextHatchOverrideSpeciesId;
+  void setNextHatchOverride(String? speciesId) {
+    _nextHatchOverrideSpeciesId = speciesId;
+  }
+  
   // Optional service references for notifications
   NativeBridge? _nativeBridge;
   NotificationPreferencesService? _notificationPrefs;
@@ -342,7 +348,15 @@ class OrbeService extends ChangeNotifier {
       finalLootTable.addAll(type.lootTable);
     }
 
-    final speciesId = _rollLootTable(finalLootTable);
+    String? speciesId;
+    if (_nextHatchOverrideSpeciesId != null) {
+      speciesId = _nextHatchOverrideSpeciesId;
+      _nextHatchOverrideSpeciesId = null; // Consume override
+      debugPrint('OrbeService: Forcing hatch result to $speciesId');
+    } else {
+      speciesId = _rollLootTable(finalLootTable);
+    }
+    
     if (speciesId == null) return null;
 
     final instance = CreatureInstance(
@@ -424,7 +438,7 @@ class OrbeService extends ChangeNotifier {
 
     switch (typeId) {
       case InventoryItemTypes.tempSanctuaryFastFlow:
-        speed = 2.0; // -50% pasos = 2x velocidad
+        speed = 1.111111; // -10% pasos = 1/0.9 velocidad
         uses = 1;
         break;
       case InventoryItemTypes.tempSanctuarySymbiosis:

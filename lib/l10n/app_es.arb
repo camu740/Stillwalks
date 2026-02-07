@@ -332,7 +332,8 @@
   "infiniteChannelingDesc": "Canalización Infinita. Nunca se agota y permite canalizar cualquier tipo de orbe.",
   "improveSpeedHint": "Mejora la velocidad de canalización en la tienda para reducir los pasos necesarios.",
   
-  "activateSanctuary": "Activar Santuario",
+  "activateSanctuary": "Activar",
+  "tapToSelectSanctuary": "Toca para seleccionar santuario",
   "buy": "Comprar",
   "emptyUses": "Vacío ({count} usos)",
   "@emptyUses": {
@@ -343,6 +344,7 @@
   "tapToActivate": "Toca para activar",
   "goToShop": "Ir a tienda",
   "typeTemporary": "Tipo: Santuario Temporal",
+  "noSanctuariesInBag": "Sin santuarios disponibles",
   "remainingUses": "Usos restantes: {count}",
   "@remainingUses": {
     "placeholders": {
@@ -351,7 +353,7 @@
   },
   "destroyWarning": "Se destruye automáticamente después de agotar todos los usos.",
   
-  "abilityFastFlow": "Reduce los pasos requeridos en un 50% (multiplicador 2x de velocidad).",
+  "abilityFastFlow": "Reduce los pasos requeridos en un 10% (multiplicador 1.11x de velocidad).",
   "abilitySymbiosis": "Otorga 1 punto de Esencia por cada 10 pasos realizados durante la canalización.",
   "abilityQuietude": "Permite eclosionar orbes usando Esencia en lugar de pasos.",
   "abilityEcho": "Reduce pasos en 70% pero solo genera criaturas comunes/inusuales.",
@@ -373,7 +375,7 @@
   "sancPrimordialName": "Primordial",
   "sancPrimordialDesc": "El primer santuario descubierto. Un lugar tranquilo donde los Orbes pueden canalizar su energía.",
   "sancFastFlowName": "Flujo Rápido",
-  "sancFastFlowDesc": "-50% pasos requeridos (1 uso)",
+  "sancFastFlowDesc": "Reduce en un 10% los pasos requeridos (1 uso)",
   "sancSymbiosisName": "Simbiosis",
   "sancSymbiosisDesc": "+1 Esencia cada 10 pasos (2 usos)",
   "sancQuietudeName": "Quietud Absoluta",
@@ -438,5 +440,20 @@
   "systemHealthy": "Sistema funcionando correctamente",
   "noIssues": "No se detectaron problemas",
   "none": "Ninguno",
-  "justNow": "Justo ahora"
+  "justNow": "Justo ahora",
+  
+  "tutorialWelcome": "BIENVENIDO A STILLWALKS",
+  "tutorialWelcomeDesc": "Descubre criaturas mágicas caminando en el mundo real y usando menos el móvil.\n\nCuando el teléfono está bloqueado,\ngeneras Esencia automáticamente.\n\nLa Esencia te ayuda a avanzar y a descubrir nuevas criaturas.\n\nPara empezar tu aventura,\nte regalamos Esencia suficiente\npara comprar tu primer Orbe.",
+  "startAdventure": "¡Empezar Aventura!",
+  "essenceGrant": "+{amount} Esencia recibida",
+  
+  "energyTutorialTitle": "¡ENERGÍA NECESARIA!",
+  "energyTutorialDesc": "Los Orbes se canalizan en los Santuarios.\n\nAl caminar, generas Energía.\nLa Energía canaliza el Orbe hasta estar listo para descubrir el stillwalk que contiene.\n\nComo es tu primera vez,\nvamos a acelerar un poco el proceso.",
+  "walkingSim": "Caminando...",
+  "letsGo": "¡Vamos!",
+  "tutorialCompleteTitle": "¡Tutorial Completado!",
+  "tutorialCompleteDesc": "¡Felicidades! Ahora eres libre de explorar el mundo real para encontrar más criaturas.\n\nRecuerda: ¡Tienes que moverte para conseguir Esencia!",
+  
+  "tutorialConclusionTitle": "TU AVENTURA CONTINÚA",
+  "tutorialConclusionDesc": "Utiliza la Esencia que consigues al descansar para comprar orbes, mejorar santuarios y avanzar. Recuerda salir a caminar para seguir canalizando orbes y descubrir a todas las criaturas!\n\nStillwalks avanza contigo,\na tu ritmo."
 }

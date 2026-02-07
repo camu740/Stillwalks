@@ -630,7 +630,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upgrade channeling speed in the shop to reduce required steps.';
 
   @override
-  String get activateSanctuary => 'Activate Sanctuary';
+  String get activateSanctuary => 'Activate';
+
+  @override
+  String get tapToSelectSanctuary => 'Tap to select sanctuary';
 
   @override
   String emptyUses(int count) {
@@ -644,6 +647,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get typeTemporary => 'Type: Temporary Sanctuary';
 
   @override
+  String get noSanctuariesInBag => 'No available sanctuaries';
+
+  @override
   String remainingUses(int count) {
     return 'Remaining uses: $count';
   }
@@ -654,7 +660,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get abilityFastFlow =>
-      'Reduces required steps by 50% (2x speed multiplier).';
+      'Reduces required steps by 10% (1.11x speed multiplier).';
 
   @override
   String get abilitySymbiosis =>
@@ -719,7 +725,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sancFastFlowName => 'Fast Flow';
 
   @override
-  String get sancFastFlowDesc => '-50% steps required (1 use)';
+  String get sancFastFlowDesc => 'Reduces required steps by 10% (1 use)';
 
   @override
   String get sancSymbiosisName => 'Symbiosis';
@@ -881,4 +887,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get justNow => 'Just now';
+
+  @override
+  String get tutorialWelcome => 'WELCOME TO STILLWALKS';
+
+  @override
+  String get tutorialWelcomeDesc =>
+      'Discover magical creatures by walking in the real world and using your phone less.\n\nWhen your phone is locked,\nyou generate Essence automatically.\n\n\nEssence helps you advance and discover new creatures.\n\nTo start your adventure,\nwe grant you enough Essence\nto buy your first Orb.';
+
+  @override
+  String get startAdventure => 'Start Adventure!';
+
+  @override
+  String essenceGrant(Object amount) {
+    return '+$amount Essence received';
+  }
+
+  @override
+  String get energyTutorialTitle => 'ENERGY NEEDED!';
+
+  @override
+  String get energyTutorialDesc =>
+      'Orbs are channeled in Sanctuaries.\n\nBy walking, you generate Energy.\nEnergy channels the Orb until it is ready to discover the stillwalk inside.\n\nSince it\'s your first time,\nlet\'s speed up the process a bit.';
+
+  @override
+  String get walkingSim => 'Walking...';
+
+  @override
+  String get letsGo => 'Let\'s Go!';
+
+  @override
+  String get tutorialCompleteTitle => 'Tutorial Completed!';
+
+  @override
+  String get tutorialCompleteDesc =>
+      'Congratulations! You are now free to explore the real world to find more creatures.\n\nRemember: You have to move to get Essence!';
+
+  @override
+  String get tutorialConclusionTitle => 'YOUR ADVENTURE CONTINUES';
+
+  @override
+  String get tutorialConclusionDesc =>
+      'Use the Essence you get from resting to buy orbs, upgrade sanctuaries, and advance. Remember to go for a walk to continue channeling orbs and discover all the creatures!\n\nStillwalks moves with you,\nat your own pace.';
 }

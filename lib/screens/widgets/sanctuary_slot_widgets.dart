@@ -11,6 +11,7 @@ import 'package:stillwalks/screens/inventory_screen.dart';
 import 'package:stillwalks/screens/channeling_screen.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/models/upgrade.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/l10n/data_localizations.dart';
@@ -18,11 +19,13 @@ import 'package:stillwalks/l10n/data_localizations.dart';
 class SanctuarySlot extends StatelessWidget {
   final Sanctuary sanctuary;
   final OrbeService orbeService;
+  final Key? containerKey;
 
   const SanctuarySlot({
     super.key,
     required this.sanctuary,
     required this.orbeService,
+    this.containerKey,
   });
 
   @override
@@ -55,6 +58,7 @@ class SanctuarySlot extends StatelessWidget {
     }
     
     return Container(
+      key: containerKey,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
@@ -95,6 +99,13 @@ class SanctuarySlot extends StatelessWidget {
                         final species = await orbeService.getSpeciesById(instance.speciesId);
                         final isNew = await orbeService.isNewDiscovery(instance.speciesId);
                         if (species != null && context.mounted) {
+                          // Complete tutorial step if in hatch phase
+                          final tutorialService = Provider.of<TutorialService>(context, listen: false);
+                          if (tutorialService.currentStep == TutorialStep.hatch) {
+                             tutorialService.setTarget(null); // Clear highlight
+                             await tutorialService.nextStep(); // Move to completed
+                          }
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -684,8 +695,8 @@ class TemporarySanctuarySlot extends StatelessWidget {
                   else
                     Text(
                       hasTemporaryItems 
-                          ? AppLocalizations.of(context)!.tapToActivate 
-                          : AppLocalizations.of(context)!.goToShop,
+                          ? AppLocalizations.of(context)!.tapToSelectSanctuary 
+                          : AppLocalizations.of(context)!.noSanctuariesInBag,
                       style: TextStyle(
                         fontSize: 12,
                         color: hasTemporaryItems ? Colors.white54 : Colors.amber.withOpacity(0.7),

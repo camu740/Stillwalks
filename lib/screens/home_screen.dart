@@ -5,11 +5,14 @@ import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/screens/explorer_journal_screen.dart';
-import 'package:stillwalks/screens/sanctuary_screen.dart';
+
 import 'package:stillwalks/screens/settings_screen.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/screens/widgets/sanctuary_slot_widgets.dart';
+import 'package:stillwalks/screens/widgets/tutorial_overlay.dart';
+import 'package:stillwalks/screens/widgets/tutorial_manager.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Pantalla principal con el estado del jugador
@@ -21,11 +24,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey _shopButtonKey = GlobalKey();
+  final GlobalKey _sanctuarySlotKey = GlobalKey();
+  
+
+
   @override
   Widget build(BuildContext context) {
     // Escuchar cambios en los servicios
     final esenciaService = Provider.of<EsenciaService>(context);
     final orbeService = Provider.of<OrbeService>(context);
+
     
     final currentEsencia = esenciaService.playerState.totalEsencia;
     // Asumimos que esenciaPerHour está en el estado del jugador, si no, calculamos o usamos base
@@ -36,273 +45,330 @@ class _HomeScreenState extends State<HomeScreen> {
     // Mirando EsenciaService.dart linea 75: _playerState.esenciaPerHour * hoursElapsed. SI EXISTE.
     final esenciaPerHour = esenciaService.playerState.esenciaPerHour; 
     
-    // Ocupado si hay orbes no completados
-    final sanctuaryOccupied = orbeService.orbes.isNotEmpty;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.appTitle),
-        backgroundColor: Colors.deepPurple.withOpacity(0.8),
-        elevation: 0,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.withOpacity(0.8),
-              Colors.black,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Sección superior: Esencia
-              Expanded(
-                flex: 2,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        AppLocalizations.of(context)!.essence,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        currentEsencia.toStringAsFixed(0),
-                        style: const TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amberAccent,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
+
+    
+    // Tutorial Target Updates
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final tutorialService = Provider.of<TutorialService>(context, listen: false);
+      
+      if (tutorialService.currentStep == TutorialStep.shop) {
+        _updateTutorialTarget(_shopButtonKey, tutorialService);
+      } else if (tutorialService.currentStep == TutorialStep.sanctuary) {
+        _updateTutorialTarget(_sanctuarySlotKey, tutorialService);
+      } else if (tutorialService.currentStep == TutorialStep.hatch) {
+         _updateTutorialTarget(_sanctuarySlotKey, tutorialService);
+      }
+    });
+
+    return TutorialManager(
+      child: TutorialOverlay(
+      child: Stack(
+        children: [
+          Scaffold(
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context)!.appTitle),
+              backgroundColor: Colors.deepPurple.withAlpha(204),
+              elevation: 0,
+            ),
+            body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.deepPurple.withAlpha(204),
+                  Colors.black,
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Sección superior: Esencia
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.white70,
-                          ),
-                          const SizedBox(width: 4),
                           Text(
-                            '+${esenciaPerHour.toStringAsFixed(0)} ${AppLocalizations.of(context)!.perHour}',
+                            AppLocalizations.of(context)!.essence,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 20,
                               color: Colors.white70,
+                              fontWeight: FontWeight.w300,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.blueAccent.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(6),
+                          const SizedBox(height: 8),
+                          Text(
+                            currentEsencia.toStringAsFixed(0),
+                            style: const TextStyle(
+                              fontSize: 64,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amberAccent,
                             ),
-                            child: Text(
-                              '${AppLocalizations.of(context)!.level} ${esenciaService.upgrades.firstWhere((u) => u.type == UpgradeType.idleMultiplier, orElse: () => Upgrade(id: '', type: UpgradeType.idleMultiplier, currentLevel: 0, name: '', description: '')).currentLevel}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Colors.white70,
                               ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '+${esenciaPerHour.toStringAsFixed(0)} ${AppLocalizations.of(context)!.perHour}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent.withAlpha(51),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '${AppLocalizations.of(context)!.level} ${esenciaService.upgrades.firstWhere((u) => u.type == UpgradeType.idleMultiplier, orElse: () => Upgrade(id: '', type: UpgradeType.idleMultiplier, currentLevel: 0, name: '', description: '')).currentLevel}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blueAccent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Sección media: Santuarios (2 slots lado a lado)
+                  Expanded(
+                    flex: 1,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(
+                        children: [
+                          // Santuario Primordial (izquierda)
+                          Expanded(
+                            child: SanctuarySlot(
+                              containerKey: _sanctuarySlotKey,
+                              sanctuary: orbeService.sanctuaries.firstWhere(
+                                (s) => !s.isTemporary,
+                                orElse: () => orbeService.sanctuaries.first,
+                              ),
+                              orbeService: orbeService,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Santuario Temporal (derecha)
+                          Expanded(
+                            child: TemporarySanctuarySlot(
+                              orbeService: orbeService,
                             ),
                           ),
                         ],
                       ),
-
-                    ],
-                  ),
-                ),
-              ),
-
-              // Sección media: Santuarios (2 slots lado a lado)
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      // Santuario Primordial (izquierda)
-                      Expanded(
-                        child: SanctuarySlot(
-                          sanctuary: orbeService.sanctuaries.firstWhere(
-                            (s) => !s.isTemporary,
-                            orElse: () => orbeService.sanctuaries.first,
-                          ),
-                          orbeService: orbeService,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Santuario Temporal (derecha)
-                      Expanded(
-                        child: TemporarySanctuarySlot(
-                          orbeService: orbeService,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Almacén de Energía (Debajo de santuarios)
-              if (esenciaService.storageCapacity > 0)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.blueAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                ),
 
-              // Sección inferior: Botones de navegación
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      _NavButton(
-                        icon: Icons.shopping_bag,
-                        label: AppLocalizations.of(context)!.shop,
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
-                        },
+                  // Almacén de Energía (Debajo de santuarios)
+                  if (esenciaService.storageCapacity > 0)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withAlpha(25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.blueAccent.withAlpha(77)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      _NavButton(
-                        icon: Icons.book,
-                        label: AppLocalizations.of(context)!.explorerJournal,
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
-                        },
+                    ),
+
+                  // Sección inferior: Botones de navegación
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        children: [
+                          _NavButton(
+                            key: _shopButtonKey,
+                            icon: Icons.shopping_bag,
+                            label: AppLocalizations.of(context)!.shop,
+                            onPressed: () {
+                              // Allow navigation only if permitted
+                               final tutorialService = Provider.of<TutorialService>(context, listen: false);
+                               if (tutorialService.isActive && !tutorialService.allowShopAccess) {
+                                 return;
+                               }
+                               
+                               if (tutorialService.currentStep == TutorialStep.shop) {
+                                 tutorialService.setTarget(null); // Clear highlight
+                               }
+                               
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _NavButton(
+                            icon: Icons.book,
+                            label: AppLocalizations.of(context)!.explorerJournal,
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _NavButton(
+                            icon: Icons.settings,
+                            label: AppLocalizations.of(context)!.settings,
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      _NavButton(
-                        icon: Icons.settings,
-                        label: AppLocalizations.of(context)!.settings,
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-                        },
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-      floatingActionButton: kDebugMode
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton.extended(
-                  heroTag: 'essence_btn',
-                  onPressed: () async {
-                    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+          floatingActionButton: kDebugMode
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                      heroTag: 'essence_btn',
+                      onPressed: () async {
+                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                        await esenciaService.addEsencia(1000.0);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.flash_on),
+                      label: const Text('+1000 Esencia'),
+                      backgroundColor: Colors.amber,
+                    ),
+                    const SizedBox(height: 16),
+                    FloatingActionButton.extended(
+                      heroTag: 'steps_btn',
+                      onPressed: () async {
+                        final orbeService = Provider.of<OrbeService>(context, listen: false);
+                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                        
+                        const steps = 500;
+                        final activeOrbs = await orbeService.addStepsToActiveOrbes(steps);
+                        if (activeOrbs['count'] == 0) {
+                          await esenciaService.addStoredSteps(steps);
+                        }
+                        esenciaService.updateSteps(steps);
+                        
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('DEBUG: +500 pasos simulados')),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.directions_run),
+                      label: const Text('+500 Pasos'),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                    const SizedBox(height: 16),
+                    FloatingActionButton.extended(
+                      heroTag: 'storage_btn',
+                      onPressed: () {
+                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                        esenciaService.addStoredSteps(100);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('DEBUG: +100 pasos al Almacén')),
+                        );
+                      },
+                      icon: const Icon(Icons.battery_charging_full),
+                      label: const Text('+100 Almacén'),
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    const SizedBox(height: 16),
+                    FloatingActionButton.extended(
+                      heroTag: 'reset_btn',
+                      onPressed: () async {
+                         final orbeService = Provider.of<OrbeService>(context, listen: false);
+                         final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                         final tutorialService = Provider.of<TutorialService>(context, listen: false);
 
-                    await esenciaService.addEsencia(1000.0);
-                    
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.flash_on),
-                  label: const Text('+1000 Esencia'),
-                  backgroundColor: Colors.amber,
-                ),
-                const SizedBox(height: 16),
-                FloatingActionButton.extended(
-                  heroTag: 'steps_btn',
-                  onPressed: () async {
-                    final orbeService = Provider.of<OrbeService>(context, listen: false);
-                    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                    
-                    const steps = 500;
-                    final activeOrbs = await orbeService.addStepsToActiveOrbes(steps);
-                    if (activeOrbs == 0) {
-                      await esenciaService.addStoredSteps(steps);
-                    }
-                    esenciaService.updateSteps(steps);
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('DEBUG: +500 pasos simulados')),
-                    );
-                  },
-                  icon: const Icon(Icons.directions_run),
-                  label: const Text('+500 Pasos'),
-                  backgroundColor: Colors.redAccent,
-                ),
-                const SizedBox(height: 16),
-                FloatingActionButton.extended(
-                  heroTag: 'storage_btn',
-                  onPressed: () {
-                    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                    esenciaService.addStoredSteps(100);
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('DEBUG: +100 pasos al Almacén')),
-                    );
-                  },
-                  icon: const Icon(Icons.battery_charging_full),
-                  label: const Text('+100 Almacén'),
-                  backgroundColor: Colors.blueAccent,
-                ),
-                const SizedBox(height: 16),
-                FloatingActionButton.extended(
-                  heroTag: 'reset_btn',
-                  onPressed: () async {
-                     final db = DatabaseHelper();
-                     await db.resetDatabase();
-                     
-                     // Recargar servicios para reflejar el reset
-                     final orbeService = Provider.of<OrbeService>(context, listen: false);
-                     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                     
-                     await orbeService.initialize();
-                     await esenciaService.initialize();
-                     
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('DEBUG: Base de datos REINICIADA y Servicios Recargados 💥')),
-                    );
-                  },
-                  icon: const Icon(Icons.delete_forever),
-                  label: const Text('Reset DB'),
-                  backgroundColor: Colors.black,
-                ),
-              ],
-            )
-          : null,
+                         final db = DatabaseHelper();
+                         await db.resetDatabase();
+                         
+                         await orbeService.initialize();
+                         await esenciaService.initialize();
+                         await tutorialService.resetTutorial();
+                         
+                         if (context.mounted) {
+
+                           ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('DEBUG: Base de datos REINICIADA y Servicios Recargados 💥')),
+                          );
+                         }
+                      },
+                      icon: const Icon(Icons.delete_forever),
+                      label: const Text('Reset DB'),
+                      backgroundColor: Colors.black,
+                    ),
+                  ],
+                )
+              : null,
+          ),
+          
+
+        ],
+      ),
+      ),
     );
+  }
+
+
+  void _updateTutorialTarget(GlobalKey key, TutorialService service) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (key.currentContext == null || !key.currentContext!.mounted) return;
+      
+      final RenderBox? renderBox = key.currentContext!.findRenderObject() as RenderBox?;
+      if (renderBox != null && renderBox.attached) {
+        final position = renderBox.localToGlobal(Offset.zero);
+        final size = renderBox.size;
+        final rect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
+        
+        // Update service only if changed significantly
+        if (service.targetRect != rect) {
+          service.setTarget(rect);
+        }
+      }
+    });
   }
 }
 
@@ -312,6 +378,7 @@ class _NavButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const _NavButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
@@ -325,7 +392,7 @@ class _NavButton extends StatelessWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.white.withOpacity(0.1),
+          backgroundColor: Colors.white.withAlpha(25),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

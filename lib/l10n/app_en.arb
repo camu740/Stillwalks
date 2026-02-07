@@ -315,16 +315,18 @@
   "infiniteChannelingDesc": "Infinite Channeling. Never runs out and allows channeling of any orb type.",
   "improveSpeedHint": "Upgrade channeling speed in the shop to reduce required steps.",
   
-  "activateSanctuary": "Activate Sanctuary",
+  "activateSanctuary": "Activate",
+  "tapToSelectSanctuary": "Tap to select sanctuary",
   "buy": "Buy",
   "emptyUses": "Empty ({count} uses)",
   "tapToActivate": "Tap to activate",
   "goToShop": "Go to Shop",
   "typeTemporary": "Type: Temporary Sanctuary",
+  "noSanctuariesInBag": "No available sanctuaries",
   "remainingUses": "Remaining uses: {count}",
   "destroyWarning": "Automatically destroyed after depleting all uses.",
   
-  "abilityFastFlow": "Reduces required steps by 50% (2x speed multiplier).",
+  "abilityFastFlow": "Reduces required steps by 10% (1.11x speed multiplier).",
   "abilitySymbiosis": "Grants 1 Essence for every 10 steps taken during channeling.",
   "abilityQuietude": "Allows hatching orbs using Essence instead of steps.",
   "abilityEcho": "Reduces steps by 70% but only generates common/uncommon creatures.",
@@ -347,7 +349,7 @@
   "sancPrimordialName": "Primordial",
   "sancPrimordialDesc": "The first discovered sanctuary. A peaceful place where Orbs can channel their energy.",
   "sancFastFlowName": "Fast Flow",
-  "sancFastFlowDesc": "-50% steps required (1 use)",
+  "sancFastFlowDesc": "Reduces required steps by 10% (1 use)",
   "sancSymbiosisName": "Symbiosis",
   "sancSymbiosisDesc": "+1 Essence every 10 steps (2 uses)",
   "sancQuietudeName": "Absolute Quietude",
@@ -411,5 +413,20 @@
   "systemHealthy": "System working correctly",
   "noIssues": "No issues detected",
   "none": "None",
-  "justNow": "Just now"
+  "justNow": "Just now",
+  
+  "tutorialWelcome": "WELCOME TO STILLWALKS",
+  "tutorialWelcomeDesc": "Discover magical creatures by walking in the real world and using your phone less.\n\nWhen your phone is locked,\nyou generate Essence automatically.\n\n\nEssence helps you advance and discover new creatures.\n\nTo start your adventure,\nwe grant you enough Essence\nto buy your first Orb.",
+  "startAdventure": "Start Adventure!",
+  "essenceGrant": "+{amount} Essence received",
+  
+  "energyTutorialTitle": "ENERGY NEEDED!",
+  "energyTutorialDesc": "Orbs are channeled in Sanctuaries.\n\nBy walking, you generate Energy.\nEnergy channels the Orb until it is ready to discover the stillwalk inside.\n\nSince it's your first time,\nlet's speed up the process a bit.",
+  "walkingSim": "Walking...",
+  "letsGo": "Let's Go!",
+  "tutorialCompleteTitle": "Tutorial Completed!",
+  "tutorialCompleteDesc": "Congratulations! You are now free to explore the real world to find more creatures.\n\nRemember: You have to move to get Essence!",
+
+  "tutorialConclusionTitle": "YOUR ADVENTURE CONTINUES",
+  "tutorialConclusionDesc": "Use the Essence you get from resting to buy orbs, upgrade sanctuaries, and advance. Remember to go for a walk to continue channeling orbs and discover all the creatures!\n\nStillwalks moves with you,\nat your own pace."
 }

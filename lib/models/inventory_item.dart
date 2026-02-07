@@ -19,7 +19,7 @@ class InventoryItem {
       'id': id,
       'typeId': typeId,
       'quantity': quantity,
-      'metadata': metadata != null ? metadata.toString() : null, // Simplificado para SQLite
+      'metadata': metadata?.toString(), // Simplificado para SQLite
     };
   }
 
@@ -71,7 +71,7 @@ class InventoryItemTypes {
 
   static String getDescription(String typeId) {
     switch (typeId) {
-      case tempSanctuaryFastFlow: return '-50% pasos requeridos (1 uso)';
+      case tempSanctuaryFastFlow: return '-10% pasos requeridos (1 uso)';
       case tempSanctuarySymbiosis: return '+1 Esencia cada 10 pasos (2 usos)';
       case tempSanctuaryQuietude: return 'Eclosión con Esencia (1 uso)';
       case tempSanctuaryEcho: return '-70% pasos | Solo comunes/inusuales (1 uso)';

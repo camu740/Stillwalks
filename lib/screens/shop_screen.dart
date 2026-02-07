@@ -6,6 +6,7 @@ import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/models/orbe.dart';
 import 'package:stillwalks/models/sanctuary.dart';
 import 'package:stillwalks/models/inventory_item.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/l10n/data_localizations.dart';
 
@@ -41,16 +42,45 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     final orbeService = Provider.of<OrbeService>(context);
     
     final currentEsencia = esenciaService.playerState.totalEsencia;
+    // Check tutorial state
+    final tutorialService = Provider.of<TutorialService>(context);
+    final bool isTutorialActive = tutorialService.isActive && !tutorialService.isCompleted;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.shop),
         backgroundColor: Colors.deepPurple.withOpacity(0.8),
         bottom: TabBar(
           controller: _tabController,
+          onTap: (index) {
+            if (isTutorialActive && index != 0) {
+              // Prevent switching tabs during tutorial
+              _tabController.index = 0;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('⚠️ ${AppLocalizations.of(context)!.energyTutorialDesc.split('\n')[0]}... Focus on the Orb!'), 
+                  // Use a generic "Focus" message or just block silently/brief toast
+                  // Since we didn't add a specific string for this, we'll use a hardcoded fallback or reuse something generic.
+                  // For now, let's just reset the index silently or with a simple message if possible.
+                  backgroundColor: Colors.redAccent,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
+          },
           tabs: [
             Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
-            Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
-            Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades),
+            
+            // Disable visual feedback for restricted tabs
+            Opacity(
+              opacity: isTutorialActive ? 0.3 : 1.0, 
+              child: Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries)
+            ),
+            
+            Opacity(
+              opacity: isTutorialActive ? 0.3 : 1.0,
+              child: Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades)
+            ),
           ],
         ),
       ),
@@ -129,38 +159,71 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
   Widget _buildOrbItem(OrbeType type, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService) {
       final cost = orbeService.getOrbeCost(type.id);
+      final tutorialService = Provider.of<TutorialService>(context);
       
       // Determine color based on rarity/difficulty
       Color iconColor = Colors.grey; // Default for basic
       if (type.id == 'orbe_advanced') iconColor = Colors.green;
       else if (type.id == 'orbe_expert') iconColor = Colors.blue;
 
+      // Tutorial Logic: Only allow 'orbe_basic' purchase if in 'shop' step
+      // Disable others visually
+      final bool isTutorialActive = tutorialService.isActive;
+      final bool isTutorialShopStep = tutorialService.currentStep == TutorialStep.shop;
+      
+      bool isDisabled = false;
+      if (isTutorialShopStep) {
+        if (type.id != 'orbe_basic') {
+          isDisabled = true;
+        }
+      }
+
       return Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
-        child: _ShopItem(
-          icon: Icons.circle_outlined,
-          iconColor: iconColor,
-          title: AppLocalizations.of(context)!.getOrbName(type.id, type.name),
-          description: AppLocalizations.of(context)!.getOrbDescription(type.id, type.description),
-          cost: cost,
-          currentEsencia: currentEsencia,
-          onPurchase: () async {
-            final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
-            if (result != null) {
-              await esenciaService.spendEsencia(cost);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
-                );
-              }
-            } else {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
-                );
-              }
-            }
-          },
+        child: Opacity(
+          opacity: isDisabled ? 0.3 : 1.0,
+          child: IgnorePointer(
+            ignoring: isDisabled,
+            child: _ShopItem(
+              icon: Icons.circle_outlined,
+              iconColor: iconColor,
+              title: AppLocalizations.of(context)!.getOrbName(type.id, type.name),
+              description: AppLocalizations.of(context)!.getOrbDescription(type.id, type.description),
+              cost: cost,
+              currentEsencia: currentEsencia,
+              onPurchase: () async {
+                final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
+                if (result != null) {
+                  await esenciaService.spendEsencia(cost);
+                  
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
+                    );
+                    
+                    // Advance tutorial if in shop step
+                    if (isTutorialShopStep) {
+                      await tutorialService.nextStep();
+                      
+                      // Show subtle hint or dialog? 
+                      // For now, let's just go back?
+                      // User flow: "luego lo guiaremos al santuario primordial"
+                      // So we should pop shop screen?
+                      // Or standard back navigation?
+                      // Let's pop.
+                      Navigator.of(context).pop();
+                    }
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
+                    );
+                  }
+                }
+              },
+            ),
+          ),
         ),
       );
   }
