@@ -5,6 +5,7 @@ import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
 import 'package:stillwalks/services/native_bridge.dart';
 import 'package:stillwalks/services/notification_preferences_service.dart';
+import 'package:stillwalks/services/progression_service.dart';
 import 'package:stillwalks/services/notification_guard_service.dart';
 
 /// Servicio que gestiona la generación de Esencia y el estado del jugador
@@ -149,6 +150,40 @@ class EsenciaService extends ChangeNotifier {
     debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
   }
 
+  // Progression Service
+  final ProgressionService _progressionService = ProgressionService();
+
+  // Stream for notifying level up events
+  final _levelUpController = StreamController<int>.broadcast();
+  Stream<int> get onLevelUp => _levelUpController.stream;
+
+  /// Añade XP al jugador y verifica subida de nivel
+  Future<void> addXp(int amount) async {
+    if (amount <= 0) return;
+
+    final oldLevel = _playerState.explorerLevel;
+    final newXp = _playerState.currentXp + amount;
+    
+    // Calcular nuevo nivel basado en XP acumulada
+    final newLevel = _progressionService.calculateLevel(newXp);
+
+    _playerState = _playerState.copyWith(
+      currentXp: newXp,
+      explorerLevel: newLevel,
+    );
+
+    await _db.updatePlayerState(_playerState.toJson());
+    notifyListeners();
+
+    debugPrint('⭐ XP Added: $amount. Total XP: $newXp. Level: $oldLevel -> $newLevel');
+
+    // Notificar si hubo subida de nivel
+    if (newLevel > oldLevel) {
+      debugPrint('🎉 LEVEL UP! $oldLevel -> $newLevel');
+      _levelUpController.add(newLevel);
+    }
+  }
+
   /// Verifica si se ha alcanzado un nuevo hito de esencia
   void _checkMilestoneNotification() {
     if (_nativeBridge == null || _notificationPrefs == null) return;
@@ -194,6 +229,21 @@ class EsenciaService extends ChangeNotifier {
     
     // Verificar si puede ser mejorado
     if (!upgrade.canUpgrade()) return false;
+
+    // Map UpgradeType to string ID used in ProgressionService
+    String upgradeTypeId = '';
+    if (upgrade.type == UpgradeType.idleMultiplier) upgradeTypeId = 'idle_multiplier';
+    if (upgrade.type == UpgradeType.energyStorage) upgradeTypeId = 'energy_storage';
+    // Add sanctuary if it was an upgrade type, but it handles separately in OrbeService for Sanctuaries
+
+    // Verificar límite por Nivel de Explorador
+    final levelCap = _progressionService.getUpgradeCap(_playerState.explorerLevel, type: upgradeTypeId);
+    
+    // Si la mejora ya está en el cap del nivel actual (y el cap es restrictivo > 0)
+    if (upgrade.currentLevel >= levelCap) {
+      debugPrint('🚫 Upgrade cap reached for Level ${_playerState.explorerLevel}. Cap: $levelCap (Type: $upgradeTypeId)');
+      return false;
+    }
     
     final cost = upgrade.calculateNextLevelCost();
 
@@ -210,12 +260,20 @@ class EsenciaService extends ChangeNotifier {
       currentLevel: upgrade.currentLevel + 1,
     );
 
-    await _db.updateUpgrade(upgradeId, {'currentLevel': upgradedUpgrade.currentLevel});
+    // Update in DB (using index logic or ID)
+    // Note: DatabaseHelper might need 'type' if ID isn't unique, but usually ID is unique key.
+    // However, if we inserted them manually...
+    await _db.updateUpgrade(upgrade.id, {'currentLevel': upgradedUpgrade.currentLevel});
     _upgrades[upgradeIndex] = upgradedUpgrade;
 
     // Recalcular multiplicadores
     _updateMultipliers();
+    
+    // Force player state update to save Essence spending and potentially synced data
     await _db.updatePlayerState(_playerState.toJson());
+    
+    // Add XP for purchasing upgrade (10 XP)
+    addXp(10);
 
     notifyListeners();
     return true;
@@ -243,7 +301,8 @@ class EsenciaService extends ChangeNotifier {
         description: '',
       ),
     );
-    return storageUpgrade.currentLevel * 300;
+    // Base 100 + 200 per level
+    return 100 + (storageUpgrade.currentLevel * 200);
   }
 
   /// Añade pasos al almacén (respetando el límite)
@@ -282,5 +341,21 @@ class EsenciaService extends ChangeNotifier {
     debugPrint('🔋 EsenciaService: Consumed $consumed stored steps. Remaining: ${_playerState.storedSteps}');
     
     return consumed;
+  }
+
+  /// Reinicia el progreso del jugador (Debug)
+  Future<void> resetProgress() async {
+    _playerState = PlayerState.initial();
+    
+    // Reset upgrades
+    for (var i = 0; i < _upgrades.length; i++) {
+        _upgrades[i] = _upgrades[i].copyWith(currentLevel: 0);
+        await _db.updateUpgrade(_upgrades[i].id, {'currentLevel': 0});
+    }
+    _updateMultipliers(); // Reset multipliers
+
+    await _db.updatePlayerState(_playerState.toJson());
+    notifyListeners();
+    debugPrint('🔄 EsenciaService: Progress reset to initial state.');
   }
 }

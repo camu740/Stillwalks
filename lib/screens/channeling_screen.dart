@@ -212,6 +212,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                                 // Short delay to ensure transition is seemingly done or at least stack is cleared
                                 // This ensures the dialog from nextStep() is pushed onto the Home screen, not wiped by popUntil
                                 await Future.delayed(const Duration(milliseconds: 100));
+                                tutorialService.setTarget(null); // Ensure highlight is removed
                                 await tutorialService.nextStep();
                             }
                           },

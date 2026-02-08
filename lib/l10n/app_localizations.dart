@@ -791,7 +791,7 @@ abstract class AppLocalizations {
   /// No description provided for @permanentSanctuaryUpgrades.
   ///
   /// In es, this message translates to:
-  /// **'Mejoras de Santuarios Permanentes'**
+  /// **'Mejora de Santuario Permanente'**
   String get permanentSanctuaryUpgrades;
 
   /// No description provided for @globalUpgrades.

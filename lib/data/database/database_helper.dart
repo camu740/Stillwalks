@@ -25,7 +25,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -41,6 +41,8 @@ class DatabaseHelper {
         lastActiveTimestamp TEXT NOT NULL,
         totalSteps INTEGER NOT NULL DEFAULT 0,
         storedSteps INTEGER NOT NULL DEFAULT 0,
+        explorerLevel INTEGER NOT NULL DEFAULT 1,
+        currentXp INTEGER NOT NULL DEFAULT 0,
         lastBootTime TEXT
       )
     ''');
@@ -145,6 +147,8 @@ class DatabaseHelper {
       'lastActiveTimestamp': DateTime.now().toIso8601String(),
       'totalSteps': 0,
       'storedSteps': 0,
+      'explorerLevel': 1,
+      'currentXp': 0,
       'lastBootTime': DateTime.now().toIso8601String(),
     });
   }
@@ -220,6 +224,15 @@ class DatabaseHelper {
         await db.execute('ALTER TABLE orbe_types ADD COLUMN mechanics TEXT');
       } catch (e) {
         // Ignorar si ya existe
+      }
+    }
+    // V9: Añadir columnas explorerLevel y currentXp
+    if (oldVersion < 9) {
+      try {
+        await db.execute('ALTER TABLE player_state ADD COLUMN explorerLevel INTEGER NOT NULL DEFAULT 1');
+        await db.execute('ALTER TABLE player_state ADD COLUMN currentXp INTEGER NOT NULL DEFAULT 0');
+      } catch (e) {
+        // Columna ya existe
       }
     }
   }
@@ -466,6 +479,8 @@ class DatabaseHelper {
       'idleMultiplier': 1.0,
       'totalSteps': 0,
       'storedSteps': 0,
+      'explorerLevel': 1,
+      'currentXp': 0,
       'lastActiveTimestamp': DateTime.now().toIso8601String(),
     }, where: 'id = ?', whereArgs: [1]);
   }

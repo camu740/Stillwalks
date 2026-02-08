@@ -371,7 +371,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checkBag => 'Revisa tu Bolsa';
 
   @override
-  String get permanentSanctuaryUpgrades => 'Mejoras de Santuarios Permanentes';
+  String get permanentSanctuaryUpgrades => 'Mejora de Santuario Permanente';
 
   @override
   String get globalUpgrades => 'Mejoras Globales';

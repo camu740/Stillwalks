@@ -12,6 +12,7 @@ import 'services/widget_service.dart';
 import 'services/notification_preferences_service.dart';
 import 'services/notification_guard_service.dart';
 import 'services/tutorial_service.dart';
+import 'services/progression_service.dart'; // Added
 import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,6 +44,7 @@ class StillwalksApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         Provider(create: (_) => NativeBridge()),
         Provider(create: (_) => WidgetService()),
+        Provider(create: (_) => ProgressionService()), // Added
       ],
       child: Builder(
         builder: (context) {
@@ -235,6 +237,7 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       esenciaService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
       
       // Wire game mechanics listeners
+      orbeService.setEsenciaService(esenciaService);
       orbeService.listenToEssenceService(esenciaService.onEssenceEarned);
       
       // Calculate pending Esencia from offline time

@@ -13,6 +13,9 @@ import 'package:stillwalks/screens/widgets/sanctuary_slot_widgets.dart';
 import 'package:stillwalks/screens/widgets/tutorial_overlay.dart';
 import 'package:stillwalks/screens/widgets/tutorial_manager.dart';
 import 'package:stillwalks/services/tutorial_service.dart';
+import 'dart:async';
+import 'package:stillwalks/services/progression_service.dart';
+import 'package:stillwalks/screens/widgets/level_up_dialog.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Pantalla principal con el estado del jugador
@@ -26,17 +29,51 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _shopButtonKey = GlobalKey();
   final GlobalKey _sanctuarySlotKey = GlobalKey();
+  StreamSubscription<int>? _levelUpSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for level up events
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+      _levelUpSubscription = esenciaService.onLevelUp.listen((newLevel) {
+        _showLevelUpDialog(newLevel);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _levelUpSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _showLevelUpDialog(int newLevel) {
+    // Get unlocks for this level
+    final progressionService = ProgressionService();
+    final levelDef = progressionService.getLevelDefinition(newLevel);
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User must tap button
+      builder: (context) => LevelUpDialog(
+        newLevel: newLevel,
+        unlocks: levelDef.unlocks,
+        onDismiss: () => Navigator.of(context).pop(),
+      ),
+    );
+  }
   
-
-
   @override
   Widget build(BuildContext context) {
     // Escuchar cambios en los servicios
     final esenciaService = Provider.of<EsenciaService>(context);
     final orbeService = Provider.of<OrbeService>(context);
-
+    final progressionService = ProgressionService();
     
     final currentEsencia = esenciaService.playerState.totalEsencia;
+    final nextLevelXp = progressionService.getNextLevelXpRequirement(esenciaService.playerState.explorerLevel);
     // Asumimos que esenciaPerHour está en el estado del jugador, si no, calculamos o usamos base
     // Revisando EsenciaService: _playerState.esenciaPerHour se usa en calculatePendingEsencia.
     // Si la propiedad no existe en el modelo público, usaremos un valor derivado o fijo por ahora.
@@ -110,36 +147,95 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 8),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(
-                                Icons.access_time,
-                                size: 16,
-                                color: Colors.white70,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '+${esenciaPerHour.toStringAsFixed(0)} ${AppLocalizations.of(context)!.perHour}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.blueAccent.withAlpha(51),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  '${AppLocalizations.of(context)!.level} ${esenciaService.upgrades.firstWhere((u) => u.type == UpgradeType.idleMultiplier, orElse: () => Upgrade(id: '', type: UpgradeType.idleMultiplier, currentLevel: 0, name: '', description: '')).currentLevel}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blueAccent,
-                                    fontWeight: FontWeight.bold,
+                              // Empty container to balance or could be menu button
+                              const SizedBox(width: 48),
+
+                              // CENTER: Essence & Hourly (Existing)
+                              Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.flash_on, color: Colors.amberAccent, size: 28),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        esenciaService.playerState.totalEsencia.toStringAsFixed(0),
+                                        style: const TextStyle(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.access_time, size: 14, color: Colors.white70),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '+${esenciaPerHour.toStringAsFixed(0)}/h',
+                                        style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+
+                              // RIGHT: Circular Level Indicator
+                              Column(
+                                children: [
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: 48,
+                                        height: 48,
+                                        child: CircularProgressIndicator(
+                                          value: nextLevelXp != null 
+                                            ? esenciaService.playerState.currentXp / nextLevelXp 
+                                            : 1.0,
+                                          backgroundColor: Colors.white10,
+                                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                                          strokeWidth: 4,
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black26,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          '${esenciaService.playerState.explorerLevel}',
+                                          style: const TextStyle(
+                                            color: Colors.amber,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
+                                    style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -149,32 +245,60 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Sección media: Santuarios (2 slots lado a lado)
+                  // Sección media: Santuarios (Condicional)
                   Expanded(
                     flex: 1,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Row(
-                        children: [
-                          // Santuario Primordial (izquierda)
-                          Expanded(
-                            child: SanctuarySlot(
-                              containerKey: _sanctuarySlotKey,
-                              sanctuary: orbeService.sanctuaries.firstWhere(
-                                (s) => !s.isTemporary,
-                                orElse: () => orbeService.sanctuaries.first,
+                       child: LayoutBuilder(
+                        builder: (context, constraints) {
+                           // Use ProgressionService to check unlock status instead of hardcoding
+                           final isTempUnlocked = progressionService.isFeatureUnlocked(
+                             esenciaService.playerState.explorerLevel, 
+                             ProgressionFeature.temporarySanctuarySlot
+                           );
+                           
+                           if (!isTempUnlocked) {
+                             // Locked: Centered Primordial Sanctuary
+                             return Center(
+                               child: SizedBox(
+                                 width: constraints.maxWidth * 0.6, // Slightly wider when single
+                                 child: SanctuarySlot(
+                                  containerKey: _sanctuarySlotKey,
+                                  sanctuary: orbeService.sanctuaries.firstWhere(
+                                    (s) => !s.isTemporary,
+                                    orElse: () => orbeService.sanctuaries.first,
+                                  ),
+                                  orbeService: orbeService,
+                                 ),
+                               ),
+                             );
+                           }
+                           
+                           // Unlocked: Side by Side
+                           return Row(
+                            children: [
+                              // Santuario Primordial (izquierda)
+                              Expanded(
+                                child: SanctuarySlot(
+                                  containerKey: _sanctuarySlotKey,
+                                  sanctuary: orbeService.sanctuaries.firstWhere(
+                                    (s) => !s.isTemporary,
+                                    orElse: () => orbeService.sanctuaries.first,
+                                  ),
+                                  orbeService: orbeService,
+                                ),
                               ),
-                              orbeService: orbeService,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Santuario Temporal (derecha)
-                          Expanded(
-                            child: TemporarySanctuarySlot(
-                              orbeService: orbeService,
-                            ),
-                          ),
-                        ],
+                              const SizedBox(width: 12),
+                              // Santuario Temporal (derecha)
+                              Expanded(
+                                child: TemporarySanctuarySlot(
+                                  orbeService: orbeService,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
                       ),
                     ),
                   ),
@@ -325,8 +449,12 @@ class _HomeScreenState extends State<HomeScreen> {
                          final db = DatabaseHelper();
                          await db.resetDatabase();
                          
+                         // Services must reset their internal state too
                          await orbeService.initialize();
-                         await esenciaService.initialize();
+                         await esenciaService.resetProgress(); // Explicitly reset player state in memory
+                         // Re-initialize to load fresh state from DB (though resetProgress sets memory)
+                         await esenciaService.initialize(); 
+                         
                          await tutorialService.resetTutorial();
                          
                          if (context.mounted) {

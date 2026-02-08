@@ -4,11 +4,12 @@ import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/models/orbe.dart';
-import 'package:stillwalks/models/sanctuary.dart';
-import 'package:stillwalks/models/inventory_item.dart';
-import 'package:stillwalks/services/tutorial_service.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/l10n/data_localizations.dart';
+import 'package:stillwalks/models/sanctuary.dart';
+import 'package:stillwalks/models/inventory_item.dart';
+import 'package:stillwalks/services/progression_service.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 
 /// Pantalla de la tienda para comprar Orbes y mejoras
 class ShopScreen extends StatefulWidget {
@@ -40,11 +41,16 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     // Escuchar servicios
     final esenciaService = Provider.of<EsenciaService>(context);
     final orbeService = Provider.of<OrbeService>(context);
+    final progressionService = Provider.of<ProgressionService>(context); // Injected
+    final tutorialService = Provider.of<TutorialService>(context);       // Injected
     
     final currentEsencia = esenciaService.playerState.totalEsencia;
-    // Check tutorial state
-    final tutorialService = Provider.of<TutorialService>(context);
-    final bool isTutorialActive = tutorialService.isActive && !tutorialService.isCompleted;
+    final currentLevel = esenciaService.playerState.explorerLevel;
+
+    // TUTORIAL LOCK: If in shop step, force tab 0 (Orbs) and disable others.
+    // We can just ignore tap on other tabs or hide them? 
+    // Better to Disable interaction if strict.
+    final bool isTutorialShopStep = tutorialService.currentStep == TutorialStep.shop;
 
     return Scaffold(
       appBar: AppBar(
@@ -53,34 +59,17 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         bottom: TabBar(
           controller: _tabController,
           onTap: (index) {
-            if (isTutorialActive && index != 0) {
-              // Prevent switching tabs during tutorial
-              _tabController.index = 0;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('⚠️ ${AppLocalizations.of(context)!.energyTutorialDesc.split('\n')[0]}... Focus on the Orb!'), 
-                  // Use a generic "Focus" message or just block silently/brief toast
-                  // Since we didn't add a specific string for this, we'll use a hardcoded fallback or reuse something generic.
-                  // For now, let's just reset the index silently or with a simple message if possible.
-                  backgroundColor: Colors.redAccent,
-                  duration: const Duration(seconds: 1),
-                ),
-              );
-            }
+             if (isTutorialShopStep && index != 0) {
+               _tabController.index = 0; // Force back to Orbs
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text('Sigue el tutorial: Compra un orbe básico.')),
+               );
+             }
           },
           tabs: [
             Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
-            
-            // Disable visual feedback for restricted tabs
-            Opacity(
-              opacity: isTutorialActive ? 0.3 : 1.0, 
-              child: Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries)
-            ),
-            
-            Opacity(
-              opacity: isTutorialActive ? 0.3 : 1.0,
-              child: Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades)
-            ),
+            Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
+            Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades),
           ],
         ),
       ),
@@ -129,10 +118,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             Expanded(
               child: TabBarView(
                 controller: _tabController,
+                physics: isTutorialShopStep ? const NeverScrollableScrollPhysics() : null, // Disable swipe
                 children: [
-                  _buildOrbesTab(),
-                  _buildSanctuariesTab(),
-                  _buildUpgradesTab(),
+                   _buildOrbesTab(currentLevel, isTutorialShopStep),
+                   _buildSanctuariesTab(currentLevel),
+                   _buildUpgradesTab(currentLevel),
                 ],
               ),
             ),
@@ -142,95 +132,102 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildOrbesTab() {
+  Widget _buildOrbesTab(int currentLevel, bool isTutorialMode) {
     final orbeService = Provider.of<OrbeService>(context);
     final esenciaService = Provider.of<EsenciaService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
-    
+    final progressionService = Provider.of<ProgressionService>(context);
+    final tutorialService = Provider.of<TutorialService>(context); // Added retrieval
+
     // Get all orb types and sort by required steps
     final allOrbes = orbeService.orbeTypes;
     allOrbes.sort((a, b) => a.requiredSteps.compareTo(b.requiredSteps));
 
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: allOrbes.map((type) => _buildOrbItem(type, currentEsencia, orbeService, esenciaService)).toList(),
+      children: allOrbes.map((type) {
+         // LOCK LOGIC
+         bool isLockedByLevel = !progressionService.isItemUnlocked(currentLevel, type.id);
+         bool isLockedByTutorial = isTutorialMode && type.id != 'orbe_basic';
+         
+         String? lockReason;
+         if (isLockedByTutorial) {
+           lockReason = "Bloqueado por Tutorial";
+         } else if (isLockedByLevel) {
+           final reqLevel = progressionService.getRequiredLevelForItem(type.id);
+           lockReason = "Requiere Nivel $reqLevel";
+         }
+
+         return _buildOrbItem(type, currentEsencia, orbeService, esenciaService, lockReason, tutorialService);
+      }).toList(),
     );
   }
 
-  Widget _buildOrbItem(OrbeType type, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService) {
+  Widget _buildOrbItem(OrbeType type, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService, String? lockReason, TutorialService tutorialService) {
       final cost = orbeService.getOrbeCost(type.id);
-      final tutorialService = Provider.of<TutorialService>(context);
       
       // Determine color based on rarity/difficulty
       Color iconColor = Colors.grey; // Default for basic
       if (type.id == 'orbe_advanced') iconColor = Colors.green;
       else if (type.id == 'orbe_expert') iconColor = Colors.blue;
 
-      // Tutorial Logic: Only allow 'orbe_basic' purchase if in 'shop' step
-      // Disable others visually
-      final bool isTutorialActive = tutorialService.isActive;
-      final bool isTutorialShopStep = tutorialService.currentStep == TutorialStep.shop;
-      
-      bool isDisabled = false;
-      if (isTutorialShopStep) {
-        if (type.id != 'orbe_basic') {
-          isDisabled = true;
-        }
-      }
+      final isLocked = lockReason != null;
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
-        child: Opacity(
-          opacity: isDisabled ? 0.3 : 1.0,
-          child: IgnorePointer(
-            ignoring: isDisabled,
-            child: _ShopItem(
-              icon: Icons.circle_outlined,
-              iconColor: iconColor,
-              title: AppLocalizations.of(context)!.getOrbName(type.id, type.name),
-              description: AppLocalizations.of(context)!.getOrbDescription(type.id, type.description),
-              cost: cost,
-              currentEsencia: currentEsencia,
-              onPurchase: () async {
-                final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
-                if (result != null) {
-                  await esenciaService.spendEsencia(cost);
+        child: Opacity( // Dim if locked
+          opacity: isLocked ? 0.6 : 1.0,
+          child: _ShopItem(
+            icon: Icons.circle_outlined,
+            iconColor: iconColor,
+            title: AppLocalizations.of(context)!.getOrbName(type.id, type.name),
+            description: isLocked ? lockReason : AppLocalizations.of(context)!.getOrbDescription(type.id, type.description),
+            cost: cost,
+            currentEsencia: currentEsencia,
+            isLocked: isLocked, // Pass lock state
+            onPurchase: isLocked ? () {
+               // Show reason if clicked while locked
+               ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(lockReason ?? "Bloqueado")),
+               );
+            } : () async {
+              final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
+              if (result != null) {
+                await esenciaService.spendEsencia(cost);
+                
+                // ADVANCE TUTORIAL if applicable
+                if (type.id == 'orbe_basic' && tutorialService.currentStep == TutorialStep.shop) {
+                  await tutorialService.nextStep();
+                  debugPrint('🎓 ShopScreen: Advanced tutorial to Sanctuary step');
                   
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
-                    );
-                    
-                    // Advance tutorial if in shop step
-                    if (isTutorialShopStep) {
-                      await tutorialService.nextStep();
-                      
-                      // Show subtle hint or dialog? 
-                      // For now, let's just go back?
-                      // User flow: "luego lo guiaremos al santuario primordial"
-                      // So we should pop shop screen?
-                      // Or standard back navigation?
-                      // Let's pop.
-                      Navigator.of(context).pop();
-                    }
+                    Navigator.of(context).pop(); // Return to Home
                   }
-                } else {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
-                    );
-                  }
+                  return; // Exit function to avoid showing purchase snackbar which might be confusing during transition
                 }
-              },
-            ),
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.orbPurchased))
+                  );
+                }
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
+                  );
+                }
+              }
+            },
           ),
         ),
       );
   }
 
-  Widget _buildSanctuariesTab() {
+  Widget _buildSanctuariesTab(int currentLevel) {
     final orbeService = Provider.of<OrbeService>(context);
     final esenciaService = Provider.of<EsenciaService>(context);
+    final progressionService = Provider.of<ProgressionService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
     
     // Obtener santuarios permanentes
@@ -262,20 +259,29 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         
         ...permanentSanctuaries.map((sanctuary) {
           final cost = Sanctuary.getUpgradeCost(sanctuary.speedUpgradeLevel);
-          final currentLevel = sanctuary.speedUpgradeLevel;
-          final reductionPercent = (currentLevel * 2);
+          final currentLevelVal = sanctuary.speedUpgradeLevel;
+          final reductionPercent = (currentLevelVal * 2);
+          
+          // Check Upgrade Cap
+          final upgradeCap = progressionService.getUpgradeCap(currentLevel, type: 'sanctuary');
+          final isCappedByLevel = currentLevelVal >= upgradeCap;
+          final nextReqLevel = isCappedByLevel ? progressionService.getLevelRequiredForHigherCap(upgradeCap, type: 'sanctuary') : null;
           
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _SanctuaryUpgradeItem(
               title: AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
               description: AppLocalizations.of(context)!.getSanctuaryDescription(sanctuary.id, sanctuary.typeId, sanctuary.description),
-              currentLevel: currentLevel,
+              currentLevel: currentLevelVal,
               maxLevel: 15,
               cost: cost,
               currentEsencia: currentEsencia,
               reductionPercent: reductionPercent,
+              isCappedByLevel: isCappedByLevel,
+              nextRequiredLevel: nextReqLevel,
               onPurchase: () async {
+                if (isCappedByLevel) return; // Should be disabled
+
                 final success = await orbeService.upgradeSanctuarySpeed(sanctuary.id, currentEsencia);
                 if (success) {
                   await esenciaService.spendEsencia(cost);
@@ -283,7 +289,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryUpgraded(
                         AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
-                        currentLevel + 1
+                        currentLevelVal + 1
                       ))),
                     );
                   }
@@ -316,82 +322,61 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           ),
         ),
         const SizedBox(height: 8),
-        _ShopItem(
-          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuaryFastFlow),
-          iconColor: Colors.tealAccent, // Unified color
-          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuaryFastFlow, 'Fast Flow'),
-          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuaryFastFlow, ''),
-          cost: 1200.0,
-          currentEsencia: currentEsencia,
-          onPurchase: () async {
-            final success = await orbeService.purchaseInventoryItem(
-              InventoryItemTypes.tempSanctuaryFastFlow,
-              1200.0,
-              currentEsencia,
-            );
-            if (success) {
-              await esenciaService.spendEsencia(1200.0);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
-                );
-              }
-            }
-          },
-        ),
+        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuaryFastFlow, 1200.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
         const SizedBox(height: 12),
-        _ShopItem(
-          icon: InventoryItemTypes.getIcon(InventoryItemTypes.tempSanctuarySymbiosis),
-          iconColor: Colors.tealAccent, // Unified color
-          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuarySymbiosis, 'Symbiosis'),
-          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuarySymbiosis, ''),
-          cost: 2000.0,
-          currentEsencia: currentEsencia,
-          onPurchase: () async {
-            final success = await orbeService.purchaseInventoryItem(
-              InventoryItemTypes.tempSanctuarySymbiosis,
-              2000.0,
-              currentEsencia,
-            );
-            if (success) {
-              await esenciaService.spendEsencia(2000.0);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
-                );
-              }
-            }
-          },
-        ),
+        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuarySymbiosis, 2000.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
         const SizedBox(height: 12),
-        _ShopItem(
-          icon: Icons.spa, // Quietude icon (Lotus/Spa)
-          iconColor: Colors.tealAccent,
-          title: AppLocalizations.of(context)!.getSanctuaryName('', InventoryItemTypes.tempSanctuaryQuietude, 'Quietude'),
-          description: AppLocalizations.of(context)!.getSanctuaryDescription('', InventoryItemTypes.tempSanctuaryQuietude, ''),
-          cost: 4000.0, // High cost as requested
-          currentEsencia: currentEsencia,
-          onPurchase: () async {
-            final success = await orbeService.purchaseInventoryItem(
-              InventoryItemTypes.tempSanctuaryQuietude,
-              4000.0,
-              currentEsencia,
-            );
-            if (success) {
-              await esenciaService.spendEsencia(4000.0);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
-                );
-              }
-            }
-          },
-        ),
+        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuaryQuietude, 4000.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
       ],
     );
   }
+  
+  // Helper for Sanctuary with Locks
+  Widget _buildLockedSanctuaryItem(String typeId, double cost, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService, ProgressionService progressionService, int currentLevel) {
+      final isLocked = !progressionService.isItemUnlocked(currentLevel, typeId);
+      final reqLevel = progressionService.getRequiredLevelForItem(typeId);
+      
+      String description = AppLocalizations.of(context)!.getSanctuaryDescription('', typeId, '');
+      if (isLocked) description = "Requiere Nivel $reqLevel";
+      
+      IconData icon = InventoryItemTypes.getIcon(typeId);
+      if (typeId == InventoryItemTypes.tempSanctuaryQuietude) icon = Icons.spa;
 
-  Widget _buildUpgradesTab() {
+      return Opacity(
+        opacity: isLocked ? 0.6 : 1.0,
+        child: _ShopItem(
+          icon: icon,
+          iconColor: Colors.tealAccent,
+          title: AppLocalizations.of(context)!.getSanctuaryName('', typeId, InventoryItemTypes.getShortName(typeId)),
+          description: description,
+          cost: cost,
+          currentEsencia: currentEsencia,
+          isLocked: isLocked,
+          hasBackground: false, // No orb background for sanctuaries
+          onPurchase: isLocked ? () {
+             ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Requiere Nivel $reqLevel")),
+             );
+          } : () async {
+            final success = await orbeService.purchaseInventoryItem(
+              typeId,
+              cost,
+              currentEsencia,
+            );
+            if (success) {
+              await esenciaService.spendEsencia(cost);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
+                );
+              }
+            }
+          },
+        ),
+      );
+  }
+
+  Widget _buildUpgradesTab(int currentLevel) {
     final esenciaService = Provider.of<EsenciaService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
     
@@ -435,6 +420,18 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           )
         else
           ...globalUpgrades.map((upgrade) {
+            
+            // Check Upgrade Cap with Type
+            final progressionService = Provider.of<ProgressionService>(context);
+            // Map UpgradeType to string ID used in ProgressionService
+            String upgradeTypeId = '';
+            if (upgrade.type == UpgradeType.idleMultiplier) upgradeTypeId = 'idle_multiplier';
+            if (upgrade.type == UpgradeType.energyStorage) upgradeTypeId = 'energy_storage';
+            
+            final upgradeCap = progressionService.getUpgradeCap(currentLevel, type: upgradeTypeId);
+            final isCappedByLevel = upgrade.currentLevel >= upgradeCap;
+            final nextReqLevel = isCappedByLevel ? progressionService.getLevelRequiredForHigherCap(upgradeCap, type: upgradeTypeId) : null;
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _UpgradeItem(
@@ -447,20 +444,32 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 currentEsencia: currentEsencia,
                 multiplier: AppLocalizations.of(context)!.getUpgradeBonusText(upgrade.type),
                 bonusText: upgrade.type == UpgradeType.energyStorage
-                    ? 'Capacidad: ${(upgrade.currentLevel * 300)}'
+                    ? 'Capacidad: ${(100 + upgrade.currentLevel * 200)}' // Base 100 + 200/lvl
                     : 'Bono actual: +${(upgrade.currentLevel * 2)}%',
+                isCappedByLevel: isCappedByLevel,
+                nextRequiredLevel: nextReqLevel,
                 onPurchase: () async {
+                  if (isCappedByLevel) return; // Should be disabled, but safeguard
+
                   final success = await esenciaService.purchaseUpgrade(upgrade.id);
                   if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
-                        AppLocalizations.of(context)!.getUpgradeName(upgrade.type)
-                      ))),
-                    );
+                    // Force UI update explicitly if needed, but notifyListeners in service should suffice.
+                    // Debug print to confirm flow
+                    debugPrint('ShopScreen: Global upgrade success. Waiting for rebuild.');
+                    
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
+                          AppLocalizations.of(context)!.getUpgradeName(upgrade.type)
+                        ))),
+                      );
+                    }
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
-                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
+                      );
+                    }
                   }
                 },
               ),
@@ -490,7 +499,9 @@ class _ShopItem extends StatelessWidget {
   final String description;
   final double cost;
   final double currentEsencia;
-  final VoidCallback onPurchase;
+  final Function() onPurchase;
+  final bool isLocked;
+  final bool hasBackground; // Added parameter
 
   const _ShopItem({
     required this.icon,
@@ -500,69 +511,88 @@ class _ShopItem extends StatelessWidget {
     required this.cost,
     required this.currentEsencia,
     required this.onPurchase,
+    this.isLocked = false,
+    this.hasBackground = true, // Default to true (orb style)
   });
 
   @override
   Widget build(BuildContext context) {
-    final canAfford = currentEsencia >= cost;
-
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white24),
       ),
-      child: Row(
-        children: [
-          Icon(icon, size: 48, color: iconColor ?? Colors.deepPurpleAccent),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: hasBackground 
+        ? Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isLocked ? Colors.grey.withOpacity(0.2) : iconColor!.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isLocked ? Icons.lock : icon, 
+              color: isLocked ? Colors.grey : iconColor, 
+              size: 32
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.all(12.0), // Keep spacing consistent
+            child: Icon(
+              isLocked ? Icons.lock : icon, 
+              color: isLocked ? Colors.grey : iconColor, 
+              size: 32
+            ),
+          ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              description,
+              style: TextStyle(color: isLocked ? Colors.redAccent : Colors.white70),
+            ),
+            const SizedBox(height: 8),
+            if (!isLocked) // Only show cost if unlocked (or show regardless? Design choice: user code had cost. Let's show cost but greyed out?)
+            // Actually, if locked, we might want to hide cost or show it in red?
+            // User requested "bloqueado", usually implies not purchasable.
+            // Let's keep cost visible but button handles logic.
+            Row(
               children: [
+                const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 16),
+                const SizedBox(width: 4),
                 Text(
-                  title,
+                  cost.toStringAsFixed(0),
                   style: const TextStyle(
-                    fontSize: 18,
+                    color: Colors.amberAccent,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.auto_awesome, size: 16, color: Colors.amberAccent),
-                    const SizedBox(width: 4),
-                    Text(
-                      cost.toStringAsFixed(0),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.amberAccent,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
-          ),
-          ElevatedButton(
-            onPressed: canAfford ? onPurchase : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurpleAccent,
-              disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+          ],
+        ),
+        trailing: ElevatedButton(
+          onPressed: isLocked ? onPurchase : (currentEsencia >= cost ? onPurchase : null),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isLocked ? Colors.grey : (currentEsencia >= cost ? Colors.deepPurple : Colors.grey[800]),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(AppLocalizations.of(context)!.buy),
           ),
-        ],
+          child: Text(isLocked ? 'Bloqueado' : AppLocalizations.of(context)!.buy),
+        ),
       ),
     );
   }
@@ -579,6 +609,8 @@ class _UpgradeItem extends StatelessWidget {
   final String multiplier;
   final String bonusText;
   final VoidCallback onPurchase;
+  final bool isCappedByLevel;
+  final int? nextRequiredLevel; // Added
 
   const _UpgradeItem({
     required this.icon,
@@ -591,6 +623,8 @@ class _UpgradeItem extends StatelessWidget {
     required this.multiplier,
     required this.bonusText,
     required this.onPurchase,
+    this.isCappedByLevel = false,
+    this.nextRequiredLevel, // Added
   });
 
   @override
@@ -688,13 +722,17 @@ class _UpgradeItem extends StatelessWidget {
                 ),
               if (!isMaxLevel)
                 ElevatedButton(
-                  onPressed: canAfford ? onPurchase : null,
+                  onPressed: isCappedByLevel ? null : (canAfford ? onPurchase : null), // Disable if capped
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.greenAccent.withOpacity(0.8),
-                    foregroundColor: Colors.black,
+                    backgroundColor: isCappedByLevel ? Colors.grey.withOpacity(0.5) : Colors.greenAccent.withOpacity(0.8),
+                    foregroundColor: isCappedByLevel ? Colors.white70 : Colors.black,
                     disabledBackgroundColor: Colors.grey.withOpacity(0.3),
                   ),
-                  child: Text(AppLocalizations.of(context)!.upgrade),
+                  child: Text(
+                    isCappedByLevel 
+                      ? 'Nivel ${nextRequiredLevel ?? "?"}' 
+                      : AppLocalizations.of(context)!.upgrade
+                  ),
                 ),
             ],
           ),
@@ -713,6 +751,8 @@ class _SanctuaryUpgradeItem extends StatelessWidget {
   final double currentEsencia;
   final int reductionPercent;
   final VoidCallback onPurchase;
+  final bool isCappedByLevel;
+  final int? nextRequiredLevel; // Added
 
   const _SanctuaryUpgradeItem({
     required this.title,
@@ -723,6 +763,8 @@ class _SanctuaryUpgradeItem extends StatelessWidget {
     required this.currentEsencia,
     required this.reductionPercent,
     required this.onPurchase,
+    this.isCappedByLevel = false,
+    this.nextRequiredLevel, // Added
   });
 
   @override
@@ -822,13 +864,17 @@ class _SanctuaryUpgradeItem extends StatelessWidget {
                 ),
               if (!isMaxLevel)
                 ElevatedButton(
-                  onPressed: canAfford ? onPurchase : null,
+                  onPressed: isCappedByLevel ? null : (canAfford ? onPurchase : null), // Disable if capped
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purpleAccent.withOpacity(0.8),
-                    foregroundColor: Colors.white,
+                    backgroundColor: isCappedByLevel ? Colors.grey.withOpacity(0.5) : Colors.purpleAccent.withOpacity(0.8),
+                    foregroundColor: isCappedByLevel ? Colors.white70 : Colors.white,
                     disabledBackgroundColor: Colors.grey.withOpacity(0.3),
                   ),
-                  child: Text(AppLocalizations.of(context)!.upgrade),
+                  child: Text(
+                    isCappedByLevel 
+                      ? 'Nivel ${nextRequiredLevel ?? "?"}' 
+                      : AppLocalizations.of(context)!.upgrade
+                  ),
                 ),
             ],
           ),

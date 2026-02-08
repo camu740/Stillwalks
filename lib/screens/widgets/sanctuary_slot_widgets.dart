@@ -99,12 +99,9 @@ class SanctuarySlot extends StatelessWidget {
                         final species = await orbeService.getSpeciesById(instance.speciesId);
                         final isNew = await orbeService.isNewDiscovery(instance.speciesId);
                         if (species != null && context.mounted) {
-                          // Complete tutorial step if in hatch phase
-                          final tutorialService = Provider.of<TutorialService>(context, listen: false);
-                          if (tutorialService.currentStep == TutorialStep.hatch) {
-                             tutorialService.setTarget(null); // Clear highlight
-                             await tutorialService.nextStep(); // Move to completed
-                          }
+                          // Tutorial: The step advancement is now handled in ChannelingScreen
+                          // when the user clicks "Continue", ensuring the "Adventure Continues"
+                          // dialog appears AFTER the creature reveal, not before.
 
                           Navigator.push(
                             context,
@@ -140,19 +137,19 @@ class SanctuarySlot extends StatelessWidget {
                   Row(
                     children: [
                       if (hasOrbe && !isReadyToChannel)
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            value: progress,
-                            strokeWidth: 3,
-                            backgroundColor: Colors.white10,
+                       Column(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           Icon(
+                            Icons.fort,
+                            size: 20,
                             color: Colors.purpleAccent,
-                          ),
-                        )
+                           ),
+                         ],
+                       )
                       else
                         Icon(
-                          isReadyToChannel ? Icons.check_circle : Icons.fort_outlined,
+                          isReadyToChannel ? Icons.check_circle : Icons.fort,
                           size: 20,
                           color: isReadyToChannel ? Colors.greenAccent : Colors.purpleAccent,
                         ),
@@ -171,17 +168,35 @@ class SanctuarySlot extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   if (hasOrbe)
-                    Text(
-                      isReadyToChannel 
-                          ? AppLocalizations.of(context)!.channelNow 
-                          : sanctuary.typeId == InventoryItemTypes.tempSanctuaryQuietude
-                              ? AppLocalizations.of(context)!.progressEssence(currentSteps, requiredSteps)
-                              : AppLocalizations.of(context)!.progressSteps(currentSteps, requiredSteps),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
-                        fontWeight: isReadyToChannel ? FontWeight.bold : FontWeight.normal,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isReadyToChannel 
+                              ? AppLocalizations.of(context)!.channelNow 
+                              : sanctuary.typeId == InventoryItemTypes.tempSanctuaryQuietude
+                                  ? AppLocalizations.of(context)!.progressEssence(currentSteps, requiredSteps)
+                                  : AppLocalizations.of(context)!.progressSteps(currentSteps, requiredSteps),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
+                            fontWeight: isReadyToChannel ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        if (!isReadyToChannel)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                backgroundColor: Colors.white10,
+                                color: Colors.purpleAccent,
+                                minHeight: 4,
+                              ),
+                            ),
+                          ),
+                      ],
                     )
                   else
                     Text(
@@ -360,7 +375,7 @@ class SanctuarySlot extends StatelessWidget {
         backgroundColor: Colors.deepPurple.shade900,
         title: Row(
           children: [
-            Icon(Icons.fort_outlined, color: Colors.purpleAccent),
+            Icon(Icons.fort, color: Colors.purpleAccent), // Changed from fort_outlined
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name)),
           ],
@@ -626,16 +641,18 @@ class TemporarySanctuarySlot extends StatelessWidget {
                   Row(
                     children: [
                       if (hasTemp && orbe != null && !isReadyToChannel)
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            value: progress,
-                            strokeWidth: 3,
-                            backgroundColor: Colors.white10,
+                       Column(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                           Icon(
+                            tempSanctuary.typeId != null 
+                                ? InventoryItemTypes.getIcon(tempSanctuary.typeId!) 
+                                : Icons.timer,
+                            size: 20,
                             color: Colors.cyanAccent,
-                          ),
-                        )
+                           ),
+                         ],
+                       )
                       else
                         Icon(
                           isReadyToChannel 
@@ -683,8 +700,21 @@ class TemporarySanctuarySlot extends StatelessWidget {
                         color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
                         fontWeight: isReadyToChannel ? FontWeight.bold : FontWeight.normal,
                       ),
-                    )
-                  else if (hasTemp)
+                    ),
+                    if (hasTemp && orbe != null && !isReadyToChannel)
+                       Padding(
+                         padding: const EdgeInsets.only(top: 4.0),
+                         child: ClipRRect(
+                           borderRadius: BorderRadius.circular(2),
+                           child: LinearProgressIndicator(
+                             value: progress,
+                             backgroundColor: Colors.white10,
+                             color: Colors.cyanAccent,
+                             minHeight: 4,
+                           ),
+                         ),
+                       )
+                    else if (hasTemp)
                     Text(
                       AppLocalizations.of(context)!.emptySlot,
                       style: const TextStyle(

@@ -1,0 +1,193 @@
+1. Filosofía del sistema de niveles
+
+El sistema de niveles debe:
+
+Guiar al jugador sin abrumarlo
+
+Introducir sistemas cuando ya son necesarios
+
+Garantizar que cada nivel desbloquea algo nuevo
+
+Hacer que el early game sea rápido y el late game más reflexivo
+
+Importante:
+
+El nivel no debe dar poder directo, sino acceso.
+
+2. ¿Cómo se gana experiencia?
+
+Recomendación clara: pocas fuentes, muy legibles.
+
+Fuentes de experiencia (XP)
+Acción	XP
+Canalizar un Orbe	100 XP
+Canalizar un tipo de Orbe por primera vez	+50 XP
+Descubrir una criatura nueva	50 XP
+Comprar un Orbe	en la tienda 20 XP
+Comprar un Santuario temporal en la tienda	30 XP
+Comprar una mejora en la tienda 10xp
+
+❌ No dar XP por:
+
+Pasos
+
+Tiempo
+
+Esencia pasiva
+
+👉 Esto evita farm infinito y mantiene la XP ligada al progreso real.
+
+3. Curva de experiencia por nivel
+
+Early rápido, luego cada vez más lento.
+
+XP necesaria por nivel (acumulativa)
+Nivel	XP para subir	XP total aprox.
+1 → 2	100	100
+2 → 3	200	300
+3 → 4	350	650
+4 → 5	550	1.200
+5 → 6	800	2.000
+6 → 7	1.100	3.100
+7 → 8	1.500	4.600
+8 → 9	2.000	6.600
+9 → 10	2.700	9.300
+
+👉 Nivel 2–3 en el primer día
+👉 Nivel 6–7 tras varios días
+👉 Nivel 9 ya es mid/late game
+
+4. Niveles de Explorador y desbloqueos
+
+Aquí adapto exactamente tu idea, ajustando el orden para que sea muy natural.
+
+Nivel 1 – Explorador Novato
+
+Estado inicial
+
+Santuario Primordial
+
+Orbes básicos
+
+Sin mejoras
+
+Sin temporales
+
+Nivel 2 – Explorador Iniciado
+
+Desbloquea
+
+Mejoras del Santuario Permanente (niveles 1–2)
+
+Mejora básica de reducción de pasos
+
+👉 El jugador ya entiende qué es caminar → ahora optimiza.
+
+Nivel 3 – Explorador Atento
+
+Desbloquea
+
+Mejora del Recolector de Esencia (niveles 1–2)
+
+👉 Refuerza el bucle de bienestar digital.
+
+Nivel 4 – Explorador Errante
+
+Desbloquea
+
+Slot de Santuario Temporal revealed
+
+En tienda: Santuario Temporal de Flujo Rápido
+
+Límite de mejoras desbloqueado hasta nivel 4
+
+👉 Introduce decisiones tácticas.
+
+Nivel 5 – Explorador Constante
+
+Desbloquea
+
+Mejora del Almacén de Energía (niveles 1–2)
+
+Nuevos niveles de mejora de Santuario Permanente
+
+👉 Calidad de vida para jugadores activos.
+
+Nivel 6 – Explorador Experimentado
+
+Desbloquea
+
+Orbe Avanzado (nuevo tipo en tienda)
+
+Nuevos niveles de mejora (3–4) para sistemas existentes
+
+👉 Primer salto real de progresión.
+
+Nivel 7 – Explorador Simbiótico
+
+Desbloquea
+
+Santuario Temporal de Simbiosis
+
+Límite de mejoras ampliado
+
+👉 Introduce conversión de recursos.
+
+Nivel 8 – Explorador Sereno
+
+Desbloquea
+
+Santuario Temporal de Quietud
+
+Nuevas mejoras de eficiencia (niveles 5–6)
+
+👉 Alternativa consciente a caminar.
+
+Nivel 9 – Explorador Experto
+
+Desbloquea
+
+Orbe Experto (alta exigencia, mejores pools)
+
+Acceso a todas las mejoras base
+
+👉 Ya entiende el sistema completo.
+
+5. Sistema de bloqueo de mejoras por nivel (MUY buena idea)
+
+Esto es clave para que el progreso sea satisfactorio.
+
+Regla propuesta
+
+Cada nivel de explorador desbloquea 2 niveles más de cada mejora
+
+Ejemplo:
+
+Nivel 2 → mejoras hasta nivel 2
+
+Nivel 4 → mejoras hasta nivel 4
+
+Nivel 6 → mejoras hasta nivel 6
+
+👉 El jugador:
+
+Siempre quiere subir de nivel
+
+Nunca “maxea demasiado pronto”
+
+Siente progreso constante
+
+6. Qué mostrar al subir de nivel (UX)
+
+Animacíon que cambie del nivel actual al nuevo nivel.
+Muestra una Pantalla simple, sin texto largo:
+
+Nivel de Explorador aumentado 
+
+Has desbloqueado:
+– Mejoras del Santuario
+– Santuario Temporal: Flujo Rápido
+
+
+Botón:
+Continuar

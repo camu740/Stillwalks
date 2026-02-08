@@ -81,17 +81,21 @@ class Sanctuary {
   /// Calcula el multiplicador de velocidad basado en el nivel de mejora
   /// Cada nivel reduce los pasos en 2% (nivel 15 = -30% máximo)
   static double calculateSpeedMultiplier(int upgradeLevel) {
+    // 2% per level. Level 12 = 24% reduction (1.24x speed approx, or speed multiplier logic?)
+    // Speed Multiplier usually means Steps / Multiplier = Required.
+    // So 1.25x speed means 20% less steps.
+    // Let's keep 2% per level.
     final reductionPercent = (upgradeLevel * 0.02).clamp(0.0, 0.30);
     return 1.0 + reductionPercent;
   }
 
   /// Obtiene el coste de la siguiente mejora de velocidad
   static double getUpgradeCost(int currentLevel) {
-    // 15 niveles de mejora para un progreso más granular
+    // 12 niveles de mejora
     const costs = [
-      300.0, 500.0, 700.0, 900.0, 1200.0, // Nv 1-5 (Early)
-      1500.0, 1800.0, 2200.0, 2600.0, 3000.0, // Nv 6-10 (Mid)
-      3500.0, 4000.0, 4500.0, 5000.0, 6000.0 // Nv 11-15 (Late)
+      300.0, 600.0, 1000.0, 1500.0, 2200.0, // Nv 1-5 
+      3000.0, 4000.0, 5200.0, 6500.0, 8000.0, // Nv 6-10 
+      10000.0, 12500.0 // Nv 11-12
     ];
     if (currentLevel >= costs.length) return double.infinity;
     return costs[currentLevel];
@@ -99,6 +103,6 @@ class Sanctuary {
 
   /// Comprueba si el santuario puede ser mejorado
   bool canUpgrade() {
-    return !isTemporary && speedUpgradeLevel < 15;
+    return !isTemporary && speedUpgradeLevel < 12;
   }
 }

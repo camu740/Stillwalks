@@ -74,15 +74,16 @@ class Upgrade {
 enum UpgradeType {
   idleMultiplier(
     baseCost: 1000,
-    incrementPerLevel: 0.02,
-    maxLevel: 6,
-    costs: [1000, 2500, 5000, 9000, 15000, 25000], // Extendido
+    incrementPerLevel: 0.02, // 2% per level? 
+    maxLevel: 12,
+    // New costs for 12 levels. Smoother progression.
+    costs: [1000, 2000, 3500, 5500, 8000, 11000, 15000, 20000, 26000, 33000, 41000, 50000], 
   ),
   energyStorage(
     baseCost: 500,
-    incrementPerLevel: 300.0,
-    maxLevel: 5,
-    costs: [500, 1500, 3000, 5000, 8000],
+    incrementPerLevel: 200.0, // Requested: 200 per level
+    maxLevel: 12,
+    costs: [500, 1200, 2200, 3500, 5000, 7000, 9500, 12500, 16000, 20000, 25000, 31000],
   );
 
   const UpgradeType({

@@ -9,6 +9,7 @@ import 'package:stillwalks/models/inventory_item.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
 import 'package:stillwalks/services/native_bridge.dart';
 import 'package:stillwalks/services/notification_preferences_service.dart';
+import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/notification_guard_service.dart';
 
 /// Servicio que gestiona la lógica de Orbes, Santuarios e Inventario
@@ -31,6 +32,7 @@ class OrbeService extends ChangeNotifier {
   NativeBridge? _nativeBridge;
   NotificationPreferencesService? _notificationPrefs;
   NotificationGuardService? _notificationGuard;
+  EsenciaService? _esenciaService;
   
   // Stream subscription for essence events
   StreamSubscription<double>? _essenceSubscription;
@@ -45,6 +47,11 @@ class OrbeService extends ChangeNotifier {
     _nativeBridge = nativeBridge;
     _notificationPrefs = notificationPrefs;
     _notificationGuard = notificationGuard;
+  }
+
+  /// Inyecta el servicio de esencia para la progresión (XP)
+  void setEsenciaService(EsenciaService service) {
+    _esenciaService = service;
   }
 
   /// Inicializa el servicio
@@ -144,6 +151,10 @@ class OrbeService extends ChangeNotifier {
 
     await _db.insertOrbe(newOrbe.toJson());
     _orbes.add(newOrbe);
+    
+    // XP Award: Comprar Orbe (20 XP)
+    _esenciaService?.addXp(20);
+    
     notifyListeners();
 
     return newOrbe;
@@ -179,6 +190,13 @@ class OrbeService extends ChangeNotifier {
     
     await _db.updateInventoryItem(typeId, 1);
     await loadData(); // Recargar inventario
+    
+    // XP Award: Comprar Santuario Temporal (30 XP)
+    // Verificamos si es un item de tipo santuario temporal
+    if (typeId.startsWith('temp_sanctuary_')) {
+       _esenciaService?.addXp(30);
+    }
+    
     return true;
   }
 
@@ -370,6 +388,18 @@ class OrbeService extends ChangeNotifier {
     final channeledOrbe = orbe.copyWith(stillwalkId: instance.id);
     await _db.updateOrbe(orbeId, {'stillwalkId': instance.id});
     _orbes[orbeIdx] = channeledOrbe;
+
+    // XP Award: Canalizar Orbe (100 XP)
+    _esenciaService?.addXp(100);
+
+    // XP Award: Descubrimiento (50 XP)
+    // Check if this species was already discovered BEFORE this hatch
+    // (Wait, I just inserted it. So I should check if count == 1 now)
+    final isNew = await isNewDiscovery(speciesId);
+    if (isNew) {
+       _esenciaService?.addXp(50);
+       debugPrint('⭐ XP Bonus: New Discovery! (+50 XP)');
+    }
 
     // Calcular recompensa de esencia si está en Santuario de Simbiosis
     double symbiosisEssence = 0.0;
