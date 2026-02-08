@@ -710,7 +710,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Permite almacenar pasos no usados cuando no hay orbes activos.';
 
   @override
-  String get upgradeStorageBonus => '+300 capacidad / nivel';
+  String get upgradeStorageBonus => '+200 capacidad / nivel';
 
   @override
   String get upgradeSpeedName => 'Mejora de Velocidad';

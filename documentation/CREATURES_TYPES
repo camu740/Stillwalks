@@ -1,0 +1,257 @@
+# Stillwalks – Inspiración y Sistema de Criaturas
+
+## 1. Propósito del documento
+
+Este documento define la **inspiración artística y funcional** del sistema de criaturas de Stillwalks (Stillwalks), estableciendo unas bases claras y escalables para:
+
+* Rarezas
+* Tipos
+* Identidad temática (mitología ibérica)
+* Uso jugable y de progresión
+
+El objetivo no es cerrar un contenido definitivo, sino crear un **marco coherente** que permita añadir nuevas criaturas, regiones y eventos sin romper el sistema.
+
+---
+
+## 2. Principios de diseño del sistema de criaturas
+
+1. **Inspiración cultural real**
+   Las criaturas se basan en mitología y folclore ibérico (España como núcleo inicial).
+
+2. **Función antes que cantidad**
+   Cada criatura debe tener sentido narrativo y funcional, no ser simple relleno.
+
+3. **Rareza como significado, no solo dificultad**
+   La rareza refleja importancia simbólica y presencia en la tradición.
+
+4. **Tipos conceptuales, no de combate**
+   Los tipos no están pensados para batallas, sino para identidad y posibles interacciones futuras.
+
+5. **Sistema ampliable**
+   Nuevos tipos, rarezas o regiones pueden añadirse sin rehacer lo existente.
+
+---
+
+## 3. Rarezas
+
+Las rarezas definen **frecuencia, dificultad de obtención y peso narrativo**.
+
+### Rarezas disponibles
+
+* **Común**
+  Espíritus menores y seres cotidianos del folclore.
+
+* **Poco común**
+  Criaturas regionales o menos frecuentes en relatos.
+
+* **Raro**
+  Seres reconocibles, con nombre propio o función clara.
+
+* **Épico**
+  Criaturas muy poderosas o simbólicas.
+
+* **Legendario**
+  Figuras clave de la mitología. Muy escasas.
+
+* **Mítico**
+  Uso narrativo o especial. No forman parte del RNG normal. Por ejemplo, la criatura del tutorial.
+
+### Distribución orientativa
+
+| Rareza     | % aproximado |
+| ---------- | ------------ |
+| Común      | 35–40%       |
+| Poco común | 25–30%       |
+| Raro       | 15–20%       |
+| Épico      | 8–10%        |
+| Legendario | 3–5%         |
+| Mítico     | 1–2%         |
+
+---
+
+## 4. Tipos de criaturas
+
+Los tipos representan **naturaleza, comportamiento o simbolismo**, no elementos de combate.
+
+Cada tipo cuenta con un **símbolo simple** que sirve como referencia visual en la interfaz, la colección y los filtros del Diario del Explorador.
+
+### Tipos principales
+
+* **⛰ Terrenal**
+  Criaturas ligadas a montes, cuevas, caminos y piedra.
+
+* **🌊 Acuátil**
+  Espíritus de ríos, mares, fuentes y pozos.
+
+* **🔥 Ígneo**
+  Asociados al fuego, calor, fragua o destrucción ritual.
+
+* **🌱 Vital**
+  Representan vida, crecimiento, fertilidad y ciclos naturales.
+
+* **🐾 Salvaje**
+  Instinto, fuerza primaria, naturaleza indómita.
+
+* **🏠 Doméstico**
+  Espíritus del hogar, la familia y la protección cotidiana.
+
+* **✨ Luminar**
+  Guía, protección, presencia benévola o reveladora.
+
+* **🌑 Umbrío**
+  Misterio, noche, advertencia, temor ancestral.
+
+* **🗿 Gigante**
+  Criaturas de gran escala y origen antiguo.
+
+* **🐉 Dracónico**
+  Linaje ancestral, extremadamente raro.
+
+---
+
+## 5. Uso funcional de tipos (presente y futuro)
+
+Actualmente:
+
+* Identidad visual y narrativa
+* Filtrado en colecciones
+* Afinidad con orbes y santuarios
+
+A futuro:
+
+* Bonificaciones pasivas
+* Eventos temáticos
+* Interacciones con hábitos (caminar, horarios, constancia)
+
+---
+
+## 6. Criaturas de ejemplo (mitología ibérica)
+
+### Criaturas iniciales (ya definidas)
+
+| Nombre              | Tipo      | Rareza     | Origen              |
+| ------------------- | --------- | ---------- | -----------------   |
+| Trasgu              | Doméstico | Común      | Asturias            |
+| Moura               | Luminar   | Poco común | Galicia             |
+| Basajaun            | Salvaje   | Raro       | País Vasco          |
+| Coca                | Dracónico | Épico      | Tradición popular   |
+| Tragantía           | Umbrío    | Poco común | Andalucía           |
+| Entignao            | Gigante   | Raro       | Extremadura         |
+| Culebre             | Dracónico | Legendario | Asturias            |
+| Nubero              | Umbrío    | Raro       | Cantabria y Asturias|
+| Santa Compaña       | Terrenal  | Mítico     | Original            |
+| Lamia               | Acuátil   | Poco común | País Vasco          |
+| Follet              | Doméstico | Común      | Cataluña            |
+| Pesanta             | Umbrío    | Épico      | Cataluña            |
+| Ojancano            | Gigante   | Legendario | Cantabria           |
+| Alicornio Ibérico   | Vital     | Épico      | Norte               |
+
+---
+
+## 7. Sistema ampliable
+
+Este marco permite añadir:
+
+* Nuevas regiones (Canarias, Baleares, etc.)
+* Nuevos tipos simbólicos
+* Criaturas de evento o temporada
+* Stillwalks míticos únicos
+
+Sin modificar las bases del sistema.
+
+---
+
+## 8. Generaciones de criaturas (mitologías)
+
+### 8.1 Concepto de generación
+
+Las criaturas de Stillwalks se organizan en **Generaciones**, entendidas no como versiones técnicas del juego, sino como **bloques culturales de mitología**.
+
+Cada generación agrupa criaturas que comparten:
+
+* Origen mitológico o geográfico
+* Estética y tono narrativo
+* Contexto cultural
+
+Este sistema permite ampliar el contenido del juego de forma ordenada, sin diluir la identidad original.
+
+---
+
+### 8.2 Generación I – Mitología Ibérica
+
+* Generación inicial del juego
+* Base fundacional de Stillwalks
+* Inspirada en mitología y folclore de España
+
+Características:
+
+* Espíritus del hogar, caminos y naturaleza
+* Criaturas ligadas a tradición oral
+* Tono cercano, rural y simbólico
+
+Esta generación debe sentirse **cohesiva y completa por sí misma**.
+
+---
+
+### 8.3 Generaciones futuras (ejemplos)
+
+Algunos ejemplos de posibles generaciones futuras:
+
+* **Generación II – Mitología Mediterránea**
+  Grecia, Roma, Fenicia
+
+* **Generación III – Mitología Nórdica**
+  Seres del frío, gigantes, espíritus del invierno
+
+* **Generación IV – Mitologías Celtas**
+  Criaturas feéricas, bosques, límites entre mundos
+
+* **Generación V – Mitologías del Desierto**
+  Djinn, espíritus del viento y la arena
+
+Cada generación puede introducir:
+
+* Nuevas criaturas
+* Variaciones estéticas de tipos existentes
+* Nuevos tipos simbólicos (siempre con moderación)
+
+---
+
+### 8.4 Uso funcional de las generaciones
+
+Las generaciones sirven para:
+
+* Filtrado en la Pokédex / Diario del Explorador
+* Colecciones completas por mitología
+* Eventos y temporadas temáticas
+* Desbloqueos progresivos por nivel
+
+Las generaciones **no afectan directamente a la jugabilidad base**,
+pero sí a la progresión, colección y narrativa.
+
+---
+
+### 8.5 Presentación en el Diario del Explorador
+
+Recomendaciones de UI:
+
+* Vista principal por Generación
+* Progreso visible (X / total)
+* Subfiltros por Rareza y Tipo
+* Indicadores de criaturas no descubiertas
+
+Esto refuerza la sensación de viaje cultural y exploración,
+no solo de acumulación.
+
+---
+
+## 9. Conclusión
+
+El sistema de criaturas de Stillwalks combina:
+
+* Identidad cultural
+* Claridad jugable
+* Profundidad a largo plazo
+* Escalabilidad real
+
+Sirve como guía viva para todo el desarrollo futuro del contenido del juego.

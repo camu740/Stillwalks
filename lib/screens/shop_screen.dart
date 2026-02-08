@@ -444,7 +444,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 currentEsencia: currentEsencia,
                 multiplier: AppLocalizations.of(context)!.getUpgradeBonusText(upgrade.type),
                 bonusText: upgrade.type == UpgradeType.energyStorage
-                    ? 'Capacidad: ${(100 + upgrade.currentLevel * 200)}' // Base 100 + 200/lvl
+                    ? 'Capacidad Total: ${(100 + upgrade.currentLevel * 200)}' 
                     : 'Bono actual: +${(upgrade.currentLevel * 2)}%',
                 isCappedByLevel: isCappedByLevel,
                 nextRequiredLevel: nextReqLevel,
@@ -485,11 +485,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     return Icons.star;
   }
 
-  String _getUpgradeMultiplierText(UpgradeType type) {
-    if (type == UpgradeType.idleMultiplier) return '+2% bono / nivel';
-    if (type == UpgradeType.energyStorage) return '+300 capacidad / nivel';
-    return '';
-  }
+
 }
 
 class _ShopItem extends StatelessWidget {

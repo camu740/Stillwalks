@@ -301,8 +301,12 @@ class EsenciaService extends ChangeNotifier {
         description: '',
       ),
     );
-    // Base 100 + 200 per level
-    return 100 + (storageUpgrade.currentLevel * 200);
+    
+    if (storageUpgrade.currentLevel == 0) return 0;
+    
+    // Level 1: 100 (Unlocks storage)
+    // Level 2+: 100 + ((level - 1) * 200)
+    return 100 + ((storageUpgrade.currentLevel - 1) * 200);
   }
 
   /// Añade pasos al almacén (respetando el límite)

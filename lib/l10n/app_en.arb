@@ -343,7 +343,7 @@
   "upgradeIdleBonus": "+2% bonus / level",
   "upgradeStorageName": "Energy Storage",
   "upgradeStorageDesc": "Allows storing unused steps when no orbs are active.",
-  "upgradeStorageBonus": "+300 capacity / level",
+  "upgradeStorageBonus": "+200 capacity / level",
   "upgradeSpeedName": "Speed Upgrade",
   
   "sancPrimordialName": "Primordial",

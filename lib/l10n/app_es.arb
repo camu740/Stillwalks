@@ -369,7 +369,7 @@
   "upgradeIdleBonus": "+2% bono / nivel",
   "upgradeStorageName": "Almacén de Energía",
   "upgradeStorageDesc": "Permite almacenar pasos no usados cuando no hay orbes activos.",
-  "upgradeStorageBonus": "+300 capacidad / nivel",
+  "upgradeStorageBonus": "+200 capacidad / nivel",
   "upgradeSpeedName": "Mejora de Velocidad",
   
   "sancPrimordialName": "Primordial",

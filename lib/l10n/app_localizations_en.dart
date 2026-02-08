@@ -709,7 +709,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Allows storing unused steps when no orbs are active.';
 
   @override
-  String get upgradeStorageBonus => '+300 capacity / level';
+  String get upgradeStorageBonus => '+200 capacity / level';
 
   @override
   String get upgradeSpeedName => 'Speed Upgrade';

@@ -1385,7 +1385,7 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeStorageBonus.
   ///
   /// In es, this message translates to:
-  /// **'+300 capacidad / nivel'**
+  /// **'+200 capacidad / nivel'**
   String get upgradeStorageBonus;
 
   /// No description provided for @upgradeSpeedName.

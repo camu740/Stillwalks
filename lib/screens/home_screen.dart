@@ -82,6 +82,25 @@ class _HomeScreenState extends State<HomeScreen> {
     // Mirando EsenciaService.dart linea 75: _playerState.esenciaPerHour * hoursElapsed. SI EXISTE.
     final esenciaPerHour = esenciaService.playerState.esenciaPerHour; 
     
+    // Get Collector Level (Safe lookup)
+    int collectorLevel = 0;
+    try {
+      final collectorUpgrade = esenciaService.upgrades.firstWhere(
+        (u) => u.type == UpgradeType.idleMultiplier,
+        orElse: () => Upgrade(
+          id: 'temp', 
+          type: UpgradeType.idleMultiplier, 
+          currentLevel: 0, 
+          name: '', 
+          description: ''
+        ),
+      );
+      collectorLevel = collectorUpgrade.currentLevel;
+    } catch (e) {
+      // Fallback
+      collectorLevel = 0;
+    } 
+    
 
     
     // Tutorial Target Updates
@@ -102,11 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           Scaffold(
-            appBar: AppBar(
-              title: Text(AppLocalizations.of(context)!.appTitle),
-              backgroundColor: Colors.deepPurple.withAlpha(204),
-              elevation: 0,
-            ),
+            // Removed AppBar
             body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -124,124 +139,156 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Sección superior: Esencia
                   Expanded(
                     flex: 2,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.essence,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            currentEsencia.toStringAsFixed(0),
-                            style: const TextStyle(
-                              fontSize: 64,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.amberAccent,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Stack(
+                      children: [
+                        // Background / Centered Content
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Empty container to balance or could be menu button
-                              const SizedBox(width: 48),
-
-                              // CENTER: Essence & Hourly (Existing)
-                              Column(
+                              Text(
+                                AppLocalizations.of(context)!.essence,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              
+                              // Essence Icon + Number (Centered) - Removed the large duplicate number
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.flash_on, color: Colors.amberAccent, size: 28),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        esenciaService.playerState.totalEsencia.toStringAsFixed(0),
-                                        style: const TextStyle(
-                                          fontSize: 36,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          shadows: [
-                                            Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.access_time, size: 14, color: Colors.white70),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '+${esenciaPerHour.toStringAsFixed(0)}/h',
-                                        style: const TextStyle(fontSize: 14, color: Colors.white70),
-                                      ),
-                                    ],
+                                  const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 32),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    esenciaService.playerState.totalEsencia.toStringAsFixed(0),
+                                    style: const TextStyle(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-
-                              // RIGHT: Circular Level Indicator
-                              Column(
+                              
+                              const SizedBox(height: 12),
+                              
+                              // Hourly Rate and Collector Level Tag
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Stack(
-                                    alignment: Alignment.center,
+                                  // Hourly Rate
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      SizedBox(
-                                        width: 48,
-                                        height: 48,
-                                        child: CircularProgressIndicator(
-                                          value: nextLevelXp != null 
-                                            ? esenciaService.playerState.currentXp / nextLevelXp 
-                                            : 1.0,
-                                          backgroundColor: Colors.white10,
-                                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
-                                          strokeWidth: 4,
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 40,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Colors.black26,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          '${esenciaService.playerState.explorerLevel}',
-                                          style: const TextStyle(
-                                            color: Colors.amber,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
+                                      const Icon(Icons.access_time, size: 16, color: Colors.white70),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '+${esenciaPerHour.toStringAsFixed(0)}/h',
+                                        style: const TextStyle(fontSize: 16, color: Colors.white70),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
-                                    style: const TextStyle(
-                                      color: Colors.white60,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
+                                  
+                                  const SizedBox(width: 8),
+
+                                  // Collector Level Tag (Styled like Sanctuary Level)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.withOpacity(0.2), // Matching Essence Theme
+                                      borderRadius: BorderRadius.circular(4), // Slightly rounded like a tag
+                                      border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                                    ),
+                                    child: Text(
+                                      'LVL $collectorLevel', // Using LVL directly for now or AppLocalizations if I was sure, keeping it simple
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.amber,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ],
                           ),
+                        ),
 
-                        ],
-                      ),
+                        // Player Level Indicator (Top Right)
+                        Positioned(
+                          top: 16,
+                          right: 16,
+                          child: Column(
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 48,
+                                    height: 48,
+                                    child: CircularProgressIndicator(
+                                      value: nextLevelXp != null 
+                                        ? esenciaService.playerState.currentXp / nextLevelXp 
+                                        : 1.0,
+                                      backgroundColor: Colors.white10,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                                      strokeWidth: 4,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black26,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      '${esenciaService.playerState.explorerLevel}',
+                                      style: const TextStyle(
+                                        color: Colors.amber,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
+                                style: const TextStyle(
+                                  color: Colors.white60,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // App Title (Top Left) - Replaces AppBar
+                        Positioned(
+                          top: 16,
+                          left: 16,
+                          child: Text(
+                            AppLocalizations.of(context)!.appTitle,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -304,33 +351,55 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   // Almacén de Energía (Debajo de santuarios)
-                  if (esenciaService.storageCapacity > 0)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withAlpha(25),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.blueAccent.withAlpha(77)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
+                  // Visible only if Level >= 4 AND Storage Upgrade purchased (Level >= 1)
+                  Builder(
+                    builder: (context) {
+                       final storageUpgrade = esenciaService.upgrades.firstWhere(
+                          (u) => u.type == UpgradeType.energyStorage,
+                          orElse: () => Upgrade(
+                            id: 'temp_storage', 
+                            type: UpgradeType.energyStorage, 
+                            currentLevel: 0, 
+                            name: '', 
+                            description: ''
+                          ),
+                        );
+                        
+                        final isVisible = esenciaService.playerState.explorerLevel >= 4 && 
+                                          storageUpgrade.currentLevel >= 1;
+
+                        if (isVisible) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.blueAccent.withAlpha(25),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: Colors.blueAccent.withAlpha(77)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.blueAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                    }
+                  ),
 
                   // Sección inferior: Botones de navegación
                   Expanded(
