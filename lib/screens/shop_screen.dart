@@ -408,59 +408,97 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         const SizedBox(height: 8),
         
         // Mostrar mejoras globales
-        if (globalUpgrades.isEmpty)
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                AppLocalizations.of(context)!.loadingUpgrades,
-                style: const TextStyle(color: Colors.white54),
-              ),
-            ),
-          )
+        if (false) // Disabled loading check since we build from types
+          const Center(child: Text('...'))
         else
-          ...globalUpgrades.map((upgrade) {
-            
+          ...[UpgradeType.idleMultiplier, UpgradeType.energyStorage].map((type) {
+             final isOwned = esenciaService.hasUpgrade(type);
+             
+             Upgrade upgrade;
+             int cost;
+             String bonusText = '';
+             
+             if (isOwned) {
+               upgrade = esenciaService.getUpgrade(type)!;
+               // Cost for NEXT level (from currentLevel + 1)
+               if (upgrade.currentLevel >= type.maxLevel) {
+                 cost = 0; 
+               } else {
+                 final nextLevelIndex = upgrade.currentLevel + 1;
+                 if (nextLevelIndex < type.costs.length) {
+                    cost = type.costs[nextLevelIndex].toInt();
+                 } else {
+                    cost = 0; // Should not happen if maxLevel matches costs length
+                 }
+               }
+               
+               if (type == UpgradeType.energyStorage) {
+                 final nextCapacity = 100 + ((upgrade.currentLevel + 1) * 200);
+                 bonusText = 'Capacidad: ${100 + (upgrade.currentLevel * 200)} \u2192 $nextCapacity';
+               } else {
+                 bonusText =  AppLocalizations.of(context)!.getUpgradeBonusText(type);
+               }
+             } else {
+                // Unowned ... (rest same) -> NO, need to copy rest or use strict replacement range.
+                // Since I am replacing the `if (isOwned)` block essentially.
+                // I'll rewrite the whole block from `if (isOwned)` down to `else` closing brace.
+                
+               upgrade = Upgrade(
+                 id: 'temp_${type.name}',
+                 type: type,
+                 currentLevel: 0,
+                 name: AppLocalizations.of(context)!.getUpgradeName(type),
+                 description: AppLocalizations.of(context)!.getUpgradeDescription(type),
+               );
+               cost = type.costs[0].toInt(); // Unlock cost
+               
+               if (type == UpgradeType.energyStorage) {
+                 bonusText = 'Desbloquea capacidad: 100';
+               } else {
+                 bonusText = 'Desbloquear mejora';
+               }
+             }
+
             // Check Upgrade Cap with Type
             final progressionService = Provider.of<ProgressionService>(context);
-            // Map UpgradeType to string ID used in ProgressionService
-            String upgradeTypeId = '';
-            if (upgrade.type == UpgradeType.idleMultiplier) upgradeTypeId = 'idle_multiplier';
-            if (upgrade.type == UpgradeType.energyStorage) upgradeTypeId = 'energy_storage';
+            String upgradeTypeId = type == UpgradeType.idleMultiplier ? 'idle_multiplier' : 'energy_storage';
             
             final upgradeCap = progressionService.getUpgradeCap(currentLevel, type: upgradeTypeId);
+            // If unowned (level 0), and cap is 0, then 0 >= 0 is true -> Capped.
+            // If cap is 2 (level 4 reached), then 0 >= 2 is false -> Not capped.
             final isCappedByLevel = upgrade.currentLevel >= upgradeCap;
-            final nextReqLevel = isCappedByLevel ? progressionService.getLevelRequiredForHigherCap(upgradeCap, type: upgradeTypeId) : null;
+            final isMaxLevel = isOwned && upgrade.currentLevel >= type.maxLevel;
+            
+            // Next required level logic
+            int? nextReqLevel; 
+            if (isCappedByLevel) {
+                 nextReqLevel = progressionService.getLevelRequiredForHigherCap(upgradeCap, type: upgradeTypeId);
+            }
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _UpgradeItem(
-                icon: _getUpgradeIcon(upgrade.type),
-                title: AppLocalizations.of(context)!.getUpgradeName(upgrade.type),
-                description: AppLocalizations.of(context)!.getUpgradeDescription(upgrade.type),
-                currentLevel: upgrade.currentLevel,
-                maxLevel: upgrade.type.maxLevel,
-                cost: upgrade.calculateNextLevelCost(),
+                icon: _getUpgradeIcon(type),
+                title: AppLocalizations.of(context)!.getUpgradeName(type),
+                description: AppLocalizations.of(context)!.getUpgradeDescription(type),
+                currentLevel: isOwned ? upgrade.currentLevel : 0,
+                maxLevel: type.maxLevel,
+                cost: isMaxLevel ? 0 : cost.toDouble(),
                 currentEsencia: currentEsencia,
-                multiplier: AppLocalizations.of(context)!.getUpgradeBonusText(upgrade.type),
-                bonusText: upgrade.type == UpgradeType.energyStorage
-                    ? 'Capacidad Total: ${(100 + upgrade.currentLevel * 200)}' 
-                    : 'Bono actual: +${(upgrade.currentLevel * 2)}%',
+                multiplier: '', // Not used anymore as separate text
+                bonusText: bonusText,
                 isCappedByLevel: isCappedByLevel,
                 nextRequiredLevel: nextReqLevel,
+                isMaxLevel: isMaxLevel,
                 onPurchase: () async {
-                  if (isCappedByLevel) return; // Should be disabled, but safeguard
+                  if (isCappedByLevel || isMaxLevel) return;
 
-                  final success = await esenciaService.purchaseUpgrade(upgrade.id);
+                  final success = await esenciaService.purchaseUpgradeByType(type);
                   if (success) {
-                    // Force UI update explicitly if needed, but notifyListeners in service should suffice.
-                    // Debug print to confirm flow
-                    debugPrint('ShopScreen: Global upgrade success. Waiting for rebuild.');
-                    
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
-                          AppLocalizations.of(context)!.getUpgradeName(upgrade.type)
+                           AppLocalizations.of(context)!.getUpgradeName(type)
                         ))),
                       );
                     }
@@ -606,7 +644,8 @@ class _UpgradeItem extends StatelessWidget {
   final String bonusText;
   final VoidCallback onPurchase;
   final bool isCappedByLevel;
-  final int? nextRequiredLevel; // Added
+  final int? nextRequiredLevel;
+  final bool isMaxLevel; // Added field
 
   const _UpgradeItem({
     required this.icon,
@@ -620,12 +659,13 @@ class _UpgradeItem extends StatelessWidget {
     required this.bonusText,
     required this.onPurchase,
     this.isCappedByLevel = false,
-    this.nextRequiredLevel, // Added
+    this.nextRequiredLevel,
+    this.isMaxLevel = false, // Added parameter
   });
 
   @override
   Widget build(BuildContext context) {
-    final isMaxLevel = currentLevel >= maxLevel;
+    
     final canAfford = currentEsencia >= cost && !isMaxLevel;
 
     return Container(

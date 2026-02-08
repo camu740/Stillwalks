@@ -365,35 +365,67 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                         
+                        // Use maxLevel from definition.
+                        const maxLevel = 12; // UpgradeType.energyStorage.maxLevel is not const, but we know it's 12. 
+                        // Actually, access it dynamically if possible, or use the type's property.
+                        // Since we are in a build method, we can access the enum.
+                        final totalLevels = UpgradeType.energyStorage.maxLevel;
+                        
                         final isVisible = esenciaService.playerState.explorerLevel >= 4 && 
-                                          storageUpgrade.currentLevel >= 1;
+                                          esenciaService.hasUpgrade(UpgradeType.energyStorage);
 
                         if (isVisible) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.blueAccent.withAlpha(25),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.blueAccent.withAlpha(77)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.blueAccent,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          // Calculate width interaction
+                          final currentLevel = storageUpgrade.currentLevel;
+                          // Ratio: Level 1 should be small, Max Level should be full width.
+                          // But we start counting 'visual progress' from level 1.
+                          // So: (current - 1) / (total - 1)?
+                          // Level 1: 0/11 = 0%.
+                          // Level 12: 11/11 = 100%.
+                          // Base width: 40% of max.
+                          // visualProgress: 0.0 to 1.0.
+                          final double visualProgress = (currentLevel - 1) / (totalLevels - 1);
+                          final double clampedProgress = visualProgress.clamp(0.0, 1.0);
+
+                          return LayoutBuilder(
+                            builder: (context, constraints) {
+                              // Match bottom padding: 24 horizontal * 2 = 48.
+                              final maxAvailableWidth = constraints.maxWidth - 48;
+                              
+                              // Start at 50% width diff for Level 1, grow to 100%.
+                              final widthFactor = 0.5 + (0.5 * clampedProgress);
+                              final targetWidth = maxAvailableWidth * widthFactor;
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                child: Container(
+                                  width: targetWidth,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blueAccent.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: Colors.blueAccent.withAlpha(77)),
                                   ),
-                                ],
-                              ),
-                            ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.blueAccent,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.visible,
+                                        softWrap: false,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
                           );
                         } else {
                           return const SizedBox.shrink();

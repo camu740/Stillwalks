@@ -54,18 +54,12 @@ class EsenciaService extends ChangeNotifier {
     _upgrades = upgradesData.map((data) => Upgrade.fromJson(data)).toList();
 
     // Verificación de integridad: Asegurar que existe Energy Storage
+    // REMOVED: We want Energy Storage to be initially UNOWNED (not in list)
+    /*
     if (!_upgrades.any((u) => u.type == UpgradeType.energyStorage)) {
-      final storageUpgrade = Upgrade(
-        id: 'upgrade_energy_storage',
-        type: UpgradeType.energyStorage,
-        currentLevel: 0,
-        name: 'Almacén de Energía',
-        description: 'Permite acumular pasos para orbes futuros.',
-      );
-      await _db.insertUpgrade(storageUpgrade.toJson());
-      _upgrades.add(storageUpgrade);
-      debugPrint('🔋 EsenciaService: Upgrade "Energy Storage" inserted because it was missing.');
+       // ... removed logic ...
     }
+    */
 
     // Recalcular multiplicador basado en mejoras
     _updateMultipliers();
@@ -219,8 +213,77 @@ class EsenciaService extends ChangeNotifier {
 
     return true;
   }
+  /// Verifica si el usuario posee una mejora
+  bool hasUpgrade(UpgradeType type) {
+    return _upgrades.any((u) => u.type == type);
+  }
 
-  /// Compra una mejora
+  /// Obtiene una mejora por tipo (si existe)
+  Upgrade? getUpgrade(UpgradeType type) {
+    try {
+      return _upgrades.firstWhere((u) => u.type == type);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Compra o desbloquea una mejora por tipo
+  Future<bool> purchaseUpgradeByType(UpgradeType type) async {
+    if (hasUpgrade(type)) {
+      final upgrade = getUpgrade(type)!;
+      return purchaseUpgrade(upgrade.id);
+    }
+
+    // Desbloquear (Nivel 0)
+    // Costo base (index 0)
+    final cost = type.costs[0]; // Costo de desbloqueo (500 para Storage)
+
+    // Verificar si hay suficiente Esencia
+    if (_playerState.totalEsencia < cost) {
+      return false;
+    }
+
+    // Definir ID y nombre según tipo
+    String id = '';
+    String name = '';
+    String description = '';
+
+    if (type == UpgradeType.energyStorage) {
+      id = 'upgrade_energy_storage';
+      name = 'Almacén de Energía';
+      description = 'Permite acumular pasos para orbes futuros.';
+    } else if (type == UpgradeType.idleMultiplier) {
+      id = 'upgrade_idle_multiplier';
+      name = 'Recolector de Esencia';
+      description = 'Aumenta la generación pasiva.';
+    }
+
+    final newUpgrade = Upgrade(
+      id: id,
+      type: type,
+      currentLevel: 0, // Inicia en Nivel 0 (Desbloqueado)
+      name: name,
+      description: description,
+    );
+
+    // Gastar Esencia
+    await spendEsencia(cost);
+
+    // Guardar en DB y lista
+    await _db.insertUpgrade(newUpgrade.toJson());
+    _upgrades.add(newUpgrade);
+
+    // Recalcular multiplicadores
+    _updateMultipliers();
+    
+    // Add XP for unlocking
+    addXp(10);
+
+    notifyListeners();
+    return true;
+  }
+
+  /// Compra una mejora (incrementa nivel)
   Future<bool> purchaseUpgrade(String upgradeId) async {
     final upgradeIndex = _upgrades.indexWhere((u) => u.id == upgradeId);
     if (upgradeIndex == -1) return false;
@@ -291,22 +354,16 @@ class EsenciaService extends ChangeNotifier {
 
   /// Capacidad máxima del Almacén de Energía
   int get storageCapacity {
-    final storageUpgrade = _upgrades.firstWhere(
-      (u) => u.type == UpgradeType.energyStorage,
-      orElse: () => Upgrade(
-        id: 'upgrade_energy_storage',
-        type: UpgradeType.energyStorage,
-        currentLevel: 0,
-        name: 'Almacén de Energía',
-        description: '',
-      ),
-    );
+    if (!hasUpgrade(UpgradeType.energyStorage)) return 0;
+
+    final storageUpgrade = getUpgrade(UpgradeType.energyStorage)!;
     
-    if (storageUpgrade.currentLevel == 0) return 0;
-    
-    // Level 1: 100 (Unlocks storage)
-    // Level 2+: 100 + ((level - 1) * 200)
-    return 100 + ((storageUpgrade.currentLevel - 1) * 200);
+    // Level 0 (Just unlocked): 100
+    // Level 1+: 100 + (level * 200) --> Wait, at L1 we want 300.
+    // Formula: 100 + (level * 200).
+    // L0: 100 + 0 = 100.
+    // L1: 100 + 200 = 300.
+    return 100 + (storageUpgrade.currentLevel * 200);
   }
 
   /// Añade pasos al almacén (respetando el límite)
