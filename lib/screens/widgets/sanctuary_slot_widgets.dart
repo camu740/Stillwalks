@@ -58,6 +58,7 @@ class SanctuarySlot extends StatelessWidget {
     }
     
     return Container(
+      constraints: const BoxConstraints(minHeight: 160),
       key: containerKey,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
@@ -70,8 +71,11 @@ class SanctuarySlot extends StatelessWidget {
       ),
       child: Stack(
         children: [
+          // Dummy child to give the Stack an intrinsic size matching the container
+          const SizedBox(height: 160, width: double.infinity),
           // Área clickeable principal
-          InkWell(
+          Positioned.fill(
+            child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: hasOrbe && !isReadyToChannel
                 ? null // Deshabilitar si está canalizando
@@ -131,10 +135,13 @@ class SanctuarySlot extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 60), // Espacio fijo para alineación consistente (header ~30px + gap)
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (hasOrbe && !isReadyToChannel)
                        Column(
@@ -154,7 +161,7 @@ class SanctuarySlot extends StatelessWidget {
                           color: isReadyToChannel ? Colors.greenAccent : Colors.purpleAccent,
                         ),
                       const SizedBox(width: 8),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           AppLocalizations.of(context)!.getSanctuaryName(sanctuary.id, sanctuary.typeId, sanctuary.name),
                           style: const TextStyle(
@@ -169,7 +176,7 @@ class SanctuarySlot extends StatelessWidget {
                   const SizedBox(height: 8),
                   if (hasOrbe)
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           isReadyToChannel 
@@ -200,7 +207,7 @@ class SanctuarySlot extends StatelessWidget {
                     )
                   else
                     Text(
-                      AppLocalizations.of(context)!.emptySlot,
+                      AppLocalizations.of(context)!.noOrbAssigned,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white54,
@@ -247,6 +254,7 @@ class SanctuarySlot extends StatelessWidget {
                 ],
               ),
             ),
+            ),
           ),
           
           // Botón de información en la esquina superior derecha
@@ -262,10 +270,10 @@ class SanctuarySlot extends StatelessWidget {
             ),
           ),
           
-          // Badge de nivel en la esquina inferior derecha
+          // Badge de nivel en la esquina SUPERIOR IZQUIERDA
           Positioned(
-            bottom: 8,
-            right: 8,
+            top: 16,
+            left: 16,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -547,6 +555,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
     }
 
     return Container(
+      constraints: const BoxConstraints(minHeight: 160),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
@@ -560,207 +569,234 @@ class TemporarySanctuarySlot extends StatelessWidget {
       ),
       child: Stack(
         children: [
+          // Dummy child to give the Stack an intrinsic size matching the container's minHeight
+          const SizedBox(height: 160, width: double.infinity),
           // Área clickeable principal
-          InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: (hasTemp && orbe != null && !isReadyToChannel)
-                ? null // Deshabilitar si está canalizando
-                : () async {
-                    if (hasTemp && isReadyToChannel && orbe != null) {
-                      // Canalizar el orbe
-                      final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                      final instance = await orbeService.channelOrbe(orbe.id);
-                      
-                      // Verificar si hay recompensa de Simbiosis
-                      final symbiosisReward = orbeService.lastSymbiosisReward;
-                      if (symbiosisReward > 0 && context.mounted) {
-                        await esenciaService.addEsencia(symbiosisReward);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(AppLocalizations.of(context)!.symbiosisReward(symbiosisReward.toStringAsFixed(0))),
-                            backgroundColor: Colors.cyanAccent.withOpacity(0.8),
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                        orbeService.clearSymbiosisReward();
-                      }
-                      
-                      if (instance != null && context.mounted) {
-                        final species = await orbeService.getSpeciesById(instance.speciesId);
-                        final isNew = await orbeService.isNewDiscovery(instance.speciesId);
-                        if (species != null && context.mounted) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ChannelingScreen(
-                                species: species,
-                                instance: instance,
-                                isNew: isNew,
-                              ),
+          Positioned.fill(
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: (hasTemp && orbe != null && !isReadyToChannel)
+                  ? null // Deshabilitar si está canalizando
+                  : () async {
+                      if (hasTemp && isReadyToChannel && orbe != null) {
+                        // Canalizar el orbe
+                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                        final instance = await orbeService.channelOrbe(orbe.id);
+                        
+                        // Verificar si hay recompensa de Simbiosis
+                        final symbiosisReward = orbeService.lastSymbiosisReward;
+                        if (symbiosisReward > 0 && context.mounted) {
+                          await esenciaService.addEsencia(symbiosisReward);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.symbiosisReward(symbiosisReward.toStringAsFixed(0))),
+                              backgroundColor: Colors.cyanAccent.withOpacity(0.8),
+                              duration: const Duration(seconds: 3),
                             ),
                           );
+                          orbeService.clearSymbiosisReward();
                         }
-                      }
-                    } else if (hasTemp && tempSanctuary.orbeId == null) {
-                      // Si hay temporal asignado pero sin orbe, abrir inventario para asignar orbe
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => InventoryScreen(
-                            isSelectionMode: true,
-                            sanctuaryId: tempSanctuary.id,
-                          ),
-                        ),
-                      );
-                    } else if (hasTemporaryItems) {
-                      // Si no hay temporal asignado pero sí hay items en inventario, abrir inventario en modo selección de santuarios
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const InventoryScreen(
-                            isSanctuarySelectionMode: true,
-                          ),
-                        ),
-                      );
-                    } else {
-                      // Si no hay temporales ni en slot ni en inventario, ir a la tienda (pestaña santuarios)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ShopScreen(initialTab: 1),
-                        ),
-                      );
-                    }
-                  },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      if (hasTemp && orbe != null && !isReadyToChannel)
-                       Column(
-                         mainAxisSize: MainAxisSize.min,
-                         children: [
-                           Icon(
-                            tempSanctuary.typeId != null 
-                                ? InventoryItemTypes.getIcon(tempSanctuary.typeId!) 
-                                : Icons.timer,
-                            size: 20,
-                            color: Colors.cyanAccent,
-                           ),
-                         ],
-                       )
-                      else
-                        Icon(
-                          isReadyToChannel 
-                              ? Icons.check_circle
-                              : hasTemp 
-                                  ? (tempSanctuary.typeId != null 
-                                      ? InventoryItemTypes.getIcon(tempSanctuary.typeId!) 
-                                      : Icons.timer)
-                                  : (hasTemporaryItems ? Icons.add_circle_outline : Icons.shopping_bag_outlined),
-                          size: hasTemp ? 20 : 24,
-                          color: isReadyToChannel
-                              ? Colors.greenAccent
-                              : hasTemp 
-                                  ? Colors.cyanAccent 
-                                  : (hasTemporaryItems ? Colors.greenAccent : Colors.amber),
-                        ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                            child: Text(
-                            hasTemp 
-                                ? (tempSanctuary.typeId != null 
-                                    ? AppLocalizations.of(context)!.getSanctuaryName(tempSanctuary.id, tempSanctuary.typeId!, tempSanctuary.name)
-                                    : tempSanctuary.name)
-                                : (hasTemporaryItems ? AppLocalizations.of(context)!.activateSanctuary : AppLocalizations.of(context)!.buy),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: hasTemp ? Colors.white : (hasTemporaryItems ? Colors.white70 : Colors.amber),
+                        
+                        if (instance != null && context.mounted) {
+                          final species = await orbeService.getSpeciesById(instance.speciesId);
+                          final isNew = await orbeService.isNewDiscovery(instance.speciesId);
+                          if (species != null && context.mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChannelingScreen(
+                                  species: species,
+                                  instance: instance,
+                                  isNew: isNew,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      } else if (hasTemp && tempSanctuary.orbeId == null) {
+                        // Si hay temporal asignado pero sin orbe, abrir inventario para asignar orbe
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InventoryScreen(
+                              isSelectionMode: true,
+                              sanctuaryId: tempSanctuary.id,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
+                        );
+                      } else if (hasTemporaryItems) {
+                        // Si no hay temporal asignado pero sí hay items en inventario, abrir inventario en modo selección de santuarios
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const InventoryScreen(
+                              isSanctuarySelectionMode: true,
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Si no hay temporales ni en slot ni en inventario, ir a la tienda (pestaña santuarios)
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ShopScreen(initialTab: 1),
+                          ),
+                        );
+                      }
+                    },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                // Alineación superior si hay santuario activo (para igualar al primordial), centrada si está vacío (buy/activate)
+                  mainAxisAlignment: hasTemp ? MainAxisAlignment.start : MainAxisAlignment.center,
+                  children: [
+                    if (hasTemp)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 60),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Icon Logic
+                              Icon(
+                                (tempSanctuary?.typeId != null)
+                                    ? InventoryItemTypes.getIcon(tempSanctuary!.typeId!) 
+                                    : Icons.timer,
+                                size: 20,
+                                color: Colors.cyanAccent,
+                              ),
+                              const SizedBox(width: 8),
+                              // Name Logic
+                              Flexible(
+                                child: Text(
+                                  (tempSanctuary?.typeId != null) 
+                                      ? AppLocalizations.of(context)!.getSanctuaryName(tempSanctuary!.id, tempSanctuary.typeId!, tempSanctuary.name)
+                                      : tempSanctuary!.name,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ], 
+                          ),
+                          const SizedBox(height: 8),
+                          // Progress / Status Logic
+                          if (orbe != null) ...[
+                            Text(
+                              isReadyToChannel 
+                                  ? AppLocalizations.of(context)!.channelNow 
+                                  : tempSanctuary!.typeId == InventoryItemTypes.tempSanctuaryQuietude
+                                      ? AppLocalizations.of(context)!.progressEssence(currentSteps, requiredSteps)
+                                      : AppLocalizations.of(context)!.progressSteps(currentSteps, requiredSteps),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
+                                fontWeight: isReadyToChannel ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                            if (!isReadyToChannel)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: LinearProgressIndicator(
+                                    value: progress,
+                                    backgroundColor: Colors.white10,
+                                    color: Colors.cyanAccent,
+                                    minHeight: 4,
+                                  ),
+                                ),
+                              ),
+                          ] else ...[
+                            Text(
+                              AppLocalizations.of(context)!.noOrbAssigned,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          ],
+                        ],
+                      )
+                    else
+                      // Empty State: Buy or Activate
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            hasTemporaryItems ? Icons.add_circle_outline : Icons.shopping_bag_outlined,
+                            size: 24,
+                            color: hasTemporaryItems ? Colors.greenAccent : Colors.amber,
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  hasTemporaryItems ? AppLocalizations.of(context)!.activateSanctuary : AppLocalizations.of(context)!.buy,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: hasTemporaryItems ? Colors.white70 : Colors.amber,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  hasTemporaryItems 
+                                      ? AppLocalizations.of(context)!.tapToSelectSanctuary 
+                                      : AppLocalizations.of(context)!.noSanctuariesInBag,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: hasTemporaryItems ? Colors.white54 : Colors.amber.withOpacity(0.7),
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (hasTemp && orbe != null)
-                    Text(
-                      isReadyToChannel 
-                          ? AppLocalizations.of(context)!.channelNow 
-                          : tempSanctuary.typeId == InventoryItemTypes.tempSanctuaryQuietude
-                              ? AppLocalizations.of(context)!.progressEssence(currentSteps, requiredSteps)
-                              : AppLocalizations.of(context)!.progressSteps(currentSteps, requiredSteps),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isReadyToChannel ? Colors.greenAccent : Colors.white54,
-                        fontWeight: isReadyToChannel ? FontWeight.bold : FontWeight.normal,
+                    if (hasTemp && orbe != null && !isReadyToChannel && storedSteps > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: SizedBox(
+                          height: 28,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent.withOpacity(0.3),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            icon: const Icon(Icons.battery_charging_full, size: 14, color: Colors.blueAccent),
+                            label: Text(
+                              '${AppLocalizations.of(context)!.useStorage} ($storedSteps)',
+                              style: const TextStyle(fontSize: 11, color: Colors.white),
+                            ),
+                            onPressed: () => _showStorageChannelDialog(context, tempSanctuary!.orbeId!, requiredSteps - currentSteps, storedSteps, esenciaService),
+                          ),
+                        ),
                       ),
-                    ),
-                    if (hasTemp && orbe != null && !isReadyToChannel)
-                       Padding(
-                         padding: const EdgeInsets.only(top: 4.0),
-                         child: ClipRRect(
-                           borderRadius: BorderRadius.circular(2),
-                           child: LinearProgressIndicator(
-                             value: progress,
-                             backgroundColor: Colors.white10,
-                             color: Colors.cyanAccent,
-                             minHeight: 4,
-                           ),
-                         ),
-                       )
-                    else if (hasTemp)
-                    Text(
-                      AppLocalizations.of(context)!.emptySlot,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.white54,
-                      ),
-                    )
-                  else
-                    Text(
-                      hasTemporaryItems 
-                          ? AppLocalizations.of(context)!.tapToSelectSanctuary 
-                          : AppLocalizations.of(context)!.noSanctuariesInBag,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: hasTemporaryItems ? Colors.white54 : Colors.amber.withOpacity(0.7),
-                      ),
-                    ),
-                  if (hasTemp && orbe != null && !isReadyToChannel && storedSteps > 0)
-                   Padding(
-                     padding: const EdgeInsets.only(top: 8.0),
-                     child: SizedBox(
-                       height: 28,
-                       child: ElevatedButton.icon(
-                         style: ElevatedButton.styleFrom(
-                           backgroundColor: Colors.blueAccent.withOpacity(0.3),
-                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                         ),
-                         icon: const Icon(Icons.battery_charging_full, size: 14, color: Colors.blueAccent),
-                           label: Text(
-                             '${AppLocalizations.of(context)!.useStorage} ($storedSteps)',
-                             style: const TextStyle(fontSize: 11, color: Colors.white),
-                           ),
-                         onPressed: () => _showStorageChannelDialog(context, tempSanctuary!.orbeId!, requiredSteps - currentSteps, storedSteps, esenciaService),
-                       ),
-                     ),
-                   ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
           
-          // Badge de usos en la esquina inferior derecha
+          // Badge de usos en la esquina SUPERIOR IZQUIERDA
           if (hasTemp)
             Positioned(
-              bottom: 8,
-              right: 8,
+              top: 16,
+              left: 16,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(

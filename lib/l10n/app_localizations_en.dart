@@ -159,6 +159,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shop => 'Shop';
 
   @override
+  String get essenceCollectorLabel => 'Essence Collector';
+
+  @override
   String get freeSlot => 'Free slot';
 
   @override
@@ -328,7 +331,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get perHour => '/ hour';
 
   @override
-  String get level => 'Lv.';
+  String get level => 'LVL';
 
   @override
   String get orbsReady => 'Orb ready to channel!';
@@ -466,6 +469,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noUnassignedOrbs => 'No unassigned orbs';
 
   @override
+  String get noOrbAssigned => 'No orb assigned';
+
+  @override
   String get unknownOrb => 'Unknown Orb';
 
   @override
@@ -574,7 +580,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orbsAvailableForPurchase => 'Orbs available for purchase';
 
   @override
-  String get levelAbbr => 'Lv.';
+  String get levelAbbr => 'LVL';
 
   @override
   String get emptySlot => 'Empty';
@@ -633,7 +639,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activateSanctuary => 'Activate';
 
   @override
-  String get tapToSelectSanctuary => 'Tap to select sanctuary';
+  String get tapToSelectSanctuary => 'Select Sanctuaries';
 
   @override
   String emptyUses(int count) {

@@ -76,6 +76,7 @@
   "sanctuary": "Santuario",
   "collection": "Colección",
   "shop": "Tienda",
+  "essenceCollectorLabel": "Recolector de Esencia",
   
   "freeSlot": "Ranura libre",
   "activeOrb": "Orbe activo",
@@ -237,6 +238,7 @@
   "quantity": "Cantidad",
   
   "noUnassignedOrbs": "No tienes orbes sin asignar",
+  "noOrbAssigned": "Sin orbe asignado",
   "unknownOrb": "Orbe Desconocido",
   "stepsRequired": "{count} pasos requeridos",
   "@stepsRequired": {
@@ -333,7 +335,7 @@
   "improveSpeedHint": "Mejora la velocidad de canalización en la tienda para reducir los pasos necesarios.",
   
   "activateSanctuary": "Activar",
-  "tapToSelectSanctuary": "Toca para seleccionar santuario",
+  "tapToSelectSanctuary": "Seleccionar santuarios",
   "buy": "Comprar",
   "emptyUses": "Vacío ({count} usos)",
   "@emptyUses": {

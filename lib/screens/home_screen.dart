@@ -136,122 +136,121 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  // Sección superior: Esencia
-                  Expanded(
-                    flex: 2,
-                    child: Stack(
-                      children: [
-                        // Background / Centered Content
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context)!.essence,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              
-                              // Essence Icon + Number (Centered) - Removed the large duplicate number
-                              Row(
+                  // Sección superior: Panel Unificado (Esencia + Nivel)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Left Side: Essence Collector Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 32),
-                                  const SizedBox(width: 8),
                                   Text(
-                                    esenciaService.playerState.totalEsencia.toStringAsFixed(0),
-                                    style: const TextStyle(
-                                      fontSize: 48,
+                                    AppLocalizations.of(context)!.essenceCollectorLabel.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
-                                      ],
+                                      color: Colors.white.withOpacity(0.6),
+                                      letterSpacing: 0.5,
                                     ),
                                   ),
-                                ],
-                              ),
-                              
-                              const SizedBox(height: 12),
-                              
-                              // Hourly Rate and Collector Level Tag
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Hourly Rate
+                                  const SizedBox(height: 4),
                                   Row(
-                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.access_time, size: 16, color: Colors.white70),
-                                      const SizedBox(width: 4),
+                                      const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 24),
+                                      const SizedBox(width: 8),
                                       Text(
-                                        '+${esenciaPerHour.toStringAsFixed(0)}/h',
-                                        style: const TextStyle(fontSize: 16, color: Colors.white70),
+                                        esenciaService.playerState.totalEsencia.toStringAsFixed(0),
+                                        style: const TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          shadows: [
+                                            Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                  
-                                  const SizedBox(width: 8),
-
-                                  // Collector Level Tag (Styled like Sanctuary Level)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.withOpacity(0.2), // Matching Essence Theme
-                                      borderRadius: BorderRadius.circular(4), // Slightly rounded like a tag
-                                      border: Border.all(color: Colors.amber.withOpacity(0.5)),
-                                    ),
-                                    child: Text(
-                                      'LVL $collectorLevel', // Using LVL directly for now or AppLocalizations if I was sure, keeping it simple
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.amber,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.access_time, size: 14, color: Colors.white70),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '+${esenciaPerHour.toStringAsFixed(0)}/h',
+                                        style: const TextStyle(fontSize: 14, color: Colors.white70),
                                       ),
-                                    ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                                        ),
+                                        child: Text(
+                                          '${AppLocalizations.of(context)!.levelAbbr} $collectorLevel',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.amber,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-
-                        // Player Level Indicator (Top Right)
-                        Positioned(
-                          top: 16,
-                          right: 16,
-                          child: Column(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 48,
-                                    height: 48,
-                                    child: CircularProgressIndicator(
-                                      value: nextLevelXp != null 
-                                        ? esenciaService.playerState.currentXp / nextLevelXp 
-                                        : 1.0,
-                                      backgroundColor: Colors.white10,
-                                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
-                                      strokeWidth: 4,
+                            ),
+                            
+                            // Divider
+                            Container(
+                              width: 1,
+                              color: Colors.white.withOpacity(0.2),
+                              margin: const EdgeInsets.symmetric(horizontal: 24),
+                            ),
+                            
+                            // Right Side: Player Level Info
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 48,
+                                      height: 48,
+                                      child: CircularProgressIndicator(
+                                        value: nextLevelXp != null 
+                                          ? esenciaService.playerState.currentXp / nextLevelXp 
+                                          : 1.0,
+                                        backgroundColor: Colors.white10,
+                                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                                        strokeWidth: 4,
+                                      ),
                                     ),
-                                  ),
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black26,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
+                                    Text(
                                       '${esenciaService.playerState.explorerLevel}',
                                       style: const TextStyle(
                                         color: Colors.amber,
@@ -259,223 +258,199 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontSize: 18,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
-                                style: const TextStyle(
-                                  color: Colors.white60,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
+                               const SizedBox(height: 8),
+                                Text(
+                                  '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Espacio flexible superior
+                  const Spacer(),
+
+                  // Sección central: Santuarios y Almacén
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                     child: Column(
+                       mainAxisSize: MainAxisSize.min,
+                       children: [
+                         LayoutBuilder(
+                          builder: (context, constraints) {
+                             // Use ProgressionService to check unlock status instead of hardcoding
+                             final isTempUnlocked = progressionService.isFeatureUnlocked(
+                               esenciaService.playerState.explorerLevel, 
+                               ProgressionFeature.temporarySanctuarySlot
+                             );
+                             
+                             if (!isTempUnlocked) {
+                               // Locked: Centered Primordial Sanctuary
+                               return Center(
+                                 child: SizedBox(
+                                   width: constraints.maxWidth * 0.6, // Slightly wider when single
+                                   child: SanctuarySlot(
+                                    containerKey: _sanctuarySlotKey,
+                                    sanctuary: orbeService.sanctuaries.firstWhere(
+                                      (s) => !s.isTemporary,
+                                      orElse: () => orbeService.sanctuaries.first,
+                                    ),
+                                    orbeService: orbeService,
+                                   ),
+                                 ),
+                               );
+                             }
+                             
+                             // Unlocked: Side by Side
+                             return Row(
+                              children: [
+                                // Santuario Primordial (izquierda)
+                                Expanded(
+                                  child: SanctuarySlot(
+                                    containerKey: _sanctuarySlotKey,
+                                    sanctuary: orbeService.sanctuaries.firstWhere(
+                                      (s) => !s.isTemporary,
+                                      orElse: () => orbeService.sanctuaries.first,
+                                    ),
+                                    orbeService: orbeService,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Santuario Temporal (derecha)
+                                Expanded(
+                                  child: TemporarySanctuarySlot(
+                                    orbeService: orbeService,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
                         ),
 
-                        // App Title (Top Left) - Replaces AppBar
-                        Positioned(
-                          top: 16,
-                          left: 16,
-                          child: Text(
-                            AppLocalizations.of(context)!.appTitle,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
+                        // Almacén de Energía (Debajo de santuarios)
+                        Builder(
+                          builder: (context) {
+                            final storageUpgrade = esenciaService.upgrades.firstWhere(
+                              (u) => u.type == UpgradeType.energyStorage,
+                              orElse: () => Upgrade(
+                                id: 'temp_storage', 
+                                type: UpgradeType.energyStorage, 
+                                currentLevel: 0, 
+                                name: '', 
+                                description: ''
+                              ),
+                            );
+                            
+                            const totalLevels = 12; // UpgradeType.energyStorage.maxLevel
+                            
+                            final isVisible = esenciaService.playerState.explorerLevel >= 4 && 
+                                              esenciaService.hasUpgrade(UpgradeType.energyStorage);
+
+                            if (isVisible) {
+                              final currentLevel = storageUpgrade.currentLevel;
+                              final double visualProgress = (currentLevel - 1) / (totalLevels - 1);
+                              final double clampedProgress = visualProgress.clamp(0.0, 1.0);
+
+                              return LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final maxAvailableWidth = constraints.maxWidth; // Full width of parent
+                                  
+                                  final widthFactor = 0.5 + (0.5 * clampedProgress);
+                                  final targetWidth = maxAvailableWidth * widthFactor;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 24.0), // Space between sanctuaries and storage
+                                    child: Container(
+                                      width: targetWidth,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blueAccent.withAlpha(25),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: Colors.blueAccent.withAlpha(77)),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.blueAccent,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            overflow: TextOverflow.visible,
+                                            softWrap: false,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          }
                         ),
                       ],
                     ),
                   ),
-
-                  // Sección media: Santuarios (Condicional)
-                  Expanded(
-                    flex: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                       child: LayoutBuilder(
-                        builder: (context, constraints) {
-                           // Use ProgressionService to check unlock status instead of hardcoding
-                           final isTempUnlocked = progressionService.isFeatureUnlocked(
-                             esenciaService.playerState.explorerLevel, 
-                             ProgressionFeature.temporarySanctuarySlot
-                           );
-                           
-                           if (!isTempUnlocked) {
-                             // Locked: Centered Primordial Sanctuary
-                             return Center(
-                               child: SizedBox(
-                                 width: constraints.maxWidth * 0.6, // Slightly wider when single
-                                 child: SanctuarySlot(
-                                  containerKey: _sanctuarySlotKey,
-                                  sanctuary: orbeService.sanctuaries.firstWhere(
-                                    (s) => !s.isTemporary,
-                                    orElse: () => orbeService.sanctuaries.first,
-                                  ),
-                                  orbeService: orbeService,
-                                 ),
-                               ),
-                             );
-                           }
-                           
-                           // Unlocked: Side by Side
-                           return Row(
-                            children: [
-                              // Santuario Primordial (izquierda)
-                              Expanded(
-                                child: SanctuarySlot(
-                                  containerKey: _sanctuarySlotKey,
-                                  sanctuary: orbeService.sanctuaries.firstWhere(
-                                    (s) => !s.isTemporary,
-                                    orElse: () => orbeService.sanctuaries.first,
-                                  ),
-                                  orbeService: orbeService,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Santuario Temporal (derecha)
-                              Expanded(
-                                child: TemporarySanctuarySlot(
-                                  orbeService: orbeService,
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                      ),
-                    ),
-                  ),
-
-                  // Almacén de Energía (Debajo de santuarios)
-                  // Visible only if Level >= 4 AND Storage Upgrade purchased (Level >= 1)
-                  Builder(
-                    builder: (context) {
-                       final storageUpgrade = esenciaService.upgrades.firstWhere(
-                          (u) => u.type == UpgradeType.energyStorage,
-                          orElse: () => Upgrade(
-                            id: 'temp_storage', 
-                            type: UpgradeType.energyStorage, 
-                            currentLevel: 0, 
-                            name: '', 
-                            description: ''
-                          ),
-                        );
-                        
-                        // Use maxLevel from definition.
-                        const maxLevel = 12; // UpgradeType.energyStorage.maxLevel is not const, but we know it's 12. 
-                        // Actually, access it dynamically if possible, or use the type's property.
-                        // Since we are in a build method, we can access the enum.
-                        final totalLevels = UpgradeType.energyStorage.maxLevel;
-                        
-                        final isVisible = esenciaService.playerState.explorerLevel >= 4 && 
-                                          esenciaService.hasUpgrade(UpgradeType.energyStorage);
-
-                        if (isVisible) {
-                          // Calculate width interaction
-                          final currentLevel = storageUpgrade.currentLevel;
-                          // Ratio: Level 1 should be small, Max Level should be full width.
-                          // But we start counting 'visual progress' from level 1.
-                          // So: (current - 1) / (total - 1)?
-                          // Level 1: 0/11 = 0%.
-                          // Level 12: 11/11 = 100%.
-                          // Base width: 40% of max.
-                          // visualProgress: 0.0 to 1.0.
-                          final double visualProgress = (currentLevel - 1) / (totalLevels - 1);
-                          final double clampedProgress = visualProgress.clamp(0.0, 1.0);
-
-                          return LayoutBuilder(
-                            builder: (context, constraints) {
-                              // Match bottom padding: 24 horizontal * 2 = 48.
-                              final maxAvailableWidth = constraints.maxWidth - 48;
-                              
-                              // Start at 50% width diff for Level 1, grow to 100%.
-                              final widthFactor = 0.5 + (0.5 * clampedProgress);
-                              final targetWidth = maxAvailableWidth * widthFactor;
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                child: Container(
-                                  width: targetWidth,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blueAccent.withAlpha(25),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: Colors.blueAccent.withAlpha(77)),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.blueAccent,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        overflow: TextOverflow.visible,
-                                        softWrap: false,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                    }
-                  ),
-
+    
+                  // Espacio flexible inferior
+                  const Spacer(),
+    
                   // Sección inferior: Botones de navegación
-                  Expanded(
-                    flex: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          _NavButton(
-                            key: _shopButtonKey,
-                            icon: Icons.shopping_bag,
-                            label: AppLocalizations.of(context)!.shop,
-                            onPressed: () {
-                              // Allow navigation only if permitted
-                               final tutorialService = Provider.of<TutorialService>(context, listen: false);
-                               if (tutorialService.isActive && !tutorialService.allowShopAccess) {
-                                 return;
-                               }
-                               
-                               if (tutorialService.currentStep == TutorialStep.shop) {
-                                 tutorialService.setTarget(null); // Clear highlight
-                               }
-                               
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          _NavButton(
-                            icon: Icons.book,
-                            label: AppLocalizations.of(context)!.explorerJournal,
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          _NavButton(
-                            icon: Icons.settings,
-                            label: AppLocalizations.of(context)!.settings,
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-                            },
-                          ),
-                        ],
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        _NavButton(
+                          key: _shopButtonKey,
+                          icon: Icons.shopping_bag,
+                          label: AppLocalizations.of(context)!.shop,
+                          onPressed: () {
+                            // Allow navigation only if permitted
+                            final tutorialService = Provider.of<TutorialService>(context, listen: false);
+                            if (tutorialService.isActive && !tutorialService.allowShopAccess) {
+                              return;
+                            }
+                            
+                            if (tutorialService.currentStep == TutorialStep.shop) {
+                              tutorialService.setTarget(null); // Clear highlight
+                            }
+                            
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _NavButton(
+                          icon: Icons.book,
+                          label: AppLocalizations.of(context)!.explorerJournal,
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _NavButton(
+                          icon: Icons.settings,
+                          label: AppLocalizations.of(context)!.settings,
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -572,13 +547,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 )
               : null,
-          ),
-          
-
-        ],
-      ),
-      ),
-    );
+        ),
+      ],
+    ),
+  ),
+);
   }
 
 

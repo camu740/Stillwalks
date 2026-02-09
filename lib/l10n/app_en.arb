@@ -76,6 +76,7 @@
   "sanctuary": "Sanctuary",
   "collection": "Collection",
   "shop": "Shop",
+  "essenceCollectorLabel": "Essence Collector",
   
   "freeSlot": "Free slot",
   "activeOrb": "Active orb",
@@ -160,7 +161,7 @@
   "maxLevel": "Max level",
   
   "perHour": "/ hour",
-  "level": "Lv.",
+  "level": "LVL",
   "orbsReady": "Orb ready to channel!",
   "noActiveOrbs": "Active orbs",
   "idleProduction": "Idle production",
@@ -237,6 +238,7 @@
   "quantity": "Quantity",
   
   "noUnassignedOrbs": "No unassigned orbs",
+  "noOrbAssigned": "No orb assigned",
   "unknownOrb": "Unknown Orb",
   "stepsRequired": "{count} steps required",
   "@stepsRequired": {
@@ -296,7 +298,7 @@
   "noActiveOrbsStatus": "No active orbs",
   "orbsAvailableForPurchase": "Orbs available for purchase",
   
-  "levelAbbr": "Lv.",
+  "levelAbbr": "LVL",
   "channelNow": "Channel now!",
   "emptySlot": "Empty",
   "useStorage": "Use Storage",
@@ -316,7 +318,7 @@
   "improveSpeedHint": "Upgrade channeling speed in the shop to reduce required steps.",
   
   "activateSanctuary": "Activate",
-  "tapToSelectSanctuary": "Tap to select sanctuary",
+  "tapToSelectSanctuary": "Select Sanctuaries",
   "buy": "Buy",
   "emptyUses": "Empty ({count} uses)",
   "tapToActivate": "Tap to activate",

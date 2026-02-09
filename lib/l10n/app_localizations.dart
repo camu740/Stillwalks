@@ -386,6 +386,12 @@ abstract class AppLocalizations {
   /// **'Tienda'**
   String get shop;
 
+  /// No description provided for @essenceCollectorLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Recolector de Esencia'**
+  String get essenceCollectorLabel;
+
   /// No description provided for @freeSlot.
   ///
   /// In es, this message translates to:
@@ -962,6 +968,12 @@ abstract class AppLocalizations {
   /// **'No tienes orbes sin asignar'**
   String get noUnassignedOrbs;
 
+  /// No description provided for @noOrbAssigned.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin orbe asignado'**
+  String get noOrbAssigned;
+
   /// No description provided for @unknownOrb.
   ///
   /// In es, this message translates to:
@@ -1259,7 +1271,7 @@ abstract class AppLocalizations {
   /// No description provided for @tapToSelectSanctuary.
   ///
   /// In es, this message translates to:
-  /// **'Toca para seleccionar santuario'**
+  /// **'Seleccionar santuarios'**
   String get tapToSelectSanctuary;
 
   /// No description provided for @emptyUses.
