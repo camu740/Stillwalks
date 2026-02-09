@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Escuchar cambios en los servicios
     final esenciaService = Provider.of<EsenciaService>(context);
     final orbeService = Provider.of<OrbeService>(context);
+    final tutorialService = Provider.of<TutorialService>(context); // Listen to tutorial steps
     final progressionService = ProgressionService();
     
     final currentEsencia = esenciaService.playerState.totalEsencia;
