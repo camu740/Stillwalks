@@ -17,6 +17,7 @@ import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
+import 'screens/language_selection_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -219,6 +220,18 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       await orbeService.initialize();
       await collectionService.initialize();
       
+      // Initialize Tutorial and check integrity
+      final tutorialService = Provider.of<TutorialService>(context, listen: false);
+      await tutorialService.initialize();
+      
+      if (!tutorialService.isCompleted) {
+        debugPrint('🎓 AppInitializer: Tutorial incomplete (Step: ${tutorialService.currentStep}). Resetting to start.');
+        await tutorialService.resetTutorial();
+        // Reset Game State to prevent exploits (free orbs/essence)
+        await esenciaService.resetProgress();
+        await orbeService.resetState();
+      }
+      
       // Initialize notification preferences
       final notificationPreferences = Provider.of<NotificationPreferencesService>(context, listen: false);
       final notificationGuard = Provider.of<NotificationGuardService>(context, listen: false);
@@ -227,7 +240,12 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       await notificationGuard.initialize();
       
       // Sync locale with saved language setting
-      localeProvider.setLocale(notificationPreferences.settings.language);
+      if (!notificationPreferences.settings.hasLanguageBeenSelected) {
+        // Force English by default for the selection screen
+        localeProvider.setLocale('en');
+      } else {
+        localeProvider.setLocale(notificationPreferences.settings.language);
+      }
       
       // Wire notification services to services
       notificationPreferences.setNativeBridge(nativeBridge);
@@ -341,6 +359,12 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
     }
     
     final permissionService = Provider.of<PermissionService>(context);
+    final notificationPreferences = Provider.of<NotificationPreferencesService>(context);
+    
+    // Check if language has been selected first
+    if (!notificationPreferences.settings.hasLanguageBeenSelected) {
+      return const LanguageSelectionScreen();
+    }
     
     // Show permissions screen if not granted
     if (!permissionService.hasPermission) {

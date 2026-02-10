@@ -57,7 +57,10 @@ class NotificationPreferencesService extends ChangeNotifier {
   // --- GENERAL ---
 
   Future<void> setLanguage(String language) async {
-    _settings = _settings.copyWith(language: language);
+    _settings = _settings.copyWith(
+      language: language,
+      hasLanguageBeenSelected: true,
+    );
     await _saveSettings();
     notifyListeners();
   }

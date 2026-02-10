@@ -351,6 +351,11 @@ class DatabaseHelper {
     await db.delete('orbes', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<void> deleteAllOrbes() async {
+    final db = await database;
+    await db.delete('orbes');
+  }
+
   // ========== CREATURE SPECIES ==========
 
   Future<void> insertCreatureSpecies(Map<String, dynamic> species) async {

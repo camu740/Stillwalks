@@ -1,6 +1,7 @@
 class StillwalksSettings {
   // General
   final String language;
+  final bool hasLanguageBeenSelected;
   final bool soundVibrationEnabled;
   final bool batterySaverMode;
 
@@ -26,6 +27,7 @@ class StillwalksSettings {
 
   const StillwalksSettings({
     this.language = 'es',
+    this.hasLanguageBeenSelected = false,
     this.soundVibrationEnabled = true,
     this.batterySaverMode = false,
     this.permanentNotificationEnabled = true,
@@ -43,6 +45,7 @@ class StillwalksSettings {
   Map<String, dynamic> toJson() {
     return {
       'language': language,
+      'hasLanguageBeenSelected': hasLanguageBeenSelected,
       'soundVibrationEnabled': soundVibrationEnabled,
       'batterySaverMode': batterySaverMode,
       'permanentNotificationEnabled': permanentNotificationEnabled,
@@ -66,6 +69,7 @@ class StillwalksSettings {
     
     return StillwalksSettings(
       language: json['language'] ?? 'es',
+      hasLanguageBeenSelected: json['hasLanguageBeenSelected'] ?? false,
       soundVibrationEnabled: json['soundVibrationEnabled'] ?? true,
       batterySaverMode: json['batterySaverMode'] ?? false,
       permanentNotificationEnabled: json['permanentNotificationEnabled'] ?? true,
@@ -83,6 +87,7 @@ class StillwalksSettings {
 
   StillwalksSettings copyWith({
     String? language,
+    bool? hasLanguageBeenSelected,
     bool? soundVibrationEnabled,
     bool? batterySaverMode,
     bool? permanentNotificationEnabled,
@@ -98,6 +103,7 @@ class StillwalksSettings {
   }) {
     return StillwalksSettings(
       language: language ?? this.language,
+      hasLanguageBeenSelected: hasLanguageBeenSelected ?? this.hasLanguageBeenSelected,
       soundVibrationEnabled: soundVibrationEnabled ?? this.soundVibrationEnabled,
       batterySaverMode: batterySaverMode ?? this.batterySaverMode,
       permanentNotificationEnabled: permanentNotificationEnabled ?? this.permanentNotificationEnabled,

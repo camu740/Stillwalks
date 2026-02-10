@@ -180,6 +180,15 @@ class NativeBridge {
     }
   }
 
+  /// Sincroniza la Esencia total con el código nativo
+  Future<void> syncEsencia(double amount) async {
+    try {
+      await platform.invokeMethod('syncEsencia', {'amount': amount});
+    } on PlatformException catch (e) {
+      debugPrint('NativeBridge: Error syncing esencia: ${e.message}');
+    }
+  }
+
   /// Sincroniza las traducciones con el código nativo
   Future<void> syncLocalization(AppLocalizations l10n) async {
     try {

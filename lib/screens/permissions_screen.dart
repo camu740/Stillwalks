@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stillwalks/services/permission_service.dart';
-import 'package:permission_handler/permission_handler.dart' as ph;
+import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Pantalla inicial que solicita permisos necesarios
 class PermissionsScreen extends StatelessWidget {
@@ -9,6 +10,8 @@ class PermissionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -23,38 +26,36 @@ class PermissionsScreen extends StatelessWidget {
                 color: Colors.deepPurpleAccent,
               ),
               const SizedBox(height: 32),
-              const Text(
-                'Bienvenido a Stillwalks',
-                style: TextStyle(
+              Text(
+                l10n.welcomeTitle,
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Para ofrecerte la mejor experiencia, necesitamos tu permiso para:',
-                style: TextStyle(fontSize: 16),
+              Text(
+                l10n.welcomeSubtitle,
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
               _PermissionCard(
                 icon: Icons.directions_walk,
-                title: 'Reconocimiento de Actividad',
-                description:
-                    'Para contar tus pasos y canalizar los Orbes mientras caminas.',
+                title: l10n.permissionActivityTitle,
+                description: l10n.permissionActivityDesc,
               ),
               const SizedBox(height: 16),
               _PermissionCard(
                 icon: Icons.notifications_active,
-                title: 'Notificación Persistente',
-                description:
-                    'Para mostrarte tu progreso sin necesidad de abrir la app.',
+                title: l10n.permissionNotificationTitle,
+                description: l10n.permissionNotificationDesc,
               ),
               const SizedBox(height: 32),
-              const Text(
-                '✓ No vendemos tus datos\n✓ Toda la información se guarda localmente\n✓ Sin anuncios (por ahora)',
-                style: TextStyle(
+              Text(
+                l10n.privacyPolicySummary,
+                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white70,
                 ),
@@ -67,26 +68,24 @@ class PermissionsScreen extends StatelessWidget {
                   final granted = await permissionService.requestActivityRecognition();
                   
                   if (!granted && context.mounted) {
-                    // Si se deniega, mostrar diálogo o abrir ajustes
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Necesitamos este permiso para que el juego funcione'),
+                       SnackBar(
+                        content: Text(l10n.permissionDeniedMessage),
                         action: SnackBarAction(
-                          label: 'Ajustes',
-                          onPressed: ph.openAppSettings, // Usando el alias que ya debería estar o importamos
+                          label: l10n.settings,
+                          onPressed: () => openAppSettings(), 
                         ),
                       ),
                     );
                   }
-                  // Si se concede, el AppInitializer reconstruirá automáticamente la UI
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.deepPurpleAccent,
                 ),
-                child: const Text(
-                  'Continuar',
-                  style: TextStyle(fontSize: 18),
+                child: Text(
+                  l10n.continueButton,
+                  style: const TextStyle(fontSize: 18),
                 ),
               ),
             ],

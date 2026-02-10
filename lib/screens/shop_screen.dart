@@ -52,81 +52,90 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     // Better to Disable interaction if strict.
     final bool isTutorialShopStep = tutorialService.currentStep == TutorialStep.shop;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.shop),
-        backgroundColor: Colors.deepPurple.withOpacity(0.8),
-        bottom: TabBar(
-          controller: _tabController,
-          onTap: (index) {
-             if (isTutorialShopStep && index != 0) {
-               _tabController.index = 0; // Force back to Orbs
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text('Sigue el tutorial: Compra un orbe básico.')),
-               );
-             }
-          },
-          tabs: [
-            Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
-            Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
-            Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades),
-          ],
-        ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.withOpacity(0.8),
-              Colors.black,
+    return PopScope(
+      canPop: !isTutorialShopStep,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.tutorialBlockShop)),
+        );
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.shop),
+          backgroundColor: Colors.deepPurple.withOpacity(0.8),
+          bottom: TabBar(
+            controller: _tabController,
+            onTap: (index) {
+               if (isTutorialShopStep && index != 0) {
+                 _tabController.index = 0; // Force back to Orbs
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(content: Text('Sigue el tutorial: Compra un orbe básico.')),
+                 );
+               }
+            },
+            tabs: [
+              Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
+              Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
+              Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades),
             ],
           ),
         ),
-        child: Column(
-          children: [
-            // Balance de Esencia
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.amberAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amberAccent.withOpacity(0.3)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.auto_awesome, color: Colors.amberAccent),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${AppLocalizations.of(context)!.essence}: ${currentEsencia.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.amberAccent,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.deepPurple.withOpacity(0.8),
+                Colors.black,
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              // Balance de Esencia
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.amberAccent.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amberAccent.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.auto_awesome, color: Colors.amberAccent),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${AppLocalizations.of(context)!.essence}: ${currentEsencia.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amberAccent,
+                        ),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
+              ),
+  
+              // Contenido con tabs
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: isTutorialShopStep ? const NeverScrollableScrollPhysics() : null, // Disable swipe
+                  children: [
+                     _buildOrbesTab(currentLevel, isTutorialShopStep),
+                     _buildSanctuariesTab(currentLevel),
+                     _buildUpgradesTab(currentLevel),
                   ],
                 ),
               ),
-            ),
-
-            // Contenido con tabs
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                physics: isTutorialShopStep ? const NeverScrollableScrollPhysics() : null, // Disable swipe
-                children: [
-                   _buildOrbesTab(currentLevel, isTutorialShopStep),
-                   _buildSanctuariesTab(currentLevel),
-                   _buildUpgradesTab(currentLevel),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

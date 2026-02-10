@@ -10,21 +10,27 @@ class InitialData {
 
   /// Inicializa todos los datos semilla del juego
   static Future<void> seedDatabase() async {
-    if (await isSeeded()) {
-      // Ensure new orbs types are updated/added
-      await seedOrbeTypes();
-      return;
-    }
+    // Siempre sembramos especies y tipos de orbe para asegurar que las actualizaciones
+    // de assets o balanceo se reflejen (usan ConflictAlgorithm.replace)
     await _seedCreatureSpecies();
     await seedOrbeTypes();
+
+    if (await isSeededRest()) {
+      return;
+    }
     await _seedSanctuaries();
     await seedUpgrades();
   }
 
-  /// Verifica si la base de datos ya fue inicializada
+  /// Verifica si los datos persistentes principales ya existen
+  static Future<bool> isSeededRest() async {
+    final sanctuaries = await _db.getAllSanctuaries();
+    return sanctuaries.isNotEmpty;
+  }
+
+  /// Verifica si la base de datos ya fue inicializada (deprecated but kept for compatibility if used elsewhere)
   static Future<bool> isSeeded() async {
-    final species = await _db.getAllCreatureSpecies();
-    return species.isNotEmpty;
+    return isSeededRest();
   }
 
   // ==================== CREATURE SPECIES ====================
@@ -56,11 +62,11 @@ class InitialData {
         dexNumber: 3,
       ),
       CreatureSpecies(
-        id: 'stillwalk',
-        name: 'Stillwalk',
-        description: 'El espíritu del camino. Acompaña a quienes dan el primer paso.',
+        id: 'gamusarra',
+        name: 'Gamusarra',
+        description: 'Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.',
         rarity: 'special',
-        assetPath: 'assets/creatures/stillwalk.png',
+        assetPath: 'assets/creatures/gamusarra.png',
         dexNumber: 0,
       ),
     ];

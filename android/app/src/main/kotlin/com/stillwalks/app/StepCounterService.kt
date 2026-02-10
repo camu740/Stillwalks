@@ -7,16 +7,17 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import android.content.Intent // Added import
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.BinaryMessenger // Explicit import for clarity
 
 /**
  * Servicio que cuenta pasos usando el sensor de hardware del dispositivo
  * y actualiza el progreso de Orbes en santuarios.
  */
-class StepCounterService(
-    private val context: Context,
-    private val flutterEngine: FlutterEngine
+class StepCounterService private constructor(
+    private val context: Context
 ) : SensorEventListener {
 
     companion object {
@@ -27,10 +28,21 @@ class StepCounterService(
         private const val KEY_LAST_UPDATE_TIME = "last_step_update_time"
         
         // Anti-cheat: máximo ~250 pasos por minuto (4.16 pasos/segundo)
-        private const val MAX_STEPS_PER_SECOND = 5
-        private const val MAX_STEPS_PER_UPDATE = 100 // Para evitar saltos grandes
-    }
+        // Relaxing for batch updates: average speed check over longer periods
+        private const val MAX_STEPS_PER_SECOND = 10
+        // Increased significantly to allow for long walks with phone in pocket (Doze mode)
+        private const val MAX_STEPS_PER_UPDATE = 50000 
+        
+        @Volatile
+        private var instance: StepCounterService? = null
 
+        fun getInstance(context: Context): StepCounterService {
+            return instance ?: synchronized(this) {
+                instance ?: StepCounterService(context.applicationContext).also { instance = it }
+            }
+        }
+    }
+// ...
     private val sensorManager: SensorManager = 
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     
@@ -40,15 +52,25 @@ class StepCounterService(
     private val prefs: SharedPreferences = 
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     
-    private val methodChannel = MethodChannel(
-        flutterEngine.dartExecutor.binaryMessenger, 
-        "com.stillwalks.app/steps"
-    )
+    private var methodChannel: MethodChannel? = null
     
     private var lastStepCount: Int = 0
     private var sessionSteps: Int = 0
     private var lastUpdateTime: Long = 0
     private var isTracking = false
+
+    fun attachChannel(messenger: BinaryMessenger) {
+        methodChannel = MethodChannel(messenger, "com.stillwalks.app/steps")
+        Log.d(TAG, "MethodChannel attached")
+    }
+
+    fun detachChannel() {
+        methodChannel = null
+        Log.d(TAG, "MethodChannel detached")
+    }
+    
+    // Helper since we can't easily nullify a non-nullable type if we initialized it differently earlier.
+    // In this refactor, methodChannel is nullable.
 
     fun start() {
         if (isTracking) return
@@ -100,9 +122,11 @@ class StepCounterService(
             val totalSteps = event.values[0].toInt()
             
             // Primera lectura o después de reinicio del dispositivo
+            // Handle device reboot (sensor resets to 0)
             if (lastStepCount == 0 || totalSteps < lastStepCount) {
                 lastStepCount = totalSteps
                 lastUpdateTime = System.currentTimeMillis()
+                Log.d(TAG, "Sensor reset detected or first run. Validating base: $lastStepCount")
                 return
             }
             
@@ -117,7 +141,8 @@ class StepCounterService(
             if (newSteps > 0) {
                 lastStepCount = totalSteps
                 sessionSteps += newSteps
-                lastUpdateTime = System.currentTimeMillis()
+                val now = System.currentTimeMillis()
+                lastUpdateTime = now
                 
                 Log.d(TAG, "New steps: $newSteps (Total session: $sessionSteps)")
                 
@@ -128,6 +153,12 @@ class StepCounterService(
                 
                 // Notificar a Flutter
                 onStepsDetected(newSteps, sessionSteps)
+                
+                // Update notification in foreground service
+                // Update notification in foreground service
+                val intent = Intent(context, TrackingForegroundService::class.java)
+                intent.action = TrackingForegroundService.ACTION_UPDATE_NOTIFICATION
+                context.startService(intent)
             }
         }
     }
@@ -153,20 +184,20 @@ class StepCounterService(
             return false
         }
         
-        // Rechazar saltos muy grandes (más de 100 pasos de golpe)
+        // Rechazar saltos absurdamente grandes (más allá de lo posible en un día)
         if (steps > MAX_STEPS_PER_UPDATE) {
-            Log.w(TAG, "Step increment too large: $steps")
+            Log.w(TAG, "Step increment too large: $steps > $MAX_STEPS_PER_UPDATE")
             return false
         }
         
-        // Validar velocidad (pasos por segundo)
+        // Validar velocidad (pasos por segundo) solo si el intervalo es significativo
         val currentTime = System.currentTimeMillis()
         val timeDelta = (currentTime - lastUpdateTime) / 1000.0 // en segundos
         
-        if (timeDelta > 0) {
+        if (timeDelta > 1.0) { // Solo chequear rate si ha pasado al menos 1 segundo
             val stepsPerSecond = steps / timeDelta
             if (stepsPerSecond > MAX_STEPS_PER_SECOND) {
-                Log.w(TAG, "Steps per second too high: $stepsPerSecond")
+                Log.w(TAG, "Steps per second too high: $stepsPerSecond (steps=$steps, time=${timeDelta}s)")
                 return false
             }
         }
@@ -182,7 +213,7 @@ class StepCounterService(
             "timestamp" to System.currentTimeMillis()
         )
         
-        methodChannel.invokeMethod("onStepsUpdated", data)
+        methodChannel?.invokeMethod("onStepsUpdated", data)
     }
 
     /**

@@ -18,6 +18,34 @@
   "english": "English",
   "system": "Sistema",
   "selectLanguage": "Seleccionar Idioma",
+  "languageSelectionTitle": "Elige tu idioma",
+  "languageSelectionSubtitle": "Puedes cambiarlo después en ajustes",
+  "languageSelectionContinue": "Continuar",
+  "tutorialBlockShop": "Por favor compra un orbe para continuar el tutorial.",
+  "tutorialBlockHome": "Completa el tutorial para desbloquear todo el acceso.",
+  
+  "welcomeTitle": "Bienvenido a Stillwalks",
+  "welcomeSubtitle": "Para ofrecerte la mejor experiencia, necesitamos tu permiso para:",
+  "permissionActivityTitle": "Reconocimiento de Actividad",
+  "permissionActivityDesc": "Para contar tus pasos y canalizar los Orbes mientras caminas.",
+  "permissionNotificationTitle": "Notificación Persistente",
+  "permissionNotificationDesc": "Para mostrarte tu progreso sin necesidad de abrir la app.",
+  "privacyPolicySummary": "✓ No vendemos tus datos\n✓ Toda la información se guarda localmente\n✓ Sin anuncios (por ahora)",
+  "permissionDeniedMessage": "Necesitamos este permiso para que el juego funcione",
+  "continueButton": "Continuar",
+  
+  "tutorialWelcomeTitle": "Bienvenido, Explorador",
+  "tutorialWelcomeDesc": "Soy el Guardián Olvidado y voy a necesitar tu ayuda para encontrar a todos los stillwalks que hay perdidos por el mundo.\n\nCuando bloqueas el teléfono, los recolectores de Esencia se ponen a funcionar. Esto te ayudará en tu aventura.\n\nTe he conseguido algo de Esencia para que puedas comprar tu primer orbe sin esperar.",
+  "tutorialShopTitle": "La Tienda",
+  "tutorialShopDesc": "Ve a la Tienda y compra tu primer orbe básico. ¡Invito yo!",
+  "tutorialSanctuaryTitle": "El Santuario",
+  "tutorialSanctuaryDesc": "Ahora asigna tu nuevo orbe al Santuario Primordial para comenzar su canalización.",
+  "tutorialEnergyTitle": "Energía de tus pasos",
+  "tutorialEnergyDesc": "Los orbes se canalizan en los santuarios gracias a la energía de tus pasos.\n\ncamina para progresar y descubrir nuevos stillwalks.\n\nComo es tu primera vez, te he ayudado con algo de energía que tenía almacenada.",
+  "tutorialHatchTitle": "Listo para Canalizar",
+  "tutorialHatchDesc": "¡Tu orbe tiene energía suficiente! Interactúa con el Santuario para completar la canalización.",
+  "tutorialAdventureTitle": "Empieza tu aventura",
+  "tutorialAdventureDesc": "¡Espectacular! has encontrado una Gamusarra, es una criatura mítica super rara de encontrar\n\nUtiliza la esencia para comprar nuevos orbes o mejoras en la tienda.\n\nRecuerda salir a caminar para que tus orbes canalicen y ¡encuentra a todos los Stillwalks perdidos!",
   
   "soundVibration": "Sonido / vibración",
   "soundVibrationDesc": "Feedback sonoro y háptico",
@@ -121,7 +149,6 @@
   "notificationPermission": "Notificaciones",
   "notificationPermissionDesc": "Para mostrar progreso",
   "requestPermissions": "Solicitar permisos",
-  "continueButton": "Continuar",
   
   "welcome": "Bienvenido",
   "loading": "Cargando...",
@@ -401,9 +428,14 @@
   "infuseEssenceDesc": "Convierte {essence} Esencia en {steps} pasos",
   "essenceInfused": "¡{steps} pasos obtenidos!",
   
+  "nameSpiristone": "Spiristone",
   "descSpiristone": "Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.",
+  "nameRadispirit": "Radispirit",
   "descRadispirit": "Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.",
+  "nameSlugrry": "Slugrry",
   "descSlugrry": "Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.",
+  "nameGamusarra": "Gamusarra",
+  "descGamusarra": "Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.",
   
   "physicalActivity": "Actividad física",
   "notificationsPermission": "Notificaciones",
@@ -443,19 +475,5 @@
   "noIssues": "No se detectaron problemas",
   "none": "Ninguno",
   "justNow": "Justo ahora",
-  
-  "tutorialWelcome": "BIENVENIDO A STILLWALKS",
-  "tutorialWelcomeDesc": "Descubre criaturas mágicas caminando en el mundo real y usando menos el móvil.\n\nCuando el teléfono está bloqueado,\ngeneras Esencia automáticamente.\n\nLa Esencia te ayuda a avanzar y a descubrir nuevas criaturas.\n\nPara empezar tu aventura,\nte regalamos Esencia suficiente\npara comprar tu primer Orbe.",
-  "startAdventure": "¡Empezar Aventura!",
-  "essenceGrant": "+{amount} Esencia recibida",
-  
-  "energyTutorialTitle": "¡ENERGÍA NECESARIA!",
-  "energyTutorialDesc": "Los Orbes se canalizan en los Santuarios.\n\nAl caminar, generas Energía.\nLa Energía canaliza el Orbe hasta estar listo para descubrir el stillwalk que contiene.\n\nComo es tu primera vez,\nvamos a acelerar un poco el proceso.",
-  "walkingSim": "Caminando...",
-  "letsGo": "¡Vamos!",
-  "tutorialCompleteTitle": "¡Tutorial Completado!",
-  "tutorialCompleteDesc": "¡Felicidades! Ahora eres libre de explorar el mundo real para encontrar más criaturas.\n\nRecuerda: ¡Tienes que moverte para conseguir Esencia!",
-  
-  "tutorialConclusionTitle": "TU AVENTURA CONTINÚA",
-  "tutorialConclusionDesc": "Utiliza la Esencia que consigues al descansar para comprar orbes, mejorar santuarios y avanzar. Recuerda salir a caminar para seguir canalizando orbes y descubrir a todas las criaturas!\n\nStillwalks avanza contigo,\na tu ritmo."
+  "adventureContinues": "¡A la aventura!"
 }

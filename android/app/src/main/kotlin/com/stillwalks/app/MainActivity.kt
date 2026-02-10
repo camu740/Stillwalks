@@ -19,6 +19,15 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
+        // Inicializar servicios (Singleton for StepCounter and ScreenLockTracker)
+        screenLockTracker = ScreenLockTracker.getInstance(this)
+        screenLockTracker.attachChannel(flutterEngine.dartExecutor.binaryMessenger)
+        
+        stepCounter = StepCounterService.getInstance(this)
+        stepCounter.attachChannel(flutterEngine.dartExecutor.binaryMessenger)
+        
+        notificationManager = StillwalksNotificationManager(this)
+        
         // Crear MethodChannel para comunicación con Flutter
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
@@ -31,14 +40,29 @@ class MainActivity: FlutterActivity() {
                     result.success("Tracking stopped")
                 }
                 "getEsencia" -> {
-                    // TODO: Obtener Esencia pendiente desde BD
+                    // TODO: Obtener Esencia pendiente desde BD (or SharedPrefs if synced)
                     result.success(0.0)
+                }
+                "syncEsencia" -> {
+                    val amount = call.argument<Double>("amount") ?: 0.0
+                    val prefs = getSharedPreferences("StillwalksNativePrefs", android.content.Context.MODE_PRIVATE)
+                    prefs.edit().putFloat("total_essence", amount.toFloat()).apply()
+                    
+                    // Trigger notification update
+                    val serviceIntent = Intent(context, TrackingForegroundService::class.java).apply {
+                        action = TrackingForegroundService.ACTION_UPDATE_NOTIFICATION
+                    }
+                    startService(serviceIntent)
+                    
+                    result.success(true)
                 }
                 "getSteps" -> {
                     val steps = stepCounter.getSessionSteps()
                     result.success(steps)
                 }
                 "updateNotificationContent" -> {
+                    // This serves as a manual override from Flutter if needed, 
+                    // but syncEsencia is preferred for state.
                     val title = call.argument<String>("title")
                     val body = call.argument<String>("body")
                     
@@ -104,11 +128,12 @@ class MainActivity: FlutterActivity() {
                 }
             }
         }
-        
-        // Inicializar servicios
-        screenLockTracker = ScreenLockTracker(this, flutterEngine)
-        stepCounter = StepCounterService(this, flutterEngine)
-        notificationManager = StillwalksNotificationManager(this)
+    }
+    
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        super.cleanUpFlutterEngine(flutterEngine)
+        stepCounter.detachChannel()
+        screenLockTracker.detachChannel()
     }
     
     override fun onResume() {

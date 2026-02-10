@@ -15,9 +15,8 @@ import kotlin.math.min
  * Rastrea cuándo el dispositivo está bloqueado vs. desbloqueado
  * y calcula la Esencia generada pasivamente.
  */
-class ScreenLockTracker(
-    private val context: Context,
-    private val flutterEngine: FlutterEngine
+class ScreenLockTracker private constructor(
+    private val context: Context
 ) {
     companion object {
         private const val TAG = "ScreenLockTracker"
@@ -30,10 +29,19 @@ class ScreenLockTracker(
         private const val BASE_ESENCIA_PER_HOUR = 100.0
         private const val MAX_ACCUMULATION_HOURS = 12.0
         private const val MILLIS_PER_HOUR = 3600000.0
+        
+        @Volatile
+        private var instance: ScreenLockTracker? = null
+
+        fun getInstance(context: Context): ScreenLockTracker {
+            return instance ?: synchronized(this) {
+                instance ?: ScreenLockTracker(context.applicationContext).also { instance = it }
+            }
+        }
     }
     
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    private val methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.stillwalks.app/esencia")
+    private var methodChannel: MethodChannel? = null
     
     private var isTracking = false
     private var lastUnlockTime: Long = 0
@@ -47,6 +55,16 @@ class ScreenLockTracker(
                 Intent.ACTION_USER_PRESENT -> onDeviceUnlocked()
             }
         }
+    }
+
+    fun attachChannel(messenger: io.flutter.plugin.common.BinaryMessenger) {
+        methodChannel = MethodChannel(messenger, "com.stillwalks.app/esencia")
+        Log.d(TAG, "MethodChannel attached")
+    }
+
+    fun detachChannel() {
+        methodChannel = null
+        Log.d(TAG, "MethodChannel detached")
     }
     
     fun start() {
@@ -95,6 +113,7 @@ class ScreenLockTracker(
     private fun onScreenOff() {
         // Pantalla apagada - comienza generación de Esencia
         Log.d(TAG, "Screen OFF - Starting Esencia generation")
+        updateNotification()
     }
     
     private fun onScreenOn() {
@@ -143,6 +162,8 @@ class ScreenLockTracker(
         lastUnlockTime = currentTime
         lastBootTime = currentBootTime
         saveState()
+        
+        updateNotification()
     }
     
     /**
@@ -192,6 +213,31 @@ class ScreenLockTracker(
     }
     
     /**
+     * Calcula la Esencia pendiente (generada pero no reclamada)
+     */
+    fun getPendingEsencia(): Double {
+        val currentTime = System.currentTimeMillis()
+        val elapsedMillis = currentTime - lastUnlockTime
+        val elapsedHours = elapsedMillis / MILLIS_PER_HOUR
+        
+        if (elapsedHours <= 0) return 0.0
+        
+        val cappedHours = min(elapsedHours, MAX_ACCUMULATION_HOURS)
+        val idleMultiplier = prefs.getFloat(KEY_IDLE_MULTIPLIER, 1.0f).toDouble()
+        val esenciaPerHour = BASE_ESENCIA_PER_HOUR * idleMultiplier
+        
+        return esenciaPerHour * cappedHours
+    }
+
+    private fun updateNotification() {
+        // Trigger notification update in TrackingForegroundService
+        val intent = Intent(context, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_UPDATE_NOTIFICATION
+        }
+        context.startService(intent)
+    }
+
+    /**
      * Notifica a Flutter sobre la Esencia generada
      */
     private fun notifyFlutter(esenciaGenerated: Double, hoursElapsed: Double) {
@@ -201,6 +247,6 @@ class ScreenLockTracker(
             "timestamp" to System.currentTimeMillis()
         )
         
-        methodChannel.invokeMethod("onEsenciaGenerated", data)
+        methodChannel?.invokeMethod("onEsenciaGenerated", data)
     }
 }

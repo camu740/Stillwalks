@@ -100,7 +100,7 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
                   
                   return _CreatureCard(
                     dexNumber: species.dexNumber,
-                    name: species.name,
+                    name: AppLocalizations.of(context)!.getCreatureName(species.id, species.name),
                     discovered: isDiscovered,
                     assetPath: species.assetPath,
                     rarity: species.rarity,
@@ -124,7 +124,7 @@ class _ExplorerJournalScreenState extends State<ExplorerJournalScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text(species.name),
+        title: Text(AppLocalizations.of(context)!.getCreatureName(species.id, species.name)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

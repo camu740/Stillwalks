@@ -45,6 +45,97 @@ class AppLocalizationsEs extends AppLocalizations {
   String get selectLanguage => 'Seleccionar Idioma';
 
   @override
+  String get languageSelectionTitle => 'Elige tu idioma';
+
+  @override
+  String get languageSelectionSubtitle => 'Puedes cambiarlo después en ajustes';
+
+  @override
+  String get languageSelectionContinue => 'Continuar';
+
+  @override
+  String get tutorialBlockShop =>
+      'Por favor compra un orbe para continuar el tutorial.';
+
+  @override
+  String get tutorialBlockHome =>
+      'Completa el tutorial para desbloquear todo el acceso.';
+
+  @override
+  String get welcomeTitle => 'Bienvenido a Stillwalks';
+
+  @override
+  String get welcomeSubtitle =>
+      'Para ofrecerte la mejor experiencia, necesitamos tu permiso para:';
+
+  @override
+  String get permissionActivityTitle => 'Reconocimiento de Actividad';
+
+  @override
+  String get permissionActivityDesc =>
+      'Para contar tus pasos y canalizar los Orbes mientras caminas.';
+
+  @override
+  String get permissionNotificationTitle => 'Notificación Persistente';
+
+  @override
+  String get permissionNotificationDesc =>
+      'Para mostrarte tu progreso sin necesidad de abrir la app.';
+
+  @override
+  String get privacyPolicySummary =>
+      '✓ No vendemos tus datos\n✓ Toda la información se guarda localmente\n✓ Sin anuncios (por ahora)';
+
+  @override
+  String get permissionDeniedMessage =>
+      'Necesitamos este permiso para que el juego funcione';
+
+  @override
+  String get continueButton => 'Continuar';
+
+  @override
+  String get tutorialWelcomeTitle => 'Bienvenido, Explorador';
+
+  @override
+  String get tutorialWelcomeDesc =>
+      'Soy el Guardián Olvidado y voy a necesitar tu ayuda para encontrar a todos los stillwalks que hay perdidos por el mundo.\n\nCuando bloqueas el teléfono, los recolectores de Esencia se ponen a funcionar. Esto te ayudará en tu aventura.\n\nTe he conseguido algo de Esencia para que puedas comprar tu primer orbe sin esperar.';
+
+  @override
+  String get tutorialShopTitle => 'La Tienda';
+
+  @override
+  String get tutorialShopDesc =>
+      'Ve a la Tienda y compra tu primer orbe básico. ¡Invito yo!';
+
+  @override
+  String get tutorialSanctuaryTitle => 'El Santuario';
+
+  @override
+  String get tutorialSanctuaryDesc =>
+      'Ahora asigna tu nuevo orbe al Santuario Primordial para comenzar su canalización.';
+
+  @override
+  String get tutorialEnergyTitle => 'Energía de tus pasos';
+
+  @override
+  String get tutorialEnergyDesc =>
+      'Los orbes se canalizan en los santuarios gracias a la energía de tus pasos.\n\ncamina para progresar y descubrir nuevos stillwalks.\n\nComo es tu primera vez, te he ayudado con algo de energía que tenía almacenada.';
+
+  @override
+  String get tutorialHatchTitle => 'Listo para Canalizar';
+
+  @override
+  String get tutorialHatchDesc =>
+      '¡Tu orbe tiene energía suficiente! Interactúa con el Santuario para completar la canalización.';
+
+  @override
+  String get tutorialAdventureTitle => 'Empieza tu aventura';
+
+  @override
+  String get tutorialAdventureDesc =>
+      '¡Espectacular! has encontrado una Gamusarra, es una criatura mítica super rara de encontrar\n\nUtiliza la esencia para comprar nuevos orbes o mejoras en la tienda.\n\nRecuerda salir a caminar para que tus orbes canalicen y ¡encuentra a todos los Stillwalks perdidos!';
+
+  @override
   String get soundVibration => 'Sonido / vibración';
 
   @override
@@ -243,9 +334,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get requestPermissions => 'Solicitar permisos';
-
-  @override
-  String get continueButton => 'Continuar';
 
   @override
   String get welcome => 'Bienvenido';
@@ -807,16 +895,32 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get nameSpiristone => 'Spiristone';
+
+  @override
   String get descSpiristone =>
       'Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.';
+
+  @override
+  String get nameRadispirit => 'Radispirit';
 
   @override
   String get descRadispirit =>
       'Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.';
 
   @override
+  String get nameSlugrry => 'Slugrry';
+
+  @override
   String get descSlugrry =>
       'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.';
+
+  @override
+  String get nameGamusarra => 'Gamusarra';
+
+  @override
+  String get descGamusarra =>
+      'Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.';
 
   @override
   String get physicalActivity => 'Actividad física';
@@ -899,44 +1003,5 @@ class AppLocalizationsEs extends AppLocalizations {
   String get justNow => 'Justo ahora';
 
   @override
-  String get tutorialWelcome => 'BIENVENIDO A STILLWALKS';
-
-  @override
-  String get tutorialWelcomeDesc =>
-      'Descubre criaturas mágicas caminando en el mundo real y usando menos el móvil.\n\nCuando el teléfono está bloqueado,\ngeneras Esencia automáticamente.\n\nLa Esencia te ayuda a avanzar y a descubrir nuevas criaturas.\n\nPara empezar tu aventura,\nte regalamos Esencia suficiente\npara comprar tu primer Orbe.';
-
-  @override
-  String get startAdventure => '¡Empezar Aventura!';
-
-  @override
-  String essenceGrant(Object amount) {
-    return '+$amount Esencia recibida';
-  }
-
-  @override
-  String get energyTutorialTitle => '¡ENERGÍA NECESARIA!';
-
-  @override
-  String get energyTutorialDesc =>
-      'Los Orbes se canalizan en los Santuarios.\n\nAl caminar, generas Energía.\nLa Energía canaliza el Orbe hasta estar listo para descubrir el stillwalk que contiene.\n\nComo es tu primera vez,\nvamos a acelerar un poco el proceso.';
-
-  @override
-  String get walkingSim => 'Caminando...';
-
-  @override
-  String get letsGo => '¡Vamos!';
-
-  @override
-  String get tutorialCompleteTitle => '¡Tutorial Completado!';
-
-  @override
-  String get tutorialCompleteDesc =>
-      '¡Felicidades! Ahora eres libre de explorar el mundo real para encontrar más criaturas.\n\nRecuerda: ¡Tienes que moverte para conseguir Esencia!';
-
-  @override
-  String get tutorialConclusionTitle => 'TU AVENTURA CONTINÚA';
-
-  @override
-  String get tutorialConclusionDesc =>
-      'Utiliza la Esencia que consigues al descansar para comprar orbes, mejorar santuarios y avanzar. Recuerda salir a caminar para seguir canalizando orbes y descubrir a todas las criaturas!\n\nStillwalks avanza contigo,\na tu ritmo.';
+  String get adventureContinues => '¡A la aventura!';
 }

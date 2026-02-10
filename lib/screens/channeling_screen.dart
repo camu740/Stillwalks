@@ -5,6 +5,7 @@ import 'dart:math' show pi;
 import 'package:stillwalks/models/creature_instance.dart';
 import 'package:stillwalks/models/creature_species.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/l10n/data_localizations.dart';
 
 import 'package:provider/provider.dart';
 import 'package:stillwalks/services/tutorial_service.dart';
@@ -156,7 +157,7 @@ class _ChannelingScreenState extends State<ChannelingScreen>
 
                         // Nombre de la criatura
                         Text(
-                          widget.species.name,
+                          AppLocalizations.of(context)!.getCreatureName(widget.species.id, widget.species.name),
                           style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,

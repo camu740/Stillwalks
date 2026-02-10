@@ -170,6 +170,162 @@ abstract class AppLocalizations {
   /// **'Seleccionar Idioma'**
   String get selectLanguage;
 
+  /// No description provided for @languageSelectionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige tu idioma'**
+  String get languageSelectionTitle;
+
+  /// No description provided for @languageSelectionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes cambiarlo después en ajustes'**
+  String get languageSelectionSubtitle;
+
+  /// No description provided for @languageSelectionContinue.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get languageSelectionContinue;
+
+  /// No description provided for @tutorialBlockShop.
+  ///
+  /// In es, this message translates to:
+  /// **'Por favor compra un orbe para continuar el tutorial.'**
+  String get tutorialBlockShop;
+
+  /// No description provided for @tutorialBlockHome.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa el tutorial para desbloquear todo el acceso.'**
+  String get tutorialBlockHome;
+
+  /// No description provided for @welcomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenido a Stillwalks'**
+  String get welcomeTitle;
+
+  /// No description provided for @welcomeSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Para ofrecerte la mejor experiencia, necesitamos tu permiso para:'**
+  String get welcomeSubtitle;
+
+  /// No description provided for @permissionActivityTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reconocimiento de Actividad'**
+  String get permissionActivityTitle;
+
+  /// No description provided for @permissionActivityDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Para contar tus pasos y canalizar los Orbes mientras caminas.'**
+  String get permissionActivityDesc;
+
+  /// No description provided for @permissionNotificationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Notificación Persistente'**
+  String get permissionNotificationTitle;
+
+  /// No description provided for @permissionNotificationDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Para mostrarte tu progreso sin necesidad de abrir la app.'**
+  String get permissionNotificationDesc;
+
+  /// No description provided for @privacyPolicySummary.
+  ///
+  /// In es, this message translates to:
+  /// **'✓ No vendemos tus datos\n✓ Toda la información se guarda localmente\n✓ Sin anuncios (por ahora)'**
+  String get privacyPolicySummary;
+
+  /// No description provided for @permissionDeniedMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Necesitamos este permiso para que el juego funcione'**
+  String get permissionDeniedMessage;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Continuar'**
+  String get continueButton;
+
+  /// No description provided for @tutorialWelcomeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Bienvenido, Explorador'**
+  String get tutorialWelcomeTitle;
+
+  /// No description provided for @tutorialWelcomeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Soy el Guardián Olvidado y voy a necesitar tu ayuda para encontrar a todos los stillwalks que hay perdidos por el mundo.\n\nCuando bloqueas el teléfono, los recolectores de Esencia se ponen a funcionar. Esto te ayudará en tu aventura.\n\nTe he conseguido algo de Esencia para que puedas comprar tu primer orbe sin esperar.'**
+  String get tutorialWelcomeDesc;
+
+  /// No description provided for @tutorialShopTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'La Tienda'**
+  String get tutorialShopTitle;
+
+  /// No description provided for @tutorialShopDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Ve a la Tienda y compra tu primer orbe básico. ¡Invito yo!'**
+  String get tutorialShopDesc;
+
+  /// No description provided for @tutorialSanctuaryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'El Santuario'**
+  String get tutorialSanctuaryTitle;
+
+  /// No description provided for @tutorialSanctuaryDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahora asigna tu nuevo orbe al Santuario Primordial para comenzar su canalización.'**
+  String get tutorialSanctuaryDesc;
+
+  /// No description provided for @tutorialEnergyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Energía de tus pasos'**
+  String get tutorialEnergyTitle;
+
+  /// No description provided for @tutorialEnergyDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Los orbes se canalizan en los santuarios gracias a la energía de tus pasos.\n\ncamina para progresar y descubrir nuevos stillwalks.\n\nComo es tu primera vez, te he ayudado con algo de energía que tenía almacenada.'**
+  String get tutorialEnergyDesc;
+
+  /// No description provided for @tutorialHatchTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo para Canalizar'**
+  String get tutorialHatchTitle;
+
+  /// No description provided for @tutorialHatchDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Tu orbe tiene energía suficiente! Interactúa con el Santuario para completar la canalización.'**
+  String get tutorialHatchDesc;
+
+  /// No description provided for @tutorialAdventureTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Empieza tu aventura'**
+  String get tutorialAdventureTitle;
+
+  /// No description provided for @tutorialAdventureDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Espectacular! has encontrado una Gamusarra, es una criatura mítica super rara de encontrar\n\nUtiliza la esencia para comprar nuevos orbes o mejoras en la tienda.\n\nRecuerda salir a caminar para que tus orbes canalicen y ¡encuentra a todos los Stillwalks perdidos!'**
+  String get tutorialAdventureDesc;
+
   /// No description provided for @soundVibration.
   ///
   /// In es, this message translates to:
@@ -547,12 +703,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Solicitar permisos'**
   String get requestPermissions;
-
-  /// No description provided for @continueButton.
-  ///
-  /// In es, this message translates to:
-  /// **'Continuar'**
-  String get continueButton;
 
   /// No description provided for @welcome.
   ///
@@ -1556,11 +1706,23 @@ abstract class AppLocalizations {
   /// **'¡{steps} pasos obtenidos!'**
   String essenceInfused(Object steps);
 
+  /// No description provided for @nameSpiristone.
+  ///
+  /// In es, this message translates to:
+  /// **'Spiristone'**
+  String get nameSpiristone;
+
   /// No description provided for @descSpiristone.
   ///
   /// In es, this message translates to:
   /// **'Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.'**
   String get descSpiristone;
+
+  /// No description provided for @nameRadispirit.
+  ///
+  /// In es, this message translates to:
+  /// **'Radispirit'**
+  String get nameRadispirit;
 
   /// No description provided for @descRadispirit.
   ///
@@ -1568,11 +1730,29 @@ abstract class AppLocalizations {
   /// **'Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.'**
   String get descRadispirit;
 
+  /// No description provided for @nameSlugrry.
+  ///
+  /// In es, this message translates to:
+  /// **'Slugrry'**
+  String get nameSlugrry;
+
   /// No description provided for @descSlugrry.
   ///
   /// In es, this message translates to:
   /// **'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.'**
   String get descSlugrry;
+
+  /// No description provided for @nameGamusarra.
+  ///
+  /// In es, this message translates to:
+  /// **'Gamusarra'**
+  String get nameGamusarra;
+
+  /// No description provided for @descGamusarra.
+  ///
+  /// In es, this message translates to:
+  /// **'Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.'**
+  String get descGamusarra;
 
   /// No description provided for @physicalActivity.
   ///
@@ -1724,77 +1904,11 @@ abstract class AppLocalizations {
   /// **'Justo ahora'**
   String get justNow;
 
-  /// No description provided for @tutorialWelcome.
+  /// No description provided for @adventureContinues.
   ///
   /// In es, this message translates to:
-  /// **'BIENVENIDO A STILLWALKS'**
-  String get tutorialWelcome;
-
-  /// No description provided for @tutorialWelcomeDesc.
-  ///
-  /// In es, this message translates to:
-  /// **'Descubre criaturas mágicas caminando en el mundo real y usando menos el móvil.\n\nCuando el teléfono está bloqueado,\ngeneras Esencia automáticamente.\n\nLa Esencia te ayuda a avanzar y a descubrir nuevas criaturas.\n\nPara empezar tu aventura,\nte regalamos Esencia suficiente\npara comprar tu primer Orbe.'**
-  String get tutorialWelcomeDesc;
-
-  /// No description provided for @startAdventure.
-  ///
-  /// In es, this message translates to:
-  /// **'¡Empezar Aventura!'**
-  String get startAdventure;
-
-  /// No description provided for @essenceGrant.
-  ///
-  /// In es, this message translates to:
-  /// **'+{amount} Esencia recibida'**
-  String essenceGrant(Object amount);
-
-  /// No description provided for @energyTutorialTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'¡ENERGÍA NECESARIA!'**
-  String get energyTutorialTitle;
-
-  /// No description provided for @energyTutorialDesc.
-  ///
-  /// In es, this message translates to:
-  /// **'Los Orbes se canalizan en los Santuarios.\n\nAl caminar, generas Energía.\nLa Energía canaliza el Orbe hasta estar listo para descubrir el stillwalk que contiene.\n\nComo es tu primera vez,\nvamos a acelerar un poco el proceso.'**
-  String get energyTutorialDesc;
-
-  /// No description provided for @walkingSim.
-  ///
-  /// In es, this message translates to:
-  /// **'Caminando...'**
-  String get walkingSim;
-
-  /// No description provided for @letsGo.
-  ///
-  /// In es, this message translates to:
-  /// **'¡Vamos!'**
-  String get letsGo;
-
-  /// No description provided for @tutorialCompleteTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'¡Tutorial Completado!'**
-  String get tutorialCompleteTitle;
-
-  /// No description provided for @tutorialCompleteDesc.
-  ///
-  /// In es, this message translates to:
-  /// **'¡Felicidades! Ahora eres libre de explorar el mundo real para encontrar más criaturas.\n\nRecuerda: ¡Tienes que moverte para conseguir Esencia!'**
-  String get tutorialCompleteDesc;
-
-  /// No description provided for @tutorialConclusionTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'TU AVENTURA CONTINÚA'**
-  String get tutorialConclusionTitle;
-
-  /// No description provided for @tutorialConclusionDesc.
-  ///
-  /// In es, this message translates to:
-  /// **'Utiliza la Esencia que consigues al descansar para comprar orbes, mejorar santuarios y avanzar. Recuerda salir a caminar para seguir canalizando orbes y descubrir a todas las criaturas!\n\nStillwalks avanza contigo,\na tu ritmo.'**
-  String get tutorialConclusionDesc;
+  /// **'¡A la aventura!'**
+  String get adventureContinues;
 }
 
 class _AppLocalizationsDelegate

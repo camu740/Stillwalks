@@ -1,0 +1,27 @@
+﻿Analyzing permissions_screen.dart...                            
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\permissions_screen.dart:115:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\permissions_screen.dart:118:31 - deprecated_member_use
+
+flutter : 2 issues 
+found. (ran in 0.8s)
+En línea: 1 Carácter: 
+1
++ flutter analyze lib/
+screens/permissions_sc
+reen.dart --no-pub > 
+permis ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (2 issues f   
+ ound. (ran in 0.8    
+s):String) [], Re    
+moteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 

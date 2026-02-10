@@ -142,6 +142,24 @@ class EsenciaService extends ChangeNotifier {
 
     final source = fromNative ? 'native Android' : 'app calculation';
     debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
+    
+    // Sync with native for persistent notification
+    _syncToNative();
+  }
+
+  /// Syncs current total essence to native side
+  void _syncToNative() {
+    if (_nativeBridge != null) {
+      _nativeBridge!.syncEsencia(_playerState.totalEsencia);
+      
+      // Also update notification content immediately for responsiveness
+      // We pass a generic body, but the native side will query the exact steps/essence
+      // or we could pass it here. For now, we rely on Native side to pull data or we send it.
+      // Actually, NativeBridge.updateNotificationContent expects title/body.
+      // But we want the NATIVE service to format it. 
+      // So we'll trigger an update via channel or rely on the syncEsencia to trigger it in native.
+      // Let's rely on syncEsencia triggering the update in Native.
+    }
   }
 
   // Progression Service
@@ -210,6 +228,9 @@ class EsenciaService extends ChangeNotifier {
 
     await _db.updatePlayerState(_playerState.toJson());
     notifyListeners();
+
+    // Sync with native
+    _syncToNative();
 
     return true;
   }

@@ -38,7 +38,11 @@ class TutorialService extends ChangeNotifier {
   bool get allowChanneling => _currentStep == TutorialStep.hatch || isCompleted;
 
   TutorialService() {
-    _loadState();
+    // _loadState(); // Don't call async in constructor without await
+  }
+
+  Future<void> initialize() async {
+    await _loadState();
   }
 
   Future<void> _loadState() async {

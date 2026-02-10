@@ -1,0 +1,27 @@
+﻿Analyzing 2 items...                                            
+
+  error - Undefined name 'ContentType' - lib\widgets\tutorial_dialog.dart:46:22 - undefined_identifier
+
+flutter : 1 issue 
+found. (ran in 1.2s)
+En línea: 1 Carácter: 
+1
++ flutter analyze lib/
+widgets/tutorial_dialo
+g.dart 
+lib/screens/widgets/ 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (1 issue fo   
+ und. (ran in 1.2s    
+):String) [], Rem    
+oteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 

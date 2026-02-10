@@ -84,7 +84,7 @@ class PlayerState {
   // Estado inicial para nuevos jugadores
   factory PlayerState.initial() {
     return PlayerState(
-      totalEsencia: 0.0,
+      totalEsencia: 495.0, // Grants almost enough for first orb (500)
       idleMultiplier: 1.0,
       lastActiveTimestamp: DateTime.now(),
       totalSteps: 0,

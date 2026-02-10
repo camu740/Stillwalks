@@ -579,4 +579,42 @@ class OrbeService extends ChangeNotifier {
     
     return true;
   }
+
+  /// Reinicia el estado de Orbes y Santuarios (Para reinicio de tutorial)
+  Future<void> resetState() async {
+    // 1. Borrar todos los orbes
+    await _db.deleteAllOrbes();
+    _orbes.clear();
+
+    // 2. Borrar todos los santuarios excepto el primordial
+    final List<Sanctuary> toKeep = [];
+    for (var s in _sanctuaries) {
+      if (!s.isTemporary) {
+         // Resetear santuario primordial
+         final resetSanctuary = s.copyWith(
+           orbeId: null, // Clear assigned orb
+           clearOrbe: true,
+           speedUpgradeLevel: 0,
+           speedMultiplier: 1.0, 
+         );
+         await _db.updateSanctuary(resetSanctuary.id, resetSanctuary.toJson());
+         toKeep.add(resetSanctuary);
+      } else {
+         await _db.deleteSanctuary(s.id);
+      }
+    }
+    _sanctuaries = toKeep;
+
+    // 3. Borrar inventario
+    // (Asumimos que hay un método deleteAllInventoryItems o lo hacemos uno a uno)
+    // Inv items no tienen ID único, son tipos. Update a 0.
+    for (var item in _inventory) {
+      await _db.updateInventoryItem(item.typeId, -item.quantity); // Remove all
+    }
+    _inventory.clear(); // Reload will fix or just clear local
+    await loadData(); // Reload to be safe and ensure consistent state
+
+    debugPrint('🕊️ OrbeService: State reset complete.');
+    notifyListeners();
+  }
 }
