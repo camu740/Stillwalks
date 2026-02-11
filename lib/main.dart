@@ -13,6 +13,7 @@ import 'services/notification_preferences_service.dart';
 import 'services/notification_guard_service.dart';
 import 'services/tutorial_service.dart';
 import 'services/progression_service.dart'; // Added
+import 'services/active_time_tracker.dart'; // Added
 import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,6 +44,7 @@ class StillwalksApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationGuardService()),
         ChangeNotifierProvider(create: (_) => TutorialService()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => ActiveTimeTracker()), // Added
         Provider(create: (_) => NativeBridge()),
         Provider(create: (_) => WidgetService()),
         Provider(create: (_) => ProgressionService()), // Added
@@ -79,12 +81,9 @@ class StillwalksApp extends StatelessWidget {
           orbeService.addListener(updateWidget);
           collectionService.addListener(updateWidget);
           
-          // Configure callbacks from native Android
-          nativeBridge.onEsenciaGenerated = (esencia, hours) async {
-            await esenciaService.addEsencia(esencia, fromNative: true);
-            debugPrint('🎯 Main: Received $esencia Esencia from native ($hours hours)');
-            updateWidget();
-          };
+          // REMOVED: Native Android no longer generates essence
+          // All essence generation is now handled by Flutter
+          // nativeBridge.onEsenciaGenerated callback removed
           
           nativeBridge.onStepsUpdated = (newSteps, totalSteps) async {
             final result = await orbeService.addStepsToActiveOrbes(newSteps);
@@ -170,8 +169,24 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      debugPrint('📱 App lifecycle changed to $state. Updating widget...');
+    debugPrint('📱 App lifecycle changed to $state');
+    
+    final activeTimeTracker = Provider.of<ActiveTimeTracker>(context, listen: false);
+    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+    final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
+    
+    if (state == AppLifecycleState.resumed) {
+      // App volvió a foreground - iniciar tracking de tiempo activo
+      activeTimeTracker.startTracking();
+      
+      // Calcular esencia pendiente (tiempo bloqueado + tiempo activo)
+      esenciaService.calculatePendingEsencia(nativeBridge, activeTimeTracker);
+      
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      // App sale de foreground - detener tracking
+      activeTimeTracker.stopTracking();
+      
+      // Actualizar widget
       _updateWidget();
     }
   }
@@ -258,8 +273,9 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       orbeService.setEsenciaService(esenciaService);
       orbeService.listenToEssenceService(esenciaService.onEssenceEarned);
       
-      // Calculate pending Esencia from offline time
-      await esenciaService.calculatePendingEsencia();
+      // Calculate pending Esencia from offline time (locked + active)
+      final activeTimeTracker = Provider.of<ActiveTimeTracker>(context, listen: false);
+      await esenciaService.calculatePendingEsencia(nativeBridge, activeTimeTracker);
       
       // Check permissions
       await permissionService.checkPermission();

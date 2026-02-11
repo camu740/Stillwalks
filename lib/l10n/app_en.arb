@@ -71,5 +71,15 @@
   "getCreatureDescription": "Description",
   "orb": "Orb",
   "rarity": "Rarity",
-  "adventureContinues": "Adventure awaits!"
+  "adventureContinues": "Adventure awaits!",
+  
+  "explorerLevel": "Explorer Level",
+  "howToGainXp": "How to gain experience?",
+  "xpSourceBuyOrbs": "Buy orbs",
+  "xpSourceChannelOrbs": "Channel orbs",
+  "xpSourceBuyUpgrades": "Buy upgrades",
+  "xpSourceBuySanctuaries": "Buy sanctuaries",
+  "xpSourceUpgradeSanctuaries": "Upgrade sanctuaries",
+  "levelUpToUnlock": "Level up to unlock new features",
+  "understood": "Got it"
 }

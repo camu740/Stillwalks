@@ -475,5 +475,15 @@
   "noIssues": "No se detectaron problemas",
   "none": "Ninguno",
   "justNow": "Justo ahora",
-  "adventureContinues": "¡A la aventura!"
+  "adventureContinues": "¡A la aventura!",
+  
+  "explorerLevel": "Nivel de Explorador",
+  "howToGainXp": "¿Cómo ganar experiencia?",
+  "xpSourceBuyOrbs": "Comprar orbes",
+  "xpSourceChannelOrbs": "Canalizar orbes",
+  "xpSourceBuyUpgrades": "Comprar mejoras",
+  "xpSourceBuySanctuaries": "Comprar santuarios",
+  "xpSourceUpgradeSanctuaries": "Mejorar santuarios",
+  "levelUpToUnlock": "Sube de nivel para desbloquear nuevas funcionalidades",
+  "understood": "Entendido"
 }

@@ -3,9 +3,11 @@ package com.stillwalks.app
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import android.util.Log
 
 /**
@@ -29,13 +31,26 @@ class TrackingForegroundService : Service() {
         super.onCreate()
         notificationManager = StillwalksNotificationManager(this)
         
-        // Ensure step counter is running as long as the service is alive
-        StepCounterService.getInstance(this).start()
+        Log.d(TAG, "📱 Tracking service created")
         
-        // Ensure screen tracker is running (for passive essence)
-        ScreenLockTracker.getInstance(this).start()
+        // Verificar permiso antes de iniciar servicios
+        val hasPermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACTIVITY_RECOGNITION
+        ) == PackageManager.PERMISSION_GRANTED
         
-        Log.d(TAG, "Tracking service created")
+        if (hasPermission) {
+            Log.d(TAG, "✅ ACTIVITY_RECOGNITION permission granted, starting services")
+            
+            // Ensure step counter is running as long as the service is alive
+            StepCounterService.getInstance(this).start()
+            
+            // Ensure screen tracker is running (for passive essence)
+            ScreenLockTracker.getInstance(this).start()
+        } else {
+            Log.e(TAG, "❌ ACTIVITY_RECOGNITION permission not granted in foreground service")
+            Log.e(TAG, "Step counter and screen tracker will NOT start")
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

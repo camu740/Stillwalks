@@ -90,23 +90,52 @@ class EsenciaService extends ChangeNotifier {
     await loadPlayerState();
   }
 
-  /// Calcula y añade la Esencia pendiente basada en tiempo offline
-  Future<void> calculatePendingEsencia() async {
-    final now = DateTime.now();
-    final elapsedMinutes = now.difference(_playerState.lastActiveTimestamp).inMinutes;
-
-    // Aplicar límite de 12 horas
-    final cappedMinutes = elapsedMinutes > (maxAccumulableHours * 60)
-        ? maxAccumulableHours * 60
-        : elapsedMinutes;
-
-    final hoursElapsed = cappedMinutes / 60.0;
-    final esenciaGenerated = _playerState.esenciaPerHour * hoursElapsed;
-
-    // Use addEsencia to trigger stream events for game mechanics
-    if (esenciaGenerated > 0) {
+  /// Calcula y añade la Esencia pendiente basada en:
+  /// 1. Tiempo con móvil bloqueado (desde Android)
+  /// 2. Tiempo activo en Stillwalks (desde ActiveTimeTracker)
+  Future<void> calculatePendingEsencia(NativeBridge nativeBridge, activeTimeTracker) async {
+    try {
+      // 1. Obtener tiempo bloqueado desde Android nativo
+      final lockedMinutes = await nativeBridge.getAccumulatedLockedMinutes();
+      
+      // 2. Obtener tiempo activo en Stillwalks
+      final activeMinutes = activeTimeTracker.getCurrentAccumulatedMinutes();
+      
+      // 3. Sumar ambos tiempos
+      final totalMinutes = lockedMinutes + activeMinutes;
+      
+      // 4. Aplicar límite de 24 horas
+      final cappedMinutes = totalMinutes > (24 * 60) ? 24 * 60 : totalMinutes;
+      final hoursElapsed = cappedMinutes / 60.0;
+      
+      // 5. Calcular esencia generada
+      final esenciaGenerated = _playerState.esenciaPerHour * hoursElapsed;
+      
+      debugPrint('💎 EsenciaService: Locked: ${lockedMinutes}min, Active: ${activeMinutes}min, Total: ${cappedMinutes}min (${hoursElapsed.toStringAsFixed(2)}h)');
+      
+      if (esenciaGenerated <= 0) {
+        debugPrint('💎 EsenciaService: No essence to generate');
+        return;
+      }
+      
+      // 6. Actualizar timestamp ANTES de añadir esencia (evitar feedback loop)
+      final now = DateTime.now();
+      _playerState = _playerState.copyWith(
+        lastActiveTimestamp: now,
+      );
+      await _db.updatePlayerState(_playerState.toJson());
+      
+      // 7. Añadir esencia
       await addEsencia(esenciaGenerated);
-      debugPrint('💰 EsenciaService: Calculated $esenciaGenerated pending essence from $hoursElapsed hours offline');
+      
+      // 8. Reset contadores en ambos trackers
+      await nativeBridge.resetAccumulatedTime();
+      activeTimeTracker.reset();
+      
+      debugPrint('💰 EsenciaService: Generated $esenciaGenerated essence from ${hoursElapsed.toStringAsFixed(2)} hours (locked + active)');
+      
+    } catch (e) {
+      debugPrint('❌ EsenciaService: Error calculating pending essence: $e');
     }
   }
 
@@ -124,9 +153,11 @@ class EsenciaService extends ChangeNotifier {
   Future<void> addEsencia(double amount, {bool fromNative = false}) async {
     if (amount <= 0) return;
 
+    // CRÍTICO: NO actualizar lastActiveTimestamp aquí
+    // Esto causaba el feedback loop que generaba esencia infinita
     _playerState = _playerState.copyWith(
       totalEsencia: _playerState.totalEsencia + amount,
-      lastActiveTimestamp: DateTime.now(),
+      // lastActiveTimestamp se actualiza SOLO en calculatePendingEsencia
     );
 
     await _db.updatePlayerState(_playerState.toJson());
@@ -356,8 +387,8 @@ class EsenciaService extends ChangeNotifier {
     // Force player state update to save Essence spending and potentially synced data
     await _db.updatePlayerState(_playerState.toJson());
     
-    // Add XP for purchasing upgrade (10 XP)
-    addXp(10);
+    // Add XP for purchasing upgrade (20 XP)
+    addXp(20);
 
     notifyListeners();
     return true;

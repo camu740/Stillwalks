@@ -65,6 +65,170 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  void _showLevelInfoDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.info_outline, color: Colors.amber, size: 28),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.explorerLevel,
+                style: const TextStyle(
+                  color: Colors.amber,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.howToGainXp,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildXpSource(
+                icon: Icons.circle_outlined,
+                text: l10n.xpSourceBuyOrbs,
+                xp: '10-50',
+                color: Colors.purple,
+              ),
+              const SizedBox(height: 10),
+              _buildXpSource(
+                icon: Icons.bolt,
+                text: l10n.xpSourceChannelOrbs,
+                xp: '25-100',
+                color: Colors.orange,
+              ),
+              const SizedBox(height: 10),
+              _buildXpSource(
+                icon: Icons.trending_up,
+                text: l10n.xpSourceBuyUpgrades,
+                xp: '20',
+                color: Colors.green,
+              ),
+              const SizedBox(height: 10),
+              _buildXpSource(
+                icon: Icons.auto_awesome,
+                text: l10n.xpSourceBuySanctuaries,
+                xp: '35',
+                color: Colors.cyan,
+              ),
+              const SizedBox(height: 10),
+              _buildXpSource(
+                icon: Icons.fort,
+                text: l10n.xpSourceUpgradeSanctuaries,
+                xp: '20',
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lightbulb_outline, color: Colors.blue, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.levelUpToUnlock,
+                        style: TextStyle(
+                          color: Colors.blue.shade200,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.amber,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: Text(
+              l10n.understood,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildXpSource({required IconData icon, required String text, required String xp, required Color color}) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+        ),
+        const SizedBox(width: 16), // Increased from 8 to 16 for more breathing room
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), // Slightly larger badge
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
+          ),
+          child: Text(
+            '+$xp XP',
+            style: const TextStyle(
+              color: Colors.green,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -242,45 +406,48 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               
                               // Right Side: Player Level Info
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 48,
-                                        height: 48,
-                                        child: CircularProgressIndicator(
-                                          value: nextLevelXp != null 
-                                            ? esenciaService.playerState.currentXp / nextLevelXp 
-                                            : 1.0,
-                                          backgroundColor: Colors.white10,
-                                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
-                                          strokeWidth: 4,
+                              GestureDetector(
+                                onTap: () => _showLevelInfoDialog(context),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: 48,
+                                          height: 48,
+                                          child: CircularProgressIndicator(
+                                            value: nextLevelXp != null 
+                                              ? esenciaService.playerState.currentXp / nextLevelXp 
+                                              : 1.0,
+                                            backgroundColor: Colors.white10,
+                                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                                            strokeWidth: 4,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        '${esenciaService.playerState.explorerLevel}',
-                                        style: const TextStyle(
-                                          color: Colors.amber,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                                        Text(
+                                          '${esenciaService.playerState.explorerLevel}',
+                                          style: const TextStyle(
+                                            color: Colors.amber,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                 const SizedBox(height: 8),
-                                  Text(
-                                    '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
+                                      ],
                                     ),
-                                  ),
-                                ],
+                                   const SizedBox(height: 8),
+                                    Text(
+                                      '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

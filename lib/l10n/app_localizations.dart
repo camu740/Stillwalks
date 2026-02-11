@@ -1909,6 +1909,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'¡A la aventura!'**
   String get adventureContinues;
+
+  /// No description provided for @explorerLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nivel de Explorador'**
+  String get explorerLevel;
+
+  /// No description provided for @howToGainXp.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo ganar experiencia?'**
+  String get howToGainXp;
+
+  /// No description provided for @xpSourceBuyOrbs.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprar orbes'**
+  String get xpSourceBuyOrbs;
+
+  /// No description provided for @xpSourceChannelOrbs.
+  ///
+  /// In es, this message translates to:
+  /// **'Canalizar orbes'**
+  String get xpSourceChannelOrbs;
+
+  /// No description provided for @xpSourceBuyUpgrades.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprar mejoras'**
+  String get xpSourceBuyUpgrades;
+
+  /// No description provided for @xpSourceBuySanctuaries.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprar santuarios'**
+  String get xpSourceBuySanctuaries;
+
+  /// No description provided for @xpSourceUpgradeSanctuaries.
+  ///
+  /// In es, this message translates to:
+  /// **'Mejorar santuarios'**
+  String get xpSourceUpgradeSanctuaries;
+
+  /// No description provided for @levelUpToUnlock.
+  ///
+  /// In es, this message translates to:
+  /// **'Sube de nivel para desbloquear nuevas funcionalidades'**
+  String get levelUpToUnlock;
+
+  /// No description provided for @understood.
+  ///
+  /// In es, this message translates to:
+  /// **'Entendido'**
+  String get understood;
 }
 
 class _AppLocalizationsDelegate

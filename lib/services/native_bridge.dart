@@ -56,11 +56,41 @@ class NativeBridge {
   /// Detiene el tracking nativo
   Future<void> stopTracking() async {
     try {
-      final result = await platform.invokeMethod('stopTracking');
-      debugPrint('NativeBridge: $result');
+      await platform.invokeMethod('stopBackgroundServices');
+      debugPrint('🛑 NativeBridge: Stopped background services');
+    } catch (e) {
+      debugPrint('❌ NativeBridge: Error stopping background services: $e');
+    }
+  }
+
+  /// Obtiene el tiempo acumulado con el móvil bloqueado (en minutos)
+  Future<int> getAccumulatedLockedMinutes() async {
+    try {
+      final int minutes = await platform.invokeMethod('getAccumulatedLockedMinutes');
+      debugPrint('🔒 NativeBridge: Got accumulated locked time: $minutes minutes');
+      return minutes;
+    } catch (e) {
+      debugPrint('❌ NativeBridge: Error getting locked time: $e');
+      return 0;
+    }
+  }
+
+  /// Resetea el contador de tiempo bloqueado en Android
+  Future<void> resetAccumulatedTime() async {
+    try {
+      await platform.invokeMethod('resetAccumulatedTime');
+      debugPrint('🔄 NativeBridge: Reset accumulated locked time');
+    } catch (e) {
+      debugPrint('❌ NativeBridge: Error resetting locked time: $e');
+    }
+  }
+
+  Future<void> updateIdleMultiplier(double multiplier) async {
+    try {
+      await platform.invokeMethod('updateIdleMultiplier', {'multiplier': multiplier});
+      debugPrint('NativeBridge: Idle multiplier updated to $multiplier');
     } on PlatformException catch (e) {
-      debugPrint('NativeBridge: Error stopping tracking: ${e.message}');
-      rethrow;
+      debugPrint('NativeBridge: Error updating idle multiplier: ${e.message}');
     }
   }
   

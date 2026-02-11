@@ -1005,4 +1005,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adventureContinues => 'Adventure awaits!';
+
+  @override
+  String get explorerLevel => 'Explorer Level';
+
+  @override
+  String get howToGainXp => 'How to gain experience?';
+
+  @override
+  String get xpSourceBuyOrbs => 'Buy orbs';
+
+  @override
+  String get xpSourceChannelOrbs => 'Channel orbs';
+
+  @override
+  String get xpSourceBuyUpgrades => 'Buy upgrades';
+
+  @override
+  String get xpSourceBuySanctuaries => 'Buy sanctuaries';
+
+  @override
+  String get xpSourceUpgradeSanctuaries => 'Upgrade sanctuaries';
+
+  @override
+  String get levelUpToUnlock => 'Level up to unlock new features';
+
+  @override
+  String get understood => 'Got it';
 }

@@ -2,12 +2,14 @@ package com.stillwalks.app
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import android.content.Intent // Added import
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.BinaryMessenger // Explicit import for clarity
@@ -73,21 +75,43 @@ class StepCounterService private constructor(
     // In this refactor, methodChannel is nullable.
 
     fun start() {
-        if (isTracking) return
+        if (isTracking) {
+            Log.d(TAG, "Step counter already tracking")
+            return
+        }
+        
+        // Verificar permiso de ACTIVITY_RECOGNITION en runtime
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACTIVITY_RECOGNITION
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        if (!hasPermission) {
+            Log.e(TAG, "❌ ACTIVITY_RECOGNITION permission not granted! Cannot start step counter.")
+            Log.e(TAG, "Please ensure the permission is granted in the app settings.")
+            return
+        }
+        
+        Log.d(TAG, "✅ ACTIVITY_RECOGNITION permission granted")
         
         if (stepSensor != null) {
             // Cargar estado guardado
             loadState()
             
-            sensorManager.registerListener(
+            val registered = sensorManager.registerListener(
                 this, 
                 stepSensor, 
                 SensorManager.SENSOR_DELAY_NORMAL
             )
-            isTracking = true
-            Log.d(TAG, "Step counter started successfully")
+            
+            if (registered) {
+                isTracking = true
+                Log.d(TAG, "✅ Step counter started successfully and sensor registered")
+            } else {
+                Log.e(TAG, "❌ Failed to register step sensor listener")
+            }
         } else {
-            Log.e(TAG, "Step counter sensor not available on this device")
+            Log.e(TAG, "❌ Step counter sensor not available on this device")
         }
     }
 

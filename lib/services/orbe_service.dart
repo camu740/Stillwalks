@@ -191,10 +191,10 @@ class OrbeService extends ChangeNotifier {
     await _db.updateInventoryItem(typeId, 1);
     await loadData(); // Recargar inventario
     
-    // XP Award: Comprar Santuario Temporal (30 XP)
+    // XP Award: Comprar Santuario Temporal (35 XP)
     // Verificamos si es un item de tipo santuario temporal
     if (typeId.startsWith('temp_sanctuary_')) {
-       _esenciaService?.addXp(30);
+       _esenciaService?.addXp(35);
     }
     
     return true;
@@ -389,8 +389,11 @@ class OrbeService extends ChangeNotifier {
     await _db.updateOrbe(orbeId, {'stillwalkId': instance.id});
     _orbes[orbeIdx] = channeledOrbe;
 
-    // XP Award: Canalizar Orbe (100 XP)
-    _esenciaService?.addXp(100);
+    // XP Award: Canalizar Orbe (25/50/100 XP según rareza)
+    int channelingXp = 25; // Basic
+    if (type.id == 'orbe_advanced') channelingXp = 50;
+    if (type.id == 'orbe_expert') channelingXp = 100;
+    _esenciaService?.addXp(channelingXp);
 
     // XP Award: Descubrimiento (50 XP)
     // Check if this species was already discovered BEFORE this hatch
@@ -575,6 +578,10 @@ class OrbeService extends ChangeNotifier {
     );
     
     await _db.updateSanctuary(sanctuaryId, _sanctuaries[sIdx].toJson());
+    
+    // XP Award: Upgrade Sanctuary Speed (+20 XP)
+    _esenciaService?.addXp(20);
+    
     notifyListeners();
     
     return true;

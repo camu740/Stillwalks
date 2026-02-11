@@ -39,6 +39,19 @@ class MainActivity: FlutterActivity() {
                     stopBackgroundServices()
                     result.success("Tracking stopped")
                 }
+                "getAccumulatedLockedMinutes" -> {
+                    val minutes = screenLockTracker.getAccumulatedLockedMinutes()
+                    result.success(minutes)
+                }
+                "resetAccumulatedTime" -> {
+                    screenLockTracker.resetAccumulatedTime()
+                    result.success(true)
+                }
+                "updateIdleMultiplier" -> {
+                    val multiplier = call.argument<Double>("multiplier") ?: 1.0
+                    screenLockTracker.updateIdleMultiplier(multiplier)
+                    result.success(true)
+                }
                 "getEsencia" -> {
                     // TODO: Obtener Esencia pendiente desde BD (or SharedPrefs if synced)
                     result.success(0.0)
@@ -143,6 +156,19 @@ class MainActivity: FlutterActivity() {
     }
     
     private fun startBackgroundServices() {
+        // Verificar permisos antes de iniciar servicios
+        val hasPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACTIVITY_RECOGNITION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        
+        if (!hasPermission) {
+            android.util.Log.e("MainActivity", "❌ Cannot start services: ACTIVITY_RECOGNITION permission not granted")
+            return
+        }
+        
+        android.util.Log.d("MainActivity", "✅ Starting background services with ACTIVITY_RECOGNITION permission")
+        
         // Iniciar servicio foreground para tracking
         val serviceIntent = Intent(this, TrackingForegroundService::class.java).apply {
             action = TrackingForegroundService.ACTION_START
@@ -156,6 +182,8 @@ class MainActivity: FlutterActivity() {
         // Iniciar tracking
         screenLockTracker.start()
         stepCounter.start()
+        
+        android.util.Log.d("MainActivity", "📱 Background services started")
     }
     
     private fun stopBackgroundServices() {

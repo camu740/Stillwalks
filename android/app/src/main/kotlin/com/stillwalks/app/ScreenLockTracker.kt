@@ -27,7 +27,7 @@ class ScreenLockTracker private constructor(
         
         // Constantes de juego
         private const val BASE_ESENCIA_PER_HOUR = 100.0
-        private const val MAX_ACCUMULATION_HOURS = 12.0
+        private const val MAX_ACCUMULATION_HOURS = 24.0  // Cambiado de 12 a 24
         private const val MILLIS_PER_HOUR = 3600000.0
         
         @Volatile
@@ -123,42 +123,23 @@ class ScreenLockTracker private constructor(
     }
     
     private fun onDeviceUnlocked() {
-        // Usuario desbloqueó - calculamos Esencia generada
+        // Usuario desbloqueó - solo actualizamos timestamps
         val currentTime = System.currentTimeMillis()
         val currentBootTime = SystemClock.elapsedRealtime()
         
         // Anti-cheat: verificar manipulación de hora del sistema
         if (!isTimeValid(currentTime, currentBootTime)) {
-            Log.w(TAG, "Time manipulation detected! Skipping Esencia generation")
-            // Actualizar referencias sin dar Esencia
+            Log.w(TAG, "Time manipulation detected! Resetting timestamps without accumulation")
+            // Actualizar referencias sin acumular tiempo
             lastUnlockTime = currentTime
             lastBootTime = currentBootTime
             saveState()
             return
         }
         
-        // Calcular tiempo transcurrido
-        val elapsedMillis = currentTime - lastUnlockTime
-        val elapsedHours = elapsedMillis / MILLIS_PER_HOUR
+        Log.d(TAG, "Device UNLOCKED - Tracking time only (essence generation handled by Flutter)")
         
-        // Aplicar límite de 12 horas
-        val cappedHours = min(elapsedHours, MAX_ACCUMULATION_HOURS)
-        
-        if (cappedHours > 0) {
-            // Calcular Esencia generada
-            val idleMultiplier = prefs.getFloat(KEY_IDLE_MULTIPLIER, 1.0f).toDouble()
-            val esenciaPerHour = BASE_ESENCIA_PER_HOUR * idleMultiplier
-            val esenciaGenerated = esenciaPerHour * cappedHours
-            
-            Log.d(TAG, "Device UNLOCKED - Generated $esenciaGenerated Esencia (${cappedHours}h)")
-            
-            // Notificar a Flutter
-            notifyFlutter(esenciaGenerated, cappedHours)
-        } else {
-            Log.d(TAG, "Device UNLOCKED - No time elapsed")
-        }
-        
-        // Actualizar timestamps
+        // Actualizar timestamps (Flutter consultará el tiempo acumulado)
         lastUnlockTime = currentTime
         lastBootTime = currentBootTime
         saveState()
@@ -198,10 +179,34 @@ class ScreenLockTracker private constructor(
     
     /**
      * Llamado cuando la app se abre (para recalcular inmediatamente)
+     * DEPRECATED: Flutter ahora maneja el cálculo
      */
     fun onAppOpened() {
-        // Simular desbloqueo para recalcular
-        onDeviceUnlocked()
+        Log.d(TAG, "App opened - Flutter will handle essence calculation")
+    }
+    
+    /**
+     * Obtiene el tiempo acumulado con el móvil bloqueado (en minutos)
+     * Para que Flutter lo combine con tiempo activo en app
+     */
+    fun getAccumulatedLockedMinutes(): Int {
+        val currentTime = System.currentTimeMillis()
+        val elapsedMillis = currentTime - lastUnlockTime
+        val elapsedMinutes = (elapsedMillis / 60000).toInt()  // millis a minutos
+        
+        Log.d(TAG, "Accumulated locked time: $elapsedMinutes minutes")
+        return elapsedMinutes
+    }
+    
+    /**
+     * Resetea el contador de tiempo bloqueado
+     * Llamar después de que Flutter haya procesado la esencia
+     */
+    fun resetAccumulatedTime() {
+        lastUnlockTime = System.currentTimeMillis()
+        lastBootTime = SystemClock.elapsedRealtime()
+        saveState()
+        Log.d(TAG, "Accumulated locked time reset")
     }
     
     /**
@@ -214,6 +219,8 @@ class ScreenLockTracker private constructor(
     
     /**
      * Calcula la Esencia pendiente (generada pero no reclamada)
+     * NOTA: Este método se mantiene para compatibilidad pero Flutter
+     * manejará la generación real de esencia
      */
     fun getPendingEsencia(): Double {
         val currentTime = System.currentTimeMillis()
@@ -222,7 +229,7 @@ class ScreenLockTracker private constructor(
         
         if (elapsedHours <= 0) return 0.0
         
-        val cappedHours = min(elapsedHours, MAX_ACCUMULATION_HOURS)
+        val cappedHours = min(elapsedHours, MAX_ACCUMULATION_HOURS)  // 24h
         val idleMultiplier = prefs.getFloat(KEY_IDLE_MULTIPLIER, 1.0f).toDouble()
         val esenciaPerHour = BASE_ESENCIA_PER_HOUR * idleMultiplier
         
