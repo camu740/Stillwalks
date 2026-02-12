@@ -20,6 +20,8 @@ import 'package:stillwalks/screens/widgets/level_up_dialog.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/screens/widgets/floating_essence_text.dart';
 import 'package:stillwalks/screens/widgets/random_essence_orb.dart';
+import 'package:stillwalks/screens/widgets/shop_shortcut_button.dart';
+import 'package:stillwalks/screens/shop_screen.dart'; // Ensure ShopScreen is imported
 import 'dart:math'; // Added for random position
 
 /// Pantalla principal con el estado del jugador
@@ -135,17 +137,14 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isRandomOrbVisible = false;
       _tapAnimations.add(
-        Positioned(
+        FloatingEssenceText(
           key: ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}'),
-          left: pos.dx,
-          top: pos.dy,
-          child: FloatingEssenceText(
-            text: '+${bonus.toStringAsFixed(0)}',
-            startPosition: pos,
-            color: Colors.lightBlueAccent,
-            fontWeight: FontWeight.w900,
-            fontSize: 24,
-            onComplete: () {
+          text: '+${bonus.toStringAsFixed(0)}',
+          startPosition: pos,
+          color: Colors.lightBlueAccent,
+          fontWeight: FontWeight.w900,
+          fontSize: 24,
+          onComplete: () {
                // Cleanup handled by widget key removal usually or similar logic
                 if (mounted) {
                   setState(() {
@@ -154,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
             },
           ),
-        ),
       );
     });
 
@@ -999,6 +997,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: _tapAnimations,
                 ),
               ),
+              // Shop Shortcuts (Top Right Side)
+              Positioned(
+                top: 170, // Moved down to avoid overlap with top status bar
+                right: 0, // Flush to edge
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Upgrades Shortcut
+                      ShopShortcutButton(
+                        icon: Icons.trending_up, 
+                        iconColor: Colors.greenAccent,
+                        onTap: () {
+                           Navigator.of(context).push(
+                             MaterialPageRoute(
+                               builder: (context) => const ShopScreen(initialTab: 0), // 0 = Upgrades
+                             ),
+                           );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Buildings Shortcut
+                      ShopShortcutButton(
+                        icon: Icons.location_city, 
+                        iconColor: Colors.cyanAccent,
+                        onTap: () {
+                           Navigator.of(context).push(
+                             MaterialPageRoute(
+                               builder: (context) => const ShopScreen(initialTab: 1), // 1 = Buildings
+                             ),
+                           );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               // Random Essence Orb (Moved to top)
               if (_isRandomOrbVisible && _randomOrbPosition != null)
                 Positioned(
