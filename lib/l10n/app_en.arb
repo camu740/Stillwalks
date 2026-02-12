@@ -503,8 +503,9 @@
   
   "explorerLevel": "Explorer Level",
   "howToGainXp": "How to gain experience?",
-  "xpSourceBuyOrbs": "Buy orbs",
-  "xpSourceChannelOrbs": "Channel orbs",
+  "xpSourceBuyOrbs": "Buy Orbs",
+  "xpSourceBuyBuildings": "Buy Buildings",
+  "xpSourceChannelOrbs": "Channel Orbs",
   "xpSourceBuyUpgrades": "Buy upgrades",
   "xpSourceBuySanctuaries": "Buy sanctuaries",
   "xpSourceUpgradeSanctuaries": "Upgrade sanctuaries",

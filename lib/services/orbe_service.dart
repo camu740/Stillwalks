@@ -182,9 +182,9 @@ class OrbeService extends ChangeNotifier {
     _orbes.add(newOrbe);
     
     // XP Award: Comprar Orbe (Variable por tipo)
-    int xpReward = 5; // Basic
-    if (orbeTypeId == 'orbe_advanced') xpReward = 15;
-    if (orbeTypeId == 'orbe_expert') xpReward = 25;
+    int xpReward = 15; // Basic
+    if (orbeTypeId == 'orbe_advanced') xpReward = 45;
+    if (orbeTypeId == 'orbe_expert') xpReward = 90;
     
     _esenciaService?.addXp(xpReward);
     
@@ -425,9 +425,9 @@ class OrbeService extends ChangeNotifier {
     _orbes[orbeIdx] = channeledOrbe;
 
     // XP Award: Canalizar Orbe (25/50/100 XP según rareza)
-    int channelingXp = 25; // Basic
-    if (type.id == 'orbe_advanced') channelingXp = 50;
-    if (type.id == 'orbe_expert') channelingXp = 100;
+    int channelingXp = 60; // Basic
+    if (type.id == 'orbe_advanced') channelingXp = 150;
+    if (type.id == 'orbe_expert') channelingXp = 350;
     _esenciaService?.addXp(channelingXp);
 
     // XP Award: Descubrimiento (50 XP)
@@ -435,7 +435,7 @@ class OrbeService extends ChangeNotifier {
     // (Wait, I just inserted it. So I should check if count == 1 now)
     final isNew = await isNewDiscovery(speciesId);
     if (isNew) {
-       _esenciaService?.addXp(50);
+       _esenciaService?.addXp(150);
        debugPrint('⭐ XP Bonus: New Discovery! (+50 XP)');
     }
 
@@ -614,8 +614,8 @@ class OrbeService extends ChangeNotifier {
     
     await _db.updateSanctuary(sanctuaryId, _sanctuaries[sIdx].toJson());
     
-    // XP Award: Upgrade Sanctuary Speed (+20 XP)
-    _esenciaService?.addXp(20);
+    // XP Award: Upgrade Sanctuary Speed (+40 XP)
+    _esenciaService?.addXp(40);
     
     notifyListeners();
     

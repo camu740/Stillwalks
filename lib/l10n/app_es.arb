@@ -503,8 +503,9 @@
   
   "explorerLevel": "Nivel de Explorador",
   "howToGainXp": "¿Cómo ganar experiencia?",
-  "xpSourceBuyOrbs": "Comprar orbes",
-  "xpSourceChannelOrbs": "Canalizar orbes",
+  "xpSourceBuyOrbs": "Comprar Orbes",
+  "xpSourceBuyBuildings": "Comprar Edificios",
+  "xpSourceChannelOrbs": "Canalizar Orbes",
   "xpSourceBuyUpgrades": "Comprar mejoras",
   "xpSourceBuySanctuaries": "Comprar santuarios",
   "xpSourceUpgradeSanctuaries": "Mejorar santuarios",

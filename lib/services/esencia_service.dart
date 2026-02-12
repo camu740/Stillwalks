@@ -352,7 +352,7 @@ class EsenciaService extends ChangeNotifier {
     _updateMultipliers();
     
     // Add XP for unlocking
-    addXp(10);
+    addXp(40);
 
     notifyListeners();
     return true;
@@ -415,7 +415,7 @@ class EsenciaService extends ChangeNotifier {
     await _db.updatePlayerState(_playerState.toJson());
     
     // Add XP for purchasing upgrade (20 XP)
-    addXp(20);
+    addXp(40);
 
     notifyListeners();
     return true;
@@ -721,7 +721,7 @@ class EsenciaService extends ChangeNotifier {
     await _db.updatePlayerState(_playerState.toJson());
 
     // 5. Add XP
-    addXp(5);
+    addXp(50);
 
     notifyListeners();
     debugPrint('🏗️ Bought ${type.name} for $cost. New count: ${currentCount + 1}');

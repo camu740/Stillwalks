@@ -721,6 +721,10 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             );
             if (success) {
               await esenciaService.spendEsencia(cost);
+              
+              // XP Award: Purchase Sanctuary (+20 XP)
+              esenciaService.addXp(20);
+
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),

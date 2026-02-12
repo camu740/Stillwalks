@@ -2039,13 +2039,19 @@ abstract class AppLocalizations {
   /// No description provided for @xpSourceBuyOrbs.
   ///
   /// In es, this message translates to:
-  /// **'Comprar orbes'**
+  /// **'Comprar Orbes'**
   String get xpSourceBuyOrbs;
+
+  /// No description provided for @xpSourceBuyBuildings.
+  ///
+  /// In es, this message translates to:
+  /// **'Comprar Edificios'**
+  String get xpSourceBuyBuildings;
 
   /// No description provided for @xpSourceChannelOrbs.
   ///
   /// In es, this message translates to:
-  /// **'Canalizar orbes'**
+  /// **'Canalizar Orbes'**
   String get xpSourceChannelOrbs;
 
   /// No description provided for @xpSourceBuyUpgrades.

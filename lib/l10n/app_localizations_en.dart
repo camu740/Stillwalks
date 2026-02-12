@@ -1071,10 +1071,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get howToGainXp => 'How to gain experience?';
 
   @override
-  String get xpSourceBuyOrbs => 'Buy orbs';
+  String get xpSourceBuyOrbs => 'Buy Orbs';
 
   @override
-  String get xpSourceChannelOrbs => 'Channel orbs';
+  String get xpSourceBuyBuildings => 'Buy Buildings';
+
+  @override
+  String get xpSourceChannelOrbs => 'Channel Orbs';
 
   @override
   String get xpSourceBuyUpgrades => 'Buy upgrades';
