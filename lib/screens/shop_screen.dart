@@ -456,6 +456,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
       final type = UpgradeType.energyStorage;
       final isOwned = esenciaService.hasUpgrade(type);
       
+      final progressionService = Provider.of<ProgressionService>(context);
+      // Check unlock status using string ID 'energy_storage'
+      final isUnlocked = progressionService.isItemUnlocked(currentLevel, 'energy_storage');
+      final requiredLevel = progressionService.getRequiredLevelForItem('energy_storage');
+
       Upgrade upgrade;
       double cost;
       String bonusText = '';
@@ -486,7 +491,6 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           bonusText = '${AppLocalizations.of(context)!.unlockCapacityLabel}: 100';
       }
 
-      final progressionService = Provider.of<ProgressionService>(context);
       final upgradeCap = progressionService.getUpgradeCap(currentLevel, type: 'energy_storage');
       final isCappedByLevel = upgrade.currentLevel >= upgradeCap;
       final isMaxLevel = isOwned && upgrade.currentLevel >= type.maxLevel;
@@ -496,42 +500,57 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
            nextReqLevel = progressionService.getLevelRequiredForHigherCap(upgradeCap, type: 'energy_storage');
       }
 
-      return _UpgradeItem(
-        icon: Icons.battery_charging_full,
-        iconColor: Colors.blueAccent, 
-        bonusTextColor: Colors.blueAccent,
-        title: AppLocalizations.of(context)!.upgradeStorageName, 
-        description: AppLocalizations.of(context)!.upgradeStorageDesc,
-        currentLevel: isOwned ? upgrade.currentLevel : 0,
-        maxLevel: type.maxLevel,
-        cost: isMaxLevel ? 0 : cost.toDouble(),
-        currentEsencia: currentEsencia,
-        onPurchase: () async {
-            if (isCappedByLevel || isMaxLevel) return;
+      // Override logic if locked completely
+      if (!isUnlocked) {
+        bonusText = "Requiere Nivel $requiredLevel";
+      }
 
-            final success = await esenciaService.purchaseUpgradeByType(type);
-            if (success) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
-                      AppLocalizations.of(context)!.upgradeStorageName
-                  ))),
-                );
+      return Opacity(
+        opacity: isUnlocked ? 1.0 : 0.6,
+        child: _UpgradeItem(
+          icon: Icons.battery_charging_full,
+          iconColor: Colors.blueAccent, 
+          bonusTextColor: isUnlocked ? Colors.blueAccent : Colors.redAccent,
+          title: AppLocalizations.of(context)!.upgradeStorageName, 
+          description: isUnlocked ? AppLocalizations.of(context)!.upgradeStorageDesc : "Bloqueado hasta Nivel $requiredLevel",
+          currentLevel: isOwned ? upgrade.currentLevel : 0,
+          maxLevel: type.maxLevel,
+          cost: (isMaxLevel || !isUnlocked) ? 0 : cost.toDouble(),
+          currentEsencia: currentEsencia,
+          onPurchase: () async {
+              if (!isUnlocked) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Requiere Nivel $requiredLevel")),
+                 );
+                 return;
               }
-            } else {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
-                );
+  
+              if (isCappedByLevel || isMaxLevel) return;
+  
+              final success = await esenciaService.purchaseUpgradeByType(type);
+              if (success) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
+                        AppLocalizations.of(context)!.upgradeStorageName
+                    ))),
+                  );
+                }
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
+                  );
+                }
               }
-            }
-        },
-        // Add required parameters
-        bonusText: bonusText,
-        isCappedByLevel: isCappedByLevel,
-        nextRequiredLevel: nextReqLevel,
-        isMaxLevel: isMaxLevel,
-        multiplier: '',
+          },
+          // Add required parameters
+          bonusText: bonusText,
+          isCappedByLevel: isCappedByLevel && isUnlocked, // Only show cap warning if unlocked
+          nextRequiredLevel: isUnlocked ? nextReqLevel : null, 
+          isMaxLevel: isMaxLevel,
+          multiplier: '',
+        ),
       );
   }
 

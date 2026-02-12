@@ -420,7 +420,7 @@
   "upgradeStorageBonus": "+200 capacidad / nivel",
   "upgradeSpeedName": "Mejora de Velocidad",
   
-  "sancPrimordialName": "Santuario Primordial",
+  "sancPrimordialName": "Primordial",
   "sancPrimordialDesc": "El primer santuario descubierto. Un lugar tranquilo donde los Orbes pueden canalizar su energía.",
   "sancFastFlowName": "Flujo Rápido",
   "sancFastFlowDesc": "Reduce en un 10% los pasos requeridos (1 uso)",

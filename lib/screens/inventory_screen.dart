@@ -34,42 +34,66 @@ class InventoryScreen extends StatelessWidget {
     final inventoryItems = orbeService.inventory;
 
     // Determinar qué mostrar según el modo
-    // Determined what to show based on mode is now handled by the tab controller
-
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            isSanctuarySelectionMode 
-                ? AppLocalizations.of(context)!.selectSanctuary
-                : (isSelectionMode ? AppLocalizations.of(context)!.selectOrbTitle : AppLocalizations.of(context)!.yourBag)
-          ),
-          backgroundColor: Colors.deepPurple.withValues(alpha: 0.8),
-          bottom: TabBar(
-            tabs: [
-              Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
-              Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
-            ],
-          ),
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.deepPurple.withValues(alpha: 0.8), Colors.black],
+    Widget body;
+    if (isSelectionMode) {
+      // Modo selección de orbe: Solo mostrar lista de orbes
+      body = _buildOrbesTab(context, orbeService, availableOrbes);
+    } else if (isSanctuarySelectionMode) {
+      // Modo selección de santuario (activar): Solo mostrar lista de santuarios
+      body = _buildSantuariosTab(context, orbeService, inventoryItems);
+    } else {
+      // Modo normal: Tabs
+      return DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(AppLocalizations.of(context)!.yourBag),
+            backgroundColor: Colors.deepPurple.withOpacity(0.8),
+            bottom: TabBar(
+              tabs: [
+                Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
+                Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
+              ],
             ),
           ),
-          child: TabBarView(
-            children: [
-              // Tab Orbes
-              _buildOrbesTab(context, orbeService, availableOrbes),
-              // Tab Santuarios
-              _buildSantuariosTab(context, orbeService, inventoryItems),
-            ],
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.deepPurple.withOpacity(0.8), Colors.black],
+              ),
+            ),
+            child: TabBarView(
+              children: [
+                _buildOrbesTab(context, orbeService, availableOrbes),
+                _buildSantuariosTab(context, orbeService, inventoryItems),
+              ],
+            ),
           ),
         ),
+      );
+    }
+
+    // Scaffold sin tabs para modos de selección
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          isSanctuarySelectionMode 
+              ? AppLocalizations.of(context)!.selectSanctuary
+              : (isSelectionMode ? AppLocalizations.of(context)!.selectOrbTitle : AppLocalizations.of(context)!.yourBag)
+        ),
+        backgroundColor: Colors.deepPurple.withOpacity(0.8),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.deepPurple.withOpacity(0.8), Colors.black],
+          ),
+        ),
+        child: body,
       ),
     );
   }

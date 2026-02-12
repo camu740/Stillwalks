@@ -420,7 +420,7 @@
   "upgradeStorageBonus": "+200 capacity / level",
   "upgradeSpeedName": "Speed Upgrade",
   
-  "sancPrimordialName": "Primordial Sanctuary",
+  "sancPrimordialName": "Primordial",
   "sancPrimordialDesc": "The first discovered sanctuary. A quiet place where Orbs can channel their energy.",
   "sancFastFlowName": "Fast Flow",
   "sancFastFlowDesc": "Reduces required steps by 10% (1 use)",

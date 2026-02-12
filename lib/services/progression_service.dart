@@ -58,7 +58,7 @@ class ProgressionService {
       Unlock.item('building_mina', description: "Mina desbloqueada"),
     ]),
     LevelDefinition(level: 4, requiredXp: 1000, unlocks: [ 
-       // Caps handled dynamically
+       Unlock.item('energy_storage', description: "Almacén de Energía desbloqueado"),
     ]),
     LevelDefinition(level: 5, requiredXp: 1650, unlocks: [ 
       Unlock.feature(ProgressionFeature.temporarySanctuarySlot, description: "Slot de Santuario Temporal"),

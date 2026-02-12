@@ -138,7 +138,7 @@ class SanctuarySlot extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 60), // Espacio fijo para alineación consistente (header ~30px + gap)
+                  const SizedBox(height: 35), // Espacio reducido para evitar overflow cuando sale el botón de almacén
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -656,7 +656,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 60),
+                          const SizedBox(height: 35),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,

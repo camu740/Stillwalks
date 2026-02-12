@@ -1643,7 +1643,7 @@ abstract class AppLocalizations {
   /// No description provided for @sancPrimordialName.
   ///
   /// In es, this message translates to:
-  /// **'Santuario Primordial'**
+  /// **'Primordial'**
   String get sancPrimordialName;
 
   /// No description provided for @sancPrimordialDesc.

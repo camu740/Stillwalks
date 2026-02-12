@@ -854,7 +854,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upgradeSpeedName => 'Speed Upgrade';
 
   @override
-  String get sancPrimordialName => 'Primordial Sanctuary';
+  String get sancPrimordialName => 'Primordial';
 
   @override
   String get sancPrimordialDesc =>
