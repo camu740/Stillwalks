@@ -576,7 +576,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Left Side: Essence Collector Info
+                              // Essence Info (Takes available space)
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,13 +641,50 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ],
                                 ),
                               ),
+
+                              const SizedBox(width: 8),
+                             
+                              // Shortcuts (Next to Divider)
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ShopShortcutButton(
+                                    icon: Icons.trending_up,
+                                    iconColor: Colors.greenAccent,
+                                    isCompact: true,
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => const ShopScreen(initialTab: 0),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 6),
+                                  ShopShortcutButton(
+                                    icon: Icons.location_city,
+                                    iconColor: Colors.cyanAccent,
+                                    isCompact: true,
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => const ShopScreen(initialTab: 1),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                               
-                              // Divider
+                              const SizedBox(width: 20),
+                              
+                              // Divider (Restored)
                               Container(
                                 width: 1,
                                 color: Colors.white.withOpacity(0.2),
-                                margin: const EdgeInsets.symmetric(horizontal: 24),
+                                margin: const EdgeInsets.only(right: 20),
                               ),
+
                               
                               // Right Side: Player Level Info
                               GestureDetector(
@@ -699,6 +736,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
   
+
+
                     // Espacio flexible superior
                     const Spacer(),
   
@@ -997,43 +1036,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: _tapAnimations,
                 ),
               ),
-              // Shop Shortcuts (Top Right Side)
-              Positioned(
-                top: 170, // Moved down to avoid overlap with top status bar
-                right: 0, // Flush to edge
-                child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      // Upgrades Shortcut
-                      ShopShortcutButton(
-                        icon: Icons.trending_up, 
-                        iconColor: Colors.greenAccent,
-                        onTap: () {
-                           Navigator.of(context).push(
-                             MaterialPageRoute(
-                               builder: (context) => const ShopScreen(initialTab: 0), // 0 = Upgrades
-                             ),
-                           );
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // Buildings Shortcut
-                      ShopShortcutButton(
-                        icon: Icons.location_city, 
-                        iconColor: Colors.cyanAccent,
-                        onTap: () {
-                           Navigator.of(context).push(
-                             MaterialPageRoute(
-                               builder: (context) => const ShopScreen(initialTab: 1), // 1 = Buildings
-                             ),
-                           );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
 
               // Random Essence Orb (Moved to top)
               if (_isRandomOrbVisible && _randomOrbPosition != null)
