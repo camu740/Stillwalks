@@ -502,7 +502,32 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
       // Override logic if locked completely
       if (!isUnlocked) {
-        bonusText = "Requiere Nivel $requiredLevel";
+         // Show compact locked version using _ShopItem
+         return Opacity(
+           opacity: 0.6,
+           child: _ShopItem(
+              icon: Icons.battery_charging_full,
+              iconColor: Colors.blueAccent,
+              title: AppLocalizations.of(context)!.upgradeStorageName, 
+              description: "Requiere Nivel $requiredLevel",
+              cost: 0,
+              currentEsencia: currentEsencia,
+              isLocked: true,
+              hasBackground: false, // Match other upgrades or keep true? Upgrades usually have background. 
+              // Wait, _UpgradeItem doesn't use background for icon. But _ShopItem does if true. 
+              // Let's use hasBackground: false to match Upgrades tab style (no circle bg for icon).
+              // Or true? Buildings have circle bg. Upgrades don't.
+              // Let's use false to be safe or true if needed.
+              // _UpgradeItem just has Icon(size: 40). 
+              // _ShopItem has leading: hasBackground ? Container(...) : Padding(Icon...).
+              // So false is closer to _UpgradeItem style (just padding).
+              onPurchase: () {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Requiere Nivel $requiredLevel")),
+                 );
+              }
+           ),
+         );
       }
 
       return Opacity(
@@ -512,19 +537,12 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           iconColor: Colors.blueAccent, 
           bonusTextColor: isUnlocked ? Colors.blueAccent : Colors.redAccent,
           title: AppLocalizations.of(context)!.upgradeStorageName, 
-          description: isUnlocked ? AppLocalizations.of(context)!.upgradeStorageDesc : "Bloqueado hasta Nivel $requiredLevel",
+          description: AppLocalizations.of(context)!.upgradeStorageDesc,
           currentLevel: isOwned ? upgrade.currentLevel : 0,
           maxLevel: type.maxLevel,
           cost: (isMaxLevel || !isUnlocked) ? 0 : cost.toDouble(),
           currentEsencia: currentEsencia,
           onPurchase: () async {
-              if (!isUnlocked) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Requiere Nivel $requiredLevel")),
-                 );
-                 return;
-              }
-  
               if (isCappedByLevel || isMaxLevel) return;
   
               final success = await esenciaService.purchaseUpgradeByType(type);
@@ -550,6 +568,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           nextRequiredLevel: isUnlocked ? nextReqLevel : null, 
           isMaxLevel: isMaxLevel,
           multiplier: '',
+          isLocked: !isUnlocked, // Pass isLocked state (though likely irrelevant now)
         ),
       );
   }
@@ -1075,6 +1094,7 @@ class _UpgradeItem extends StatelessWidget {
   final bool isMaxLevel;
   final Color? iconColor; 
   final Color? bonusTextColor;
+  final bool isLocked; // Added
 
   const _UpgradeItem({
     required this.icon,
@@ -1092,12 +1112,16 @@ class _UpgradeItem extends StatelessWidget {
     this.isMaxLevel = false,
     this.iconColor,
     this.bonusTextColor,
+    this.isLocked = false, // Added
   });
 
   @override
   Widget build(BuildContext context) {
     
     final canAfford = currentEsencia >= cost && !isMaxLevel;
+    // Determine effective icon and color
+    final effectiveIcon = isLocked ? Icons.lock : icon;
+    final effectiveIconColor = isLocked ? Colors.grey : (iconColor ?? Colors.greenAccent);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1110,7 +1134,7 @@ class _UpgradeItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 40, color: iconColor ?? Colors.greenAccent),
+              Icon(effectiveIcon, size: 40, color: effectiveIconColor),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -1120,40 +1144,42 @@ class _UpgradeItem extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: isLocked ? Colors.grey : Colors.white,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: isMaxLevel ? Colors.amber.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            isMaxLevel ? 'MAX' : 'Nv. $currentLevel',
-                            style: TextStyle(
-                              fontSize: 12, 
-                              color: isMaxLevel ? Colors.amber : Colors.blueAccent,
-                              fontWeight: FontWeight.bold,
+                        if (!isLocked)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isMaxLevel ? Colors.amber.withOpacity(0.2) : Colors.blueAccent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isMaxLevel ? 'MAX' : 'Nv. $currentLevel',
+                              style: TextStyle(
+                                fontSize: 12, 
+                                color: isMaxLevel ? Colors.amber : Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: const TextStyle(fontSize: 14, color: Colors.white70),
+                      style: TextStyle(fontSize: 14, color: isLocked ? Colors.redAccent.withOpacity(0.8) : Colors.white70),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       bonusText,
                       style: TextStyle(
                         fontSize: 13, 
-                        color: bonusTextColor ?? Colors.greenAccent, 
+                        color: isLocked ? Colors.redAccent : (bonusTextColor ?? Colors.greenAccent), 
                         fontWeight: FontWeight.bold
                       ),
                     ),
@@ -1171,7 +1197,7 @@ class _UpgradeItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (!isMaxLevel)
+              if (!isMaxLevel && !isLocked)
                 Row(
                   children: [
                     const Icon(Icons.auto_awesome, size: 20, color: Colors.amberAccent),
@@ -1186,23 +1212,27 @@ class _UpgradeItem extends StatelessWidget {
                     ),
                   ],
                 )
+              else if (isLocked)
+                 // Keep empty or show 'Locked'? Design choice: Empty left side is fine.
+                 const SizedBox.shrink()
               else
                 const Text(
                   'Nivel máximo alcanzado',
                   style: TextStyle(color: Colors.amber, fontSize: 13, fontWeight: FontWeight.bold),
                 ),
-              if (!isMaxLevel)
+              if (!isMaxLevel || isLocked)
                 ElevatedButton(
-                  onPressed: isCappedByLevel ? null : (canAfford ? onPurchase : null), // Disable if capped
+                  onPressed: isLocked ? onPurchase : (isCappedByLevel ? null : (canAfford ? onPurchase : null)), 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isCappedByLevel ? Colors.grey.withOpacity(0.5) : Colors.greenAccent.withOpacity(0.8),
-                    foregroundColor: isCappedByLevel ? Colors.white70 : Colors.black,
+                    backgroundColor: isLocked ? Colors.grey : (isCappedByLevel ? Colors.grey.withOpacity(0.5) : Colors.greenAccent.withOpacity(0.8)),
+                    foregroundColor: isLocked ? Colors.white : (isCappedByLevel ? Colors.white70 : Colors.black),
                     disabledBackgroundColor: Colors.grey.withOpacity(0.3),
                   ),
                   child: Text(
-                    isCappedByLevel 
+                    isLocked ? (AppLocalizations.of(context)?.locked ?? 'Bloqueado') :
+                    (isCappedByLevel 
                       ? 'Nivel ${nextRequiredLevel ?? "?"}' 
-                      : AppLocalizations.of(context)!.upgrade
+                      : AppLocalizations.of(context)!.upgrade)
                   ),
                 ),
             ],
