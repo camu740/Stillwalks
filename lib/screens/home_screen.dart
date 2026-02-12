@@ -616,7 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         const Icon(Icons.access_time, size: 14, color: Colors.white70),
                                         const SizedBox(width: 4),
                                         Text(
-                                          '+${esenciaPerHour.toStringAsFixed(0)}/h',
+                                          '+${esenciaService.passiveEssencePerSecond.toStringAsFixed(1)}/s',
                                           style: const TextStyle(fontSize: 14, color: Colors.white70),
                                         ),
                                         const SizedBox(width: 8),

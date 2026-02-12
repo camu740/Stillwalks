@@ -571,6 +571,13 @@ class EsenciaService extends ChangeNotifier {
       total *= multiplier;
     }
 
+
+
+    // Apply Idle Multiplier (Recolector de Esencia)
+    if (_playerState.idleMultiplier > 1.0) {
+      total *= _playerState.idleMultiplier;
+    }
+
     // Collection bonuses - TODO: implement getTotalPassiveBonus in CollectionService
     // if (_collectionService != null) {
     //   final collectionBonus = _collectionService!.getTotalPassiveBonus();
