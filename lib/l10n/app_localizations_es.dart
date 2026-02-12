@@ -1065,7 +1065,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get justNow => 'Justo ahora';
 
   @override
-  String get adventureContinues => '¡A la aventura!';
+  String get adventureContinues => '¡Genial!';
 
   @override
   String get explorerLevel => 'Nivel de Explorador';

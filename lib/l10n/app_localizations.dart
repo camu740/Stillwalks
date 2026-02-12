@@ -2021,7 +2021,7 @@ abstract class AppLocalizations {
   /// No description provided for @adventureContinues.
   ///
   /// In es, this message translates to:
-  /// **'¡A la aventura!'**
+  /// **'¡Genial!'**
   String get adventureContinues;
 
   /// No description provided for @explorerLevel.

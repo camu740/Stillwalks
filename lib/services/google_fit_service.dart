@@ -52,10 +52,8 @@ class GoogleFitService extends ChangeNotifier {
   
   /// Habilita Google Fit (requiere permisos del usuario)
   Future<bool> enable() async {
-    if (!_isAvailable) {
-      debugPrint('❌ Cannot enable Google Fit: not available on this device');
-      return false;
-    }
+    // We attempt to enable even if _isAvailable is false, because 
+    // _isAvailable depends on having permissions, which we are about to request.
     
     try {
       debugPrint('🔑 Requesting Google Fit permissions...');

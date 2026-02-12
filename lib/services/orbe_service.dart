@@ -321,10 +321,11 @@ class OrbeService extends ChangeNotifier {
   }
 
   /// Actualiza SOLO los Orbes asignados a santuarios
-  /// Retorna un objeto con { count: int, essenceEarned: double }
+  /// Retorna un objeto con { count: int, essenceEarned: double, unusedSteps: int }
   Future<Map<String, dynamic>> addStepsToActiveOrbes(int newSteps) async {
     int updatedCount = 0;
     double totalEssenceEarned = 0.0;
+    int maxStepsConsumed = 0;
 
     for (var sanctuary in _sanctuaries) {
       if (sanctuary.orbeId != null) {
@@ -341,6 +342,17 @@ class OrbeService extends ChangeNotifier {
           if (type != null) {
              final effectiveRequiredSteps = (type.requiredSteps / sanctuary.speedMultiplier).round();
              if (orbe.currentProgress < effectiveRequiredSteps) {
+               // Pasos necesarios para completar ESTE orbe
+               final stepsNeeded = effectiveRequiredSteps - orbe.currentProgress;
+               
+               // Pasos que realmente consumirá de este batch
+               final stepsConsumed = newSteps > stepsNeeded ? stepsNeeded : newSteps;
+               
+               // Actualizar máximo pasos consumidos por cualquiera de los orbes
+               if (stepsConsumed > maxStepsConsumed) {
+                 maxStepsConsumed = stepsConsumed;
+               }
+
                // Aún necesita pasos
                final essence = await updateOrbeProgress(sanctuary.orbeId!, newSteps);
                totalEssenceEarned += essence;
@@ -351,14 +363,20 @@ class OrbeService extends ChangeNotifier {
       }
     }
 
-    if (updatedCount > 0) {
-      debugPrint('OrbeService: Added steps to $updatedCount orbes. Earned $totalEssenceEarned essence.');
+    // Calcular pasos no utilizados (overflow)
+    // Si no había orbes activos, todos son unused.
+    // Si había orbes, unused = total - max(consumidos por cualquier orbe)
+    final unusedSteps = newSteps - maxStepsConsumed;
+
+    if (updatedCount > 0 || unusedSteps > 0) {
+      debugPrint('OrbeService: Processed $newSteps steps. Used max $maxStepsConsumed. Unused: $unusedSteps. Earned $totalEssenceEarned essence.');
       notifyListeners();
     }
     
     return {
       'count': updatedCount,
-      'essenceEarned': totalEssenceEarned
+      'essenceEarned': totalEssenceEarned,
+      'unusedSteps': unusedSteps
     };
   }
 

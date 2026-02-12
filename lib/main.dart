@@ -91,8 +91,8 @@ class StillwalksApp extends StatelessWidget {
           
           nativeBridge.onStepsUpdated = (newSteps, totalSteps) async {
             final result = await orbeService.addStepsToActiveOrbes(newSteps);
-            final activeOrbs = result['count'] as int;
             final bonusEssence = result['essenceEarned'] as double;
+            final unusedSteps = result['unusedSteps'] as int; // Get unused steps
 
             if (bonusEssence > 0) {
               await esenciaService.addEsencia(bonusEssence);
@@ -102,8 +102,9 @@ class StillwalksApp extends StatelessWidget {
             // Update persistent sync state
             await nativeBridge.setLastSyncedFlutterSteps(totalSteps);
 
-            if (activeOrbs == 0) {
-              await esenciaService.addStoredSteps(newSteps);
+            // Add unused steps to storage (instead of only if activeOrbs == 0)
+            if (unusedSteps > 0) {
+              await esenciaService.addStoredSteps(unusedSteps);
             }
             
             // Check daily goal
@@ -126,18 +127,16 @@ class StillwalksApp extends StatelessWidget {
                 // Add missed steps
                 final result = await orbeService.addStepsToActiveOrbes(diff);
                 final bonusEssence = result['essenceEarned'] as double;
+                final unusedSteps = result['unusedSteps'] as int; // Get unused steps
                 
                 if (bonusEssence > 0) {
                    await esenciaService.addEsencia(bonusEssence);
                    debugPrint('✨ Main: Bonus essence earned from missed steps: $bonusEssence');
                 }
                 
-                // Also store steps if no active orbs (logic duplicated from live update)
-                // Wait, addStepsToActiveOrbes returns count. 
-                // We need to check activeOrbs here too to replicate logic?
-                final activeOrbs = result['count'] as int;
-                if (activeOrbs == 0) {
-                   await esenciaService.addStoredSteps(diff);
+                // Add unused steps to storage
+                if (unusedSteps > 0) {
+                   await esenciaService.addStoredSteps(unusedSteps);
                 }
                 
                 // Update sync state
@@ -161,15 +160,15 @@ class StillwalksApp extends StatelessWidget {
               debugPrint('📊 Synced $googleSteps steps from Google Fit');
               //  Process Google Fit steps the same way as hardware sensor steps
               final result = await orbeService.addStepsToActiveOrbes(googleSteps);
-              final activeOrbs = result['count'] as int;
               final bonusEssence = result['essenceEarned'] as double;
+              final unusedSteps = result['unusedSteps'] as int;
               
               if (bonusEssence > 0) {
                 await esenciaService.addEsencia(bonusEssence);
               }
               
-              if (activeOrbs == 0) {
-                await esenciaService.addStoredSteps(googleSteps);
+              if (unusedSteps > 0) {
+                await esenciaService.addStoredSteps(unusedSteps);
               }
               
               updateWidget();

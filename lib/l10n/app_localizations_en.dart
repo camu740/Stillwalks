@@ -1062,7 +1062,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get justNow => 'Just now';
 
   @override
-  String get adventureContinues => 'Adventure awaits!';
+  String get adventureContinues => 'Wonderful!';
 
   @override
   String get explorerLevel => 'Explorer Level';
