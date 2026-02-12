@@ -21,6 +21,11 @@ class OrbeService extends ChangeNotifier {
   List<OrbeType> _orbeTypes = [];
   List<Sanctuary> _sanctuaries = [];
   List<InventoryItem> _inventory = [];
+
+  // Constants for inventory limits
+  static const int maxOrbs = 10;
+  static const int maxTempSanctuaries = 5;
+
   
   // Tutorial specific: Override next hatch result
   String? _nextHatchOverrideSpeciesId;
@@ -41,6 +46,25 @@ class OrbeService extends ChangeNotifier {
   List<OrbeType> get orbeTypes => _orbeTypes;
   List<Sanctuary> get sanctuaries => _sanctuaries;
   List<InventoryItem> get inventory => _inventory;
+
+  // Helpers to check limits
+  int get currentOrbsCount {
+    final assignedIds = _sanctuaries.map((s) => s.orbeId).whereType<String>().toSet();
+    return _orbes.where((o) => !o.isChanneled && !assignedIds.contains(o.id)).length;
+  }
+  int get currentTempSanctuariesCount {
+    int count = 0;
+    for (var item in _inventory) {
+      if (item.typeId.startsWith('temp_sanctuary_')) {
+        count += item.quantity;
+      }
+    }
+    return count;
+  }
+
+  bool get canPurchaseOrbe => currentOrbsCount < maxOrbs;
+  bool get canPurchaseTempSanctuary => currentTempSanctuariesCount < maxTempSanctuaries;
+
   
   /// Sets the notification services (called from main.dart after initialization)
   void setNotificationServices(NativeBridge nativeBridge, NotificationPreferencesService notificationPrefs, NotificationGuardService notificationGuard) {
@@ -142,6 +166,11 @@ class OrbeService extends ChangeNotifier {
       return null;
     }
 
+    if (!canPurchaseOrbe) {
+      return null;
+    }
+
+
     final newOrbe = Orbe(
       id: 'orbe_${DateTime.now().millisecondsSinceEpoch}',
       orbeTypeId: orbeTypeId,
@@ -152,8 +181,12 @@ class OrbeService extends ChangeNotifier {
     await _db.insertOrbe(newOrbe.toJson());
     _orbes.add(newOrbe);
     
-    // XP Award: Comprar Orbe (20 XP)
-    _esenciaService?.addXp(20);
+    // XP Award: Comprar Orbe (Variable por tipo)
+    int xpReward = 5; // Basic
+    if (orbeTypeId == 'orbe_advanced') xpReward = 15;
+    if (orbeTypeId == 'orbe_expert') xpReward = 25;
+    
+    _esenciaService?.addXp(xpReward);
     
     notifyListeners();
 
@@ -170,10 +203,6 @@ class OrbeService extends ChangeNotifier {
         return 1200.0;
       case 'orbe_expert':
         return 2500.0;
-      case 'orbe_quietude':
-        return 800.0;
-      case 'orbe_essence':
-        return 1500.0;
       default:
         // Fallback genérico para futuros orbes (5% de los pasos)
         final type = getOrbeType(orbeTypeId);
@@ -187,14 +216,20 @@ class OrbeService extends ChangeNotifier {
   /// Compra un objeto de inventario
   Future<bool> purchaseInventoryItem(String typeId, double cost, double esenciaAvailable) async {
     if (esenciaAvailable < cost) return false;
+
+    // Check limit if it's a temporary sanctuary
+    if (typeId.startsWith('temp_sanctuary_') && !canPurchaseTempSanctuary) {
+      return false;
+    }
+
     
     await _db.updateInventoryItem(typeId, 1);
     await loadData(); // Recargar inventario
     
-    // XP Award: Comprar Santuario Temporal (35 XP)
+    // XP Award: Comprar Santuario Temporal (20 XP)
     // Verificamos si es un item de tipo santuario temporal
     if (typeId.startsWith('temp_sanctuary_')) {
-       _esenciaService?.addXp(35);
+       _esenciaService?.addXp(20);
     }
     
     return true;

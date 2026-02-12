@@ -18,6 +18,9 @@ import 'dart:async';
 import 'package:stillwalks/services/progression_service.dart';
 import 'package:stillwalks/screens/widgets/level_up_dialog.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:stillwalks/screens/widgets/floating_essence_text.dart';
+import 'package:stillwalks/screens/widgets/random_essence_orb.dart';
+import 'dart:math'; // Added for random position
 
 /// Pantalla principal con el estado del jugador
 class HomeScreen extends StatefulWidget {
@@ -31,6 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _shopButtonKey = GlobalKey();
   final GlobalKey _sanctuarySlotKey = GlobalKey();
   StreamSubscription<int>? _levelUpSubscription;
+  
+  // Tap animation state
+  final List<Widget> _tapAnimations = [];
+  int _tapIdCounter = 0;
+
+  // Random Orb State
+  Timer? _randomOrbTimer;
+  Offset? _randomOrbPosition;
+  bool _isRandomOrbVisible = false;
+  final Random _random = Random();
 
   @override
   void initState() {
@@ -41,12 +54,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _levelUpSubscription = esenciaService.onLevelUp.listen((newLevel) {
         _showLevelUpDialog(newLevel);
       });
+      
+      // Check for offline essence collected
+      _checkOfflineEssence();
     });
+
+    _startRandomOrbTimer();
   }
 
   @override
   void dispose() {
     _levelUpSubscription?.cancel();
+    _randomOrbTimer?.cancel();
     super.dispose();
   }
 
@@ -62,6 +81,221 @@ class _HomeScreenState extends State<HomeScreen> {
         newLevel: newLevel,
         unlocks: levelDef.unlocks,
         onDismiss: () => Navigator.of(context).pop(),
+      ),
+    );
+  }
+
+
+
+  void _startRandomOrbTimer() {
+    _randomOrbTimer?.cancel();
+    // Random interval between 5 and 45 seconds
+    final nextInterval = _random.nextInt(41) + 5;
+    _randomOrbTimer = Timer(Duration(seconds: nextInterval), () {
+      if (mounted) {
+        _showRandomOrb();
+      }
+    });
+  }
+
+  void _showRandomOrb() {
+    // Calculate random position (safe area roughly)
+    // Avoid top bar and bottom nav
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    // Margins
+    final minX = 40.0;
+    final maxX = screenWidth - 100.0;
+    final minY = 100.0; // Below top stats
+    final maxY = screenHeight - 200.0; // Above nav
+
+    setState(() {
+      _randomOrbPosition = Offset(
+        minX + _random.nextDouble() * (maxX - minX),
+        minY + _random.nextDouble() * (maxY - minY),
+      );
+      _isRandomOrbVisible = true;
+    });
+  }
+
+  void _handleRandomOrbTap() {
+    if (!_isRandomOrbVisible) return;
+
+    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+    
+    // Reward calculation: 5x Base Tap Strength (without multipliers)
+    final bonus = esenciaService.baseTapStrength * 5;
+    
+    esenciaService.addEsencia(bonus); 
+
+    // Show floating text
+    final pos = _randomOrbPosition ?? Offset.zero;
+    
+    setState(() {
+      _isRandomOrbVisible = false;
+      _tapAnimations.add(
+        Positioned(
+          key: ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}'),
+          left: pos.dx,
+          top: pos.dy,
+          child: FloatingEssenceText(
+            text: '+${bonus.toStringAsFixed(0)}',
+            startPosition: pos,
+            color: Colors.lightBlueAccent,
+            fontWeight: FontWeight.w900,
+            fontSize: 24,
+            onComplete: () {
+               // Cleanup handled by widget key removal usually or similar logic
+                if (mounted) {
+                  setState(() {
+                    _tapAnimations.removeWhere((w) => w.key == ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}'));
+                  });
+                }
+            },
+          ),
+        ),
+      );
+    });
+
+    _startRandomOrbTimer(); // Restart cycle
+  }
+
+  void _handleTap(TapDownDetails details) {
+    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+    final earned = esenciaService.handleTap();
+    
+    // Add floating text animation
+    final id = _tapIdCounter++;
+    
+    setState(() {
+      _tapAnimations.add(
+        Positioned(
+          key: ValueKey('tap_$id'),
+          left: details.globalPosition.dx,
+          top: details.globalPosition.dy,
+          child: FloatingEssenceText(
+            text: '+${earned.toStringAsFixed(0)}',
+            startPosition: details.globalPosition,
+            onComplete: () {
+              if (mounted) {
+                setState(() {
+                  _tapAnimations.removeWhere((widget) => widget.key == ValueKey('tap_$id'));
+                });
+              }
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  void _checkOfflineEssence() {
+    final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+    
+    if (esenciaService.lastOfflineEarnedEssence > 0) {
+      // Small delay to ensure dialog appears after screen is ready
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _showOfflineEssenceDialog(esenciaService.lastOfflineEarnedEssence);
+          esenciaService.clearOfflineEarnedEssence();
+        }
+      });
+    }
+  }
+
+  void _showOfflineEssenceDialog(double essence) {
+    final l10n = AppLocalizations.of(context)!;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.auto_awesome, color: Colors.amber, size: 28),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.offlineEssenceCollectedTitle,
+                style: const TextStyle(
+                  color: Colors.amber,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.amber.withValues(alpha: 0.3),
+                    Colors.deepPurple.withValues(alpha: 0.3),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 32),
+                  const SizedBox(width: 12),
+                  Text(
+                    essence.toStringAsFixed(0),
+                    style: const TextStyle(
+                      color: Colors.amber,
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.offlineEssenceCollectedBody,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.amber,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            child: Text(
+              l10n.adventureContinues,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -284,8 +518,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return TutorialManager(
       child: TutorialOverlay(
-      child: Stack(
-        children: [
+        child: GestureDetector(
+          onTapDown: _handleTap,
+          behavior: HitTestBehavior.opaque, // Capture taps even on empty space
+          child: Stack(
+            children: [
+              // Background (if any)
+              Container(color: Colors.black), // Ensure background is hit-testable if it was transparent
+              
+              // Floating animations (moved to top of stack)
+              // ..._tapAnimations,  <-- REMOVED from here
+              
+              // Main UI Content
+              Stack(
+                children: [
           PopScope(
             canPop: tutorialService.isCompleted,
             onPopInvokedWithResult: (didPop, result) {
@@ -651,102 +897,130 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          floatingActionButton: kDebugMode
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FloatingActionButton.extended(
-                      heroTag: 'essence_btn',
-                      onPressed: () async {
-                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                        await esenciaService.addEsencia(1000.0);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.flash_on),
-                      label: const Text('+1000 Esencia'),
-                      backgroundColor: Colors.amber,
-                    ),
-                    const SizedBox(height: 16),
-                    FloatingActionButton.extended(
-                      heroTag: 'steps_btn',
-                      onPressed: () async {
-                        final orbeService = Provider.of<OrbeService>(context, listen: false);
-                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                        
-                        const steps = 500;
-                        final activeOrbs = await orbeService.addStepsToActiveOrbes(steps);
-                        if (activeOrbs['count'] == 0) {
-                          await esenciaService.addStoredSteps(steps);
-                        }
-                        esenciaService.updateSteps(steps);
-                        
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('DEBUG: +500 pasos simulados')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.directions_run),
-                      label: const Text('+500 Pasos'),
-                      backgroundColor: Colors.redAccent,
-                    ),
-                    const SizedBox(height: 16),
-                    FloatingActionButton.extended(
-                      heroTag: 'storage_btn',
-                      onPressed: () {
-                        final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                        esenciaService.addStoredSteps(100);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('DEBUG: +100 pasos al Almacén')),
-                        );
-                      },
-                      icon: const Icon(Icons.battery_charging_full),
-                      label: const Text('+100 Almacén'),
-                      backgroundColor: Colors.blueAccent,
-                    ),
-                    const SizedBox(height: 16),
-                    FloatingActionButton.extended(
-                      heroTag: 'reset_btn',
-                      onPressed: () async {
-                         final orbeService = Provider.of<OrbeService>(context, listen: false);
-                         final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                         final tutorialService = Provider.of<TutorialService>(context, listen: false);
 
-                         final db = DatabaseHelper();
-                         await db.resetDatabase();
-                         
-                         // Services must reset their internal state too
-                         await orbeService.initialize();
-                         await esenciaService.resetProgress(); // Explicitly reset player state in memory
-                         // Re-initialize to load fresh state from DB (though resetProgress sets memory)
-                         await esenciaService.initialize(); 
-                         
-                         await tutorialService.resetTutorial();
-                         
-                         if (context.mounted) {
+              floatingActionButton: kDebugMode
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FloatingActionButton.extended(
+                          heroTag: 'essence_btn',
+                          onPressed: () async {
+                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                            await esenciaService.addEsencia(1000.0);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.flash_on),
+                          label: const Text('+1000 Esencia'),
+                          backgroundColor: Colors.amber,
+                        ),
+                        const SizedBox(height: 16),
+                        FloatingActionButton.extended(
+                          heroTag: 'steps_btn',
+                          onPressed: () async {
+                            final orbeService = Provider.of<OrbeService>(context, listen: false);
+                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                            
+                            const steps = 500;
+                            final activeOrbs = await orbeService.addStepsToActiveOrbes(steps);
+                            if (activeOrbs['count'] == 0) {
+                              await esenciaService.addStoredSteps(steps);
+                            }
+                            esenciaService.updateSteps(steps);
+                            
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('DEBUG: +500 pasos simulados')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.directions_run),
+                          label: const Text('+500 Pasos'),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                        const SizedBox(height: 16),
+                        FloatingActionButton.extended(
+                          heroTag: 'storage_btn',
+                          onPressed: () {
+                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                            esenciaService.addStoredSteps(100);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('DEBUG: +100 pasos al Almacén')),
+                            );
+                          },
+                          icon: const Icon(Icons.battery_charging_full),
+                          label: const Text('+100 Almacén'),
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                        const SizedBox(height: 16),
+                        FloatingActionButton.extended(
+                          heroTag: 'reset_btn',
+                          onPressed: () async {
+                             final orbeService = Provider.of<OrbeService>(context, listen: false);
+                             final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                             final tutorialService = Provider.of<TutorialService>(context, listen: false);
 
-                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('DEBUG: Base de datos REINICIADA y Servicios Recargados 💥')),
-                          );
-                         }
-                      },
-                      icon: const Icon(Icons.delete_forever),
-                      label: const Text('Reset DB'),
-                      backgroundColor: Colors.black,
-                    ),
-                  ],
-                )
-              : null,
+                             final db = DatabaseHelper();
+                             await db.resetDatabase();
+                             
+                             // Services must reset their internal state too
+                             await orbeService.initialize();
+                             await esenciaService.resetProgress(); // Explicitly reset player state in memory
+                             // Re-initialize to load fresh state from DB (though resetProgress sets memory)
+                             await esenciaService.initialize(); 
+                             
+                             await tutorialService.resetTutorial();
+                             
+                             if (context.mounted) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('DEBUG: Base de datos REINICIADA y Servicios Recargados 💥')),
+                              );
+                             }
+                          },
+                          icon: const Icon(Icons.delete_forever),
+                          label: const Text('Reset DB'),
+                          backgroundColor: Colors.black,
+                        ),
+                      ],
+                    )
+                  : null,
+            ),
+          ),
+                ],
+              ),
+              
+              // Floating animations (ON TOP of UI controls)
+              IgnorePointer(
+                ignoring: true, // Let taps pass through to UI
+                child: Stack(
+                  children: _tapAnimations,
+                ),
+              ),
+              // Random Essence Orb (Moved to top)
+              if (_isRandomOrbVisible && _randomOrbPosition != null)
+                Positioned(
+                  left: _randomOrbPosition!.dx,
+                  top: _randomOrbPosition!.dy,
+                  child: RandomEssenceOrb(
+                    onTap: _handleRandomOrbTap,
+                    onDismiss: () {
+                      if (mounted) {
+                        setState(() {
+                          _isRandomOrbVisible = false;
+                        });
+                        _startRandomOrbTimer();
+                      }
+                    },
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-      ],
-    ),
-  ),
-);
+    );
   }
 
 

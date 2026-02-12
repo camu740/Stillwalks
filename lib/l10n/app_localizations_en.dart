@@ -49,7 +49,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSelectionSubtitle =>
-      'You can change this anytime in settings';
+      'You can change this later in settings';
 
   @override
   String get languageSelectionContinue => 'Continue';
@@ -59,15 +59,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please purchase an orb to continue the tutorial.';
 
   @override
-  String get tutorialBlockHome =>
-      'Complete the tutorial to unlock full access.';
+  String get tutorialBlockHome => 'Complete the tutorial to unlock all access.';
 
   @override
   String get welcomeTitle => 'Welcome to Stillwalks';
 
   @override
   String get welcomeSubtitle =>
-      'To provide the best experience, we need your permission for:';
+      'To give you the best experience, we need your permission for:';
 
   @override
   String get permissionActivityTitle => 'Activity Recognition';
@@ -99,7 +98,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutorialWelcomeDesc =>
-      'I am the Forgotten Guardian and I am going to need your help to find all the stillwalks that are lost around the world.\n\nWhen you lock your phone, the Essence collectors start working. This will help you in your adventure.\n\nI have gotten you some Essence so you can buy your first orb without waiting.';
+      'I am the Forgotten Guardian and I need your help to find the lost stillwalks.\n\nTap the screen to generate Essence. You can also buy upgrades to generate it automatically.\n\nI have granted you some starting Essence so you can buy your first orb right away.';
 
   @override
   String get tutorialShopTitle => 'The Shop';
@@ -116,7 +115,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Now assign your new orb to the Primordial Sanctuary to begin its channeling.';
 
   @override
-  String get tutorialEnergyTitle => 'Energy of your steps';
+  String get tutorialEnergyTitle => 'Step Energy';
 
   @override
   String get tutorialEnergyDesc =>
@@ -134,52 +133,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutorialAdventureDesc =>
-      '¡Espectacular! has encontrado una Gamusarra, es una criatura mítica super rara de encontrar\n\nUtiliza la esencia para comprar nuevos orbes o mejoras en la tienda.\n\nRecuerda salir a caminar para que tus orbes canalicen y ¡encuentra a todos los Stillwalks perdidos!';
+      'Spectacular! You\'ve found a Gamusarra, a mythical creature very rare to find.\n\nUse Essence to buy new orbs or upgrades in the shop.\n\nRemember to go out for a walk so your orbs channel and find all the lost Stillwalks!';
 
   @override
-  String get soundVibration => 'Sonido / vibración';
+  String get soundVibration => 'Sound / Vibration';
 
   @override
-  String get soundVibrationDesc => 'Feedback sonoro y háptico';
+  String get soundVibrationDesc => 'Sound and haptic feedback';
 
   @override
-  String get batterySaver => 'Modo ahorro batería';
+  String get batterySaver => 'Battery Saver Mode';
 
   @override
-  String get batterySaverDesc => 'Reduce el consumo de batería';
+  String get batterySaverDesc => 'Reduces battery consumption';
 
   @override
-  String get permanent => 'Permanente';
+  String get permanent => 'Permanent';
 
   @override
-  String get permanentDesc => 'Tracking activo en segundo plano';
+  String get permanentDesc => 'Active background tracking';
 
   @override
-  String get events => 'Eventos';
+  String get events => 'Events';
 
   @override
-  String get eventsDesc => 'Orbes e hitos de esencia';
+  String get eventsDesc => 'Orbs and Essence milestones';
 
   @override
-  String get reminders => 'Recordatorios';
+  String get reminders => 'Reminders';
 
   @override
-  String get remindersDesc => 'Invitaciones a caminar';
+  String get remindersDesc => 'Walk invitations';
 
   @override
-  String get disabledInBatterySaver => 'Desactivado en modo ahorro';
+  String get disabledInBatterySaver => 'Disabled in battery saver mode';
 
   @override
-  String get pauseProgress => 'Pausar progreso';
+  String get pauseProgress => 'Pause progress';
 
   @override
-  String get pauseProgressDesc => 'Detiene temporalmente el tracking';
+  String get pauseProgressDesc => 'Temporarily stops tracking';
 
   @override
-  String get doNotDisturb => 'Horas no molestar';
+  String get doNotDisturb => 'Do Not Disturb hours';
 
   @override
-  String get configure => 'Configurar';
+  String get configure => 'Configure';
 
   @override
   String dndTimeRange(String start, String end) {
@@ -187,308 +186,341 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dndStartTime => 'HORA DE INICIO';
+  String get dndStartTime => 'START TIME';
 
   @override
-  String get dndEndTime => 'HORA DE FIN';
+  String get dndEndTime => 'END TIME';
 
   @override
-  String get dailyGoal => 'Objetivo diario';
+  String get dailyGoal => 'Daily Goal';
 
   @override
   String dailyGoalSteps(int count) {
-    return '$count pasos';
+    return '$count steps';
   }
 
   @override
-  String get selectDailyGoal => 'Objetivo Diario';
+  String get selectDailyGoal => 'Daily Goal';
 
   @override
-  String get permissions => 'Permisos';
+  String get permissions => 'Permissions';
 
   @override
-  String get permissionsDesc => 'Gestionar accesos de la app';
+  String get permissionsDesc => 'Manage app access';
 
   @override
-  String get sensors => 'Sensores';
+  String get sensors => 'Sensors';
 
   @override
-  String get sensorsDesc => 'Estado del podómetro';
+  String get sensorsDesc => 'Pedometer status';
 
   @override
-  String get trackingStatus => 'Estado de seguimiento';
+  String get trackingStatus => 'Tracking Status';
 
   @override
-  String get trackingStatusDesc => 'Resumen del sistema';
+  String get trackingStatusDesc => 'System summary';
 
   @override
-  String get help => 'Ayuda';
+  String get googleFit => 'Google Fit';
 
   @override
-  String get contact => 'Contacto';
+  String get googleFitDesc => 'Use Google Fit for step counting';
 
   @override
-  String get credits => 'Créditos';
+  String get googleFitNotAvailable => 'Google Fit not available on this device';
+
+  @override
+  String get googleFitEnabled => 'Google Fit enabled';
+
+  @override
+  String get googleFitDisabled => 'Google Fit disabled';
+
+  @override
+  String get googleFitPermissionDenied => 'Google Fit permissions denied';
+
+  @override
+  String get help => 'Help';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String get credits => 'Credits';
 
   @override
   String version(String version) {
-    return 'Versión v$version';
+    return 'Version v$version';
   }
 
   @override
-  String get essence => 'Esencia';
+  String get essence => 'Essence';
 
   @override
-  String get orbs => 'Orbes';
+  String get buildings => 'Buildings';
 
   @override
-  String get sanctuary => 'Santuario';
+  String get orbs => 'Orbs';
 
   @override
-  String get collection => 'Colección';
+  String get sanctuary => 'Sanctuary';
 
   @override
-  String get shop => 'Tienda';
+  String get collection => 'Collection';
 
   @override
-  String get essenceCollectorLabel => 'Recolector de Esencia';
+  String get shop => 'Shop';
 
   @override
-  String get freeSlot => 'Ranura libre';
+  String get essenceCollectorLabel => 'Essence Collector';
 
   @override
-  String get activeOrb => 'Orbe activo';
+  String get freeSlot => 'Free Slot';
 
   @override
-  String get readyToChannel => '¡Listo para canalizar!';
+  String get activeOrb => 'Active Orb';
 
   @override
-  String get channel => 'Canalizar';
+  String get readyToChannel => 'Ready to channel!';
 
   @override
-  String get channeling => 'Canalizando...';
+  String get channel => 'Channel';
 
   @override
-  String get selectOrb => 'Seleccionar Orbe';
+  String get channeling => 'Channeling...';
 
   @override
-  String get cancel => 'Cancelar';
+  String get selectOrb => 'Select Orb';
 
   @override
-  String get confirm => 'Confirmar';
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
 
   @override
   String progressSteps(int current, int total) {
-    return '$current/$total pasos';
+    return '$current/$total steps';
   }
 
   @override
   String progressEssence(int current, int total) {
-    return '$current/$total esencia';
+    return '$current/$total essence';
   }
 
   @override
-  String get creature => 'Criatura';
+  String get creature => 'Creature';
 
   @override
-  String get evolution => 'Evolución';
+  String get evolution => 'Evolution';
 
   @override
-  String get basePower => 'Poder base';
+  String get basePower => 'Base Power';
 
   @override
-  String get generation => 'Generación';
+  String get generation => 'Generation';
 
   @override
-  String get buy => 'Comprar';
+  String get buy => 'Buy';
 
   @override
-  String get cost => 'Costo';
+  String get cost => 'Cost';
 
   @override
-  String get owned => 'Posees';
+  String get owned => 'Owned';
 
   @override
-  String get upgrades => 'Mejoras';
+  String get upgrades => 'Upgrades';
 
   @override
-  String get items => 'Objetos';
+  String get items => 'Items';
 
   @override
-  String get permissionsRequired => 'Permisos Necesarios';
+  String get permissionsRequired => 'Permissions Required';
 
   @override
   String get permissionsDescription =>
-      'Stillwalks necesita los siguientes permisos para funcionar:';
+      'Stillwalks needs the following permissions to work:';
 
   @override
-  String get activityPermission => 'Actividad física';
+  String get activityPermission => 'Physical Activity';
 
   @override
-  String get activityPermissionDesc => 'Para contar pasos';
+  String get activityPermissionDesc => 'To count steps';
 
   @override
-  String get notificationPermission => 'Notificaciones';
+  String get notificationPermission => 'Notifications';
 
   @override
-  String get notificationPermissionDesc => 'Para mostrar progreso';
+  String get notificationPermissionDesc => 'To show progress';
 
   @override
-  String get requestPermissions => 'Solicitar permisos';
+  String get requestPermissions => 'Request Permissions';
 
   @override
-  String get welcome => 'Bienvenido';
+  String get welcome => 'Welcome';
 
   @override
-  String get loading => 'Cargando...';
+  String get loading => 'Loading...';
 
   @override
   String get error => 'Error';
 
   @override
-  String get retry => 'Reintentar';
+  String get retry => 'Retry';
 
   @override
   String get close => 'Close';
 
   @override
-  String get save => 'Guardar';
+  String get save => 'Save';
 
   @override
-  String get delete => 'Eliminar';
+  String get delete => 'Delete';
 
   @override
-  String get noCreatures => 'No hay criaturas disponibles';
+  String get noCreatures => 'No creatures available';
 
   @override
-  String get noOrbs => 'No tienes orbes activos';
+  String get noOrbs => 'You have no active orbs';
 
   @override
-  String get notEnoughEssence => 'No tienes suficiente esencia';
+  String get notEnoughEssence => 'Not enough essence';
 
   @override
-  String get orbTypes => 'TIPOS DE ORBE';
+  String get orbTypes => 'ORB TYPES';
 
   @override
-  String get mystical => 'Místico';
+  String get mystical => 'Mystical';
 
   @override
-  String get primal => 'Primigenio';
+  String get primal => 'Primal';
 
   @override
-  String get ethereal => 'Etéreo';
+  String get ethereal => 'Ethereal';
 
   @override
-  String get sanctuarySlots => 'Ranuras de Santuario';
+  String get sanctuarySlots => 'Sanctuary Slots';
 
   @override
   String availableSlots(int count) {
-    return '$count disponibles';
+    return '$count available';
   }
 
   @override
-  String get standardOrbs => 'Orbes Estándar';
+  String get standardOrbs => 'Standard Orbs';
 
   @override
-  String get specialOrbs => 'Orbes Especiales';
+  String get specialOrbs => 'Special Orbs';
 
   @override
-  String get walkReminder => 'Recordatorio para caminar';
+  String get walkReminder => 'Walk Reminder';
 
   @override
-  String get orbReady => 'Orbe listo';
+  String get orbReady => 'Orb Ready';
 
   @override
-  String get milestoneReached => '¡Hito alcanzado!';
+  String get milestoneReached => 'Milestone Reached!';
 
   @override
-  String get essenceGenerated => 'Esencia generada';
+  String get essenceGenerated => 'Essence Generated';
 
   @override
-  String get locked => 'Bloqueado';
+  String get offlineEssenceCollectedTitle => 'Essence Collected!';
 
   @override
-  String get unlocked => 'Desbloqueado';
+  String get offlineEssenceCollectedBody =>
+      'The essence collectors have continued working in your absence';
 
   @override
-  String get upgrade => 'Mejorar';
+  String get locked => 'Locked';
 
   @override
-  String get maxLevel => 'Nivel máximo';
+  String get unlocked => 'Unlocked';
 
   @override
-  String get perHour => '/ hora';
+  String get upgrade => 'Upgrade';
 
   @override
-  String get level => 'Nv.';
+  String get maxLevel => 'Max Level';
 
   @override
-  String get orbsReady => '¡Orbe listo para canalizar!';
+  String get perHour => '/ hour';
 
   @override
-  String get noActiveOrbs => 'Orbes activos';
+  String get level => 'Lv.';
 
   @override
-  String get idleProduction => 'Producción pasiva';
+  String get orbsReady => 'Orb ready to channel!';
 
   @override
-  String get storage => 'Almacén';
+  String get noActiveOrbs => 'Active Orbs';
 
   @override
-  String get explorerJournal => 'Diario de Explorador';
+  String get idleProduction => 'Passive Production';
 
   @override
-  String get sanctuaries => 'Santuarios';
+  String get storage => 'Storage';
 
   @override
-  String get temporarySanctuaries => 'Santuarios Temporales';
+  String get explorerJournal => 'Explorer Journal';
 
   @override
-  String get orbPurchased => '¡Orbe comprado! Revisa tu Bolsa.';
+  String get sanctuaries => 'Sanctuaries';
 
   @override
-  String get sanctuaryPurchased => '¡Santuario comprado! Revisa tu Bolsa.';
+  String get temporarySanctuaries => 'Temporary Sanctuaries';
+
+  @override
+  String get orbPurchased => 'Orb purchased! Check your Bag.';
+
+  @override
+  String get sanctuaryPurchased => 'Sanctuary purchased! Check your Bag.';
+
+  @override
+  String purchaseCompleted(String name) {
+    return '\"$name\" purchase completed!';
+  }
 
   @override
   String upgradeCompleted(String name) {
-    return '¡Mejora \"$name\" realizada!';
+    return '\"$name\" upgrade completed!';
   }
 
   @override
   String sanctuaryUpgraded(String name, int level) {
-    return '¡Mejora de \"$name\" a Nivel $level!';
+    return '\"$name\" upgraded to Level $level!';
   }
 
   @override
-  String get checkBag => 'Revisa tu Bolsa';
+  String get checkBag => 'Check your Bag';
 
   @override
-  String get permanentSanctuaryUpgrades => 'Mejora de Santuario Permanente';
+  String get permanentSanctuaryUpgrades => 'Permanent Sanctuary Upgrades';
 
   @override
-  String get globalUpgrades => 'Mejoras Globales';
+  String get globalUpgrades => 'Essence Upgrades';
 
   @override
-  String get loadingUpgrades => 'Cargando mejoras...';
+  String get loadingUpgrades => 'Loading upgrades...';
 
   @override
-  String get primordialSanctuaries => 'Santuarios Primordiales';
+  String get primordialSanctuaries => 'Primordial Sanctuaries';
 
   @override
-  String get yourBag => 'Tu Bolsa';
+  String get yourBag => 'Your Bag';
 
   @override
-  String get emptySanctuary => 'Santuario Vacío';
+  String get emptySanctuary => 'Empty Sanctuary';
 
   @override
-  String get placeOrb => 'Colocar Orbe';
+  String get placeOrb => 'Place Orb';
 
   @override
-  String get channelNow => '¡Canalizar ahora!';
+  String get channelNow => 'Channel Now!';
 
   @override
   String symbiosisReward(String essence) {
-    return '¡Santuario de Simbiosis te otorgó $essence de Esencia!';
+    return 'Symbiosis Sanctuary granted you $essence Essence!';
   }
 
   @override
@@ -496,7 +528,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String stepsProgress(int current, int total) {
-    return '$current / $total pasos';
+    return '$current / $total steps';
   }
 
   @override
@@ -520,379 +552,389 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rarityLegendary => 'Legendary';
 
   @override
-  String get selectSanctuary => 'Seleccionar Santuario';
+  String get selectSanctuary => 'Select Sanctuary';
 
   @override
-  String get selectOrbTitle => 'Seleccionar Orbe';
+  String get selectOrbTitle => 'Select Orb';
 
   @override
-  String get waitingOrbs => 'Orbes en Espera';
+  String get waitingOrbs => 'Waiting Orbs';
 
   @override
-  String get noOrbsAvailable => 'No tienes orbes disponibles';
+  String get noOrbsAvailable => 'No orbs available';
 
   @override
   String get noOrbsInstructions =>
-      'Visita la tienda para comprar orbes y comenzar a canalizar criaturas';
+      'Visit the shop to buy orbs and start channeling creatures';
 
   @override
-  String get goToShop => 'Ir a tienda';
+  String get goToShop => 'Go to Shop';
 
   @override
-  String get inventoryItems => 'Objetos de Inventario';
+  String get inventoryItems => 'Inventory Items';
 
   @override
-  String get noItemsAvailable => 'No tienes objetos disponibles';
+  String get noItemsAvailable => 'No items available';
 
   @override
   String get noItemsInstructions =>
-      'Los objetos especiales aparecerán aquí cuando los consigas';
+      'Special items will appear here when you get them';
 
   @override
-  String get use => 'Usar';
+  String get use => 'Use';
 
   @override
-  String get quantity => 'Cantidad';
+  String get quantity => 'Quantity';
 
   @override
-  String get noUnassignedOrbs => 'No tienes orbes sin asignar';
+  String get noUnassignedOrbs => 'No unassigned orbs';
 
   @override
-  String get noOrbAssigned => 'Sin orbe asignado';
+  String get noOrbAssigned => 'No orb assigned';
 
   @override
-  String get unknownOrb => 'Orbe Desconocido';
+  String get unknownOrb => 'Unknown Orb';
 
   @override
   String stepsRequired(int count) {
-    return '$count pasos requeridos';
+    return '$count steps required';
   }
 
   @override
-  String get assign => 'Asignar';
+  String get assign => 'Assign';
 
   @override
-  String get inventoryItemsAndSanctuaries => 'Objetos y Santuarios';
+  String get inventoryItemsAndSanctuaries => 'Items and Sanctuaries';
 
   @override
-  String get emptyInventoryBag => 'Bolsa de objetos vacía';
+  String get emptyInventoryBag => 'Empty inventory bag';
 
   @override
   String quantityDisplay(int count) {
-    return 'Cantidad: $count';
+    return 'Quantity: $count';
   }
 
   @override
   String itemActivated(String name) {
-    return '$name Activado';
+    return '$name Activated';
   }
 
   @override
-  String get steps => 'pasos';
+  String get steps => 'steps';
 
   @override
   String get tempSanctuaryAlreadyActive =>
-      'Ya tienes un santuario temporal activo';
+      'You already have a temporary sanctuary active';
 
   @override
   String get newCreatureBadge => 'NEW!';
 
   @override
-  String get useSingular => 'uso';
+  String get useSingular => 'use';
 
   @override
-  String get usesPlural => 'usos';
+  String get usesPlural => 'uses';
 
   @override
-  String get energyStorage => 'Almacén de Energía';
+  String get strengthLabel => 'Strength';
 
   @override
-  String get orbReadyTitle => '✨ Orbe Listo';
+  String get capacityLabel => 'Capacity';
+
+  @override
+  String get unlockCapacityLabel => 'Unlock capacity';
+
+  @override
+  String get unlockLevel1 => 'Unlock level 1';
+
+  @override
+  String get energyStorage => 'Energy Storage';
+
+  @override
+  String get orbReadyTitle => '✨ Orb Ready';
 
   @override
   String orbReadyBody(String type) {
-    return 'Tu $type ha terminado de canalizar';
+    return 'Your $type has finished channeling';
   }
 
   @override
-  String get walkReminderTitle => '🌿 Momento de Paseo';
+  String get walkReminderTitle => '🌿 Time for a Walk';
 
   @override
-  String get walkMsg1 => '¿Un paseo tranquilo?';
+  String get walkMsg1 => 'Time for a walk?';
 
   @override
-  String get walkMsg2 => 'Tal vez es buen momento para caminar';
+  String get walkMsg2 => 'Maybe it\'s a good time to walk';
 
   @override
-  String get walkMsg3 => 'El aire fresco siempre viene bien';
+  String get walkMsg3 => 'Fresh air always feels good';
 
   @override
-  String get walkMsg4 => '¿Qué tal estirar las piernas?';
+  String get walkMsg4 => 'How about stretching your legs?';
 
   @override
-  String get noGoal => 'Sin objetivo';
+  String get noGoal => 'No goal';
 
   @override
-  String get notifyGoal => 'Notificar al conseguir objetivo';
+  String get notifyGoal => 'Notify on goal reached';
 
   @override
   String get notifyGoalDesc =>
-      'Recibe un aviso cuando cumplas tu meta diaria de pasos';
+      'Get a notification when you meet your daily step goal';
 
   @override
-  String get goalReachedTitle => '¡Objetivo Cumplido!';
+  String get goalReachedTitle => 'Goal Achieved!';
 
   @override
   String goalReachedBody(Object goal) {
-    return 'Has alcanzado tu objetivo diario de $goal pasos';
+    return 'You\'ve reached your daily goal of $goal steps';
   }
 
   @override
-  String get trackingServiceTitle => 'Stillwalks activo';
+  String get trackingServiceTitle => 'Stillwalks Active';
 
   @override
-  String get trackingServiceBody => 'Generando Esencia...';
+  String get trackingServiceBody => 'Generating Essence...';
 
   @override
   String get primordial => 'Primordial';
 
   @override
-  String get temporary => 'Temporal';
+  String get temporary => 'Temporary';
 
   @override
-  String get ready => '¡Listo!';
+  String get ready => 'Ready!';
 
   @override
-  String get noActiveOrbsStatus => 'Sin orbes activos';
+  String get noActiveOrbsStatus => 'No active orbs';
 
   @override
-  String get orbsAvailableForPurchase => 'Orbes disponibles para comprar';
+  String get orbsAvailableForPurchase => 'Orbs available for purchase';
 
   @override
-  String get levelAbbr => 'Nv.';
+  String get levelAbbr => 'Lv.';
 
   @override
-  String get emptySlot => 'Vacío';
+  String get emptySlot => 'Empty';
 
   @override
-  String get useStorage => 'Usar Almacén';
+  String get useStorage => 'Use Storage';
 
   @override
-  String get channelEnergy => 'Canalizar Energía';
+  String get channelEnergy => 'Channel Energy';
 
   @override
-  String get chooseEnergyTransfer => 'Elige cuánta energía transferir:';
+  String get chooseEnergyTransfer => 'Choose how much energy to transfer:';
 
   @override
-  String get stepsLower => 'pasos';
+  String get stepsLower => 'steps';
 
   @override
   String storageVsNeeded(int stored, int needed) {
-    return 'Almacén: $stored | Necesarios: $needed';
+    return 'Storage: $stored | Needed: $needed';
   }
 
   @override
-  String get transfer => 'Transferir';
+  String get transfer => 'Transfer';
 
   @override
   String stepsChanneledFromStorage(int count) {
-    return '¡Se canalizaron $count pasos del almacén!';
+    return '$count steps channeled from storage!';
   }
 
   @override
-  String get stats => 'Características:';
+  String get stats => 'Characteristics:';
 
   @override
-  String get typePermanent => 'Tipo: Santuario Permanente';
+  String get typePermanent => 'Type: Permanent Sanctuary';
 
   @override
   String upgradeLevel(int level, String percentage) {
-    return 'Nivel de mejora: $level (-$percentage%)';
+    return 'Upgrade Level: $level (-$percentage%)';
   }
 
   @override
-  String get unlimitedUses => 'Usos: Ilimitados ♾️';
+  String get unlimitedUses => 'Uses: Unlimited ♾️';
 
   @override
-  String get specialAbility => 'Habilidad Especial:';
+  String get specialAbility => 'Special Ability:';
 
   @override
   String get infiniteChannelingDesc =>
-      'Canalización Infinita. Nunca se agota y permite canalizar cualquier tipo de orbe.';
+      'Infinite Channeling. Never runs out and allows channeling any type of orb.';
 
   @override
   String get improveSpeedHint =>
-      'Mejora la velocidad de canalización en la tienda para reducir los pasos necesarios.';
+      'Improve channeling speed in the shop to reduce required steps.';
 
   @override
-  String get activateSanctuary => 'Activar';
+  String get activateSanctuary => 'Activate';
 
   @override
-  String get tapToSelectSanctuary => 'Seleccionar santuarios';
+  String get tapToSelectSanctuary => 'Select Sanctuaries';
 
   @override
   String emptyUses(int count) {
-    return 'Vacío ($count usos)';
+    return 'Empty ($count uses)';
   }
 
   @override
-  String get tapToActivate => 'Toca para activar';
+  String get tapToActivate => 'Tap to activate';
 
   @override
-  String get typeTemporary => 'Tipo: Santuario Temporal';
+  String get typeTemporary => 'Type: Temporary Sanctuary';
 
   @override
-  String get noSanctuariesInBag => 'Sin santuarios disponibles';
+  String get noSanctuariesInBag => 'No sanctuaries available';
 
   @override
   String remainingUses(int count) {
-    return 'Usos restantes: $count';
+    return 'Remaining uses: $count';
   }
 
   @override
   String get destroyWarning =>
-      'Se destruye automáticamente después de agotar todos los usos.';
+      'Automatically destroyed after all uses are exhausted.';
 
   @override
   String get abilityFastFlow =>
-      'Reduce los pasos requeridos en un 10% (multiplicador 1.11x de velocidad).';
+      'Reduces required steps by 10% (1.11x speed multiplier).';
 
   @override
   String get abilitySymbiosis =>
-      'Otorga 1 punto de Esencia por cada 10 pasos realizados durante la canalización.';
+      'Grants 1 Essence point for every 10 steps taken during channeling.';
 
   @override
   String get abilityQuietude =>
-      'Permite eclosionar orbes usando Esencia en lugar de pasos.';
+      'Allows hatching orbs using Essence instead of steps.';
 
   @override
   String get abilityEcho =>
-      'Reduce pasos en 70% pero solo genera criaturas comunes/inusuales.';
+      'Reduces steps by 70% but only generates common/uncommon creatures.';
 
   @override
   String get abilityResonance =>
-      'Aumenta la probabilidad de obtener criaturas raras en +10%.';
+      'Increases the probability of obtaining rare creatures by +10%.';
 
   @override
   String get sanctuary_temp_sanctuary_symbiosis_desc =>
-      'Genera Esencia extra al completar el orbe.';
+      'Generates extra Essence upon completing the orb.';
 
   @override
-  String get abilityActive => 'Habilidad especial activa.';
+  String get abilityActive => 'Special ability active.';
 
   @override
-  String get sanctuary_temp_sanctuary_quietude_name => 'Santuario de Quietud';
+  String get sanctuary_temp_sanctuary_quietude_name => 'Sanctuary of Quietude';
 
   @override
   String get sanctuary_temp_sanctuary_quietude_desc =>
-      'Convierte la Esencia obtenida en pasos para el orbe.';
+      'Converts obtained Essence into steps for the orb.';
 
   @override
-  String get upgradeIdleName => 'Recolector de Esencia';
+  String get upgradeIdleName => 'Essence Collector';
 
   @override
-  String get upgradeIdleDesc =>
-      'Aumenta la velocidad de generación pasiva de Esencia.';
+  String get upgradeIdleDesc => 'Increases passive Essence generation speed.';
 
   @override
-  String get upgradeIdleBonus => '+2% bono / nivel';
+  String get upgradeIdleBonus => '+2% bonus / level';
 
   @override
-  String get upgradeStorageName => 'Almacén de Energía';
+  String get upgradeStorageName => 'Energy Storage';
 
   @override
   String get upgradeStorageDesc =>
-      'Permite almacenar pasos no usados cuando no hay orbes activos.';
+      'Allows storing unused steps when no orbs are active.';
 
   @override
-  String get upgradeStorageBonus => '+200 capacidad / nivel';
+  String get upgradeStorageBonus => '+200 capacity / level';
 
   @override
-  String get upgradeSpeedName => 'Mejora de Velocidad';
+  String get upgradeSpeedName => 'Speed Upgrade';
 
   @override
-  String get sancPrimordialName => 'Primordial';
+  String get sancPrimordialName => 'Primordial Sanctuary';
 
   @override
   String get sancPrimordialDesc =>
-      'El primer santuario descubierto. Un lugar tranquilo donde los Orbes pueden canalizar su energía.';
+      'The first discovered sanctuary. A quiet place where Orbs can channel their energy.';
 
   @override
-  String get sancFastFlowName => 'Flujo Rápido';
+  String get sancFastFlowName => 'Fast Flow';
 
   @override
-  String get sancFastFlowDesc =>
-      'Reduce en un 10% los pasos requeridos (1 uso)';
+  String get sancFastFlowDesc => 'Reduces required steps by 10% (1 use)';
 
   @override
-  String get sancSymbiosisName => 'Simbiosis';
+  String get sancSymbiosisName => 'Symbiosis';
 
   @override
-  String get sancSymbiosisDesc => '+1 Esencia cada 10 pasos (2 usos)';
+  String get sancSymbiosisDesc => '+1 Essence every 10 steps (2 uses)';
 
   @override
-  String get sancQuietudeName => 'Quietud Absoluta';
+  String get sancQuietudeName => 'Absolute Quietude';
 
   @override
-  String get sancQuietudeDesc => 'Eclosión con Esencia (1 uso)';
+  String get sancQuietudeDesc => 'Hatch with Essence (1 use)';
 
   @override
-  String get sancEchoName => 'Eco Vital';
+  String get sancEchoName => 'Vital Echo';
 
   @override
-  String get sancEchoDesc => '-70% pasos | Solo comunes/inusuales (1 uso)';
+  String get sancEchoDesc => '-70% steps | Common/Uncommon only (1 use)';
 
   @override
-  String get sancResonanceName => 'Resonancia';
+  String get sancResonanceName => 'Resonance';
 
   @override
-  String get sancResonanceDesc => '+10% prob. criatura rara (1 uso)';
+  String get sancResonanceDesc => '+10% chance for rare creature (1 use)';
 
   @override
-  String get orbBasicName => 'Orbe Básico';
+  String get orbBasicName => 'Basic Orb';
 
   @override
-  String get orbBasicDesc => 'Un Orbe común. Requiere 2000 pasos.';
+  String get orbBasicDesc => 'A common Orb. Requires 2,000 steps.';
 
   @override
-  String get orbAdvancedName => 'Orbe Avanzado';
+  String get orbAdvancedName => 'Advanced Orb';
 
   @override
   String get orbAdvancedDesc =>
-      'Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.';
+      'Improves chance for Uncommon creatures. Requires 5,000 steps.';
 
   @override
-  String get orbExpertName => 'Orbe Experto';
+  String get orbExpertName => 'Expert Orb';
 
   @override
   String get orbExpertDesc =>
-      'Mejora probabilidad de Raros. Requiere 10000 pasos.';
+      'Improves chance for Rare creatures. Requires 10,000 steps.';
 
   @override
-  String get orbQuietudeName => 'Orbe de Quietud';
+  String get orbQuietudeName => 'Orb of Quietude';
 
   @override
   String get orbQuietudeDesc =>
-      'Permite usar Esencia para avanzar. Ideal para días tranquilos.';
+      'Allows using Essence to progress. Ideal for quiet days.';
 
   @override
-  String get orbEssenceName => 'Orbe Esencial';
+  String get orbEssenceName => 'Essential Orb';
 
   @override
   String get orbEssenceDesc =>
-      'Genera Esencia extra al caminar. No acelera canalización.';
+      'Generates extra Essence while walking. Does not accelerate channeling.';
 
   @override
-  String get infuseEssence => 'Infundir Esencia';
+  String get infuseEssence => 'Infuse Essence';
 
   @override
   String infuseEssenceDesc(Object essence, Object steps) {
-    return 'Convierte $essence Esencia en $steps pasos';
+    return 'Converts $essence Essence into $steps steps';
   }
 
   @override
   String essenceInfused(Object steps) {
-    return '¡$steps pasos obtenidos!';
+    return '$steps steps obtained!';
   }
 
   @override
@@ -914,94 +956,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get descSlugrry =>
-      'A white furry slug of slow movements but quick thinking.';
+      'A white furry slug with slow movements but quick thinking.';
 
   @override
   String get nameGamusarra => 'Gamusarra';
 
   @override
   String get descGamusarra =>
-      'Gamusarra lives in forests and rural paths, where it is rarely seen. It lures travelers with strange noises and playful hops, but when someone gets too close, it strikes with its sharp claws and vanishes into the undergrowth. It is said to appear only when no one can prove they have truly seen it.';
+      'Gamusarra dwells in forests and rural roads where it is barely seen. It lures travelers with strange noises and playful jumps, but when anyone gets too close, it attacks with its sharp claws and vanishes into the undergrowth. It is said to appear only when no one can prove they have truly seen it.';
 
   @override
-  String get physicalActivity => 'Actividad física';
+  String get physicalActivity => 'Physical Activity';
 
   @override
-  String get notificationsPermission => 'Notificaciones';
+  String get notificationsPermission => 'Notifications';
 
   @override
-  String get backgroundExecution => 'Ejecución en segundo plano';
+  String get backgroundExecution => 'Background Execution';
 
   @override
-  String get granted => 'Concedido';
+  String get granted => 'Granted';
 
   @override
-  String get denied => 'Denegado';
+  String get denied => 'Denied';
 
   @override
   String get permissionsMessage =>
-      'Sin estos permisos el juego funciona, pero con menos precisión.';
+      'Without these permissions the game will work, but with less precision.';
 
   @override
-  String get openSystemSettings => 'Abrir ajustes del sistema';
+  String get openSystemSettings => 'Open system settings';
 
   @override
-  String get stepCounter => 'Contador de pasos';
+  String get stepCounter => 'Step Counter';
 
   @override
-  String get lastUpdate => 'Última actualización';
+  String get lastUpdate => 'Last update';
 
   @override
-  String get dataSource => 'Fuente de datos';
+  String get dataSource => 'Data source';
 
   @override
-  String get deviceSensor => 'Sensor del dispositivo';
+  String get deviceSensor => 'Device sensor';
 
   @override
   String minutesAgo(int minutes) {
-    return 'Hace $minutes min';
+    return '$minutes min ago';
   }
 
   @override
   String hoursAgo(int hours) {
-    return 'Hace $hours h';
+    return '$hours h ago';
   }
 
   @override
-  String get sensorActive => 'Activo';
+  String get sensorActive => 'Active';
 
   @override
-  String get sensorInactive => 'Inactivo';
+  String get sensorInactive => 'Inactive';
 
   @override
-  String get systemStatus => 'Estado del sistema';
+  String get systemStatus => 'System status';
 
   @override
-  String get trackingActive => 'Seguimiento activo';
+  String get trackingActive => 'Tracking active';
 
   @override
-  String get trackingPaused => 'Seguimiento pausado';
+  String get trackingPaused => 'Tracking paused';
 
   @override
-  String get activeNotifications => 'Notificaciones activas';
+  String get activeNotifications => 'Active notifications';
 
   @override
-  String get sanctuariesInProgress => 'Santuarios en progreso';
+  String get sanctuariesInProgress => 'Sanctuaries in progress';
 
   @override
-  String get lastSync => 'Última sincronización';
+  String get lastSync => 'Last sync';
 
   @override
-  String get systemHealthy => 'Sistema funcionando correctamente';
+  String get systemHealthy => 'System working correctly';
 
   @override
-  String get noIssues => 'No se detectaron problemas';
+  String get noIssues => 'No issues detected';
 
   @override
-  String get none => 'Ninguno';
+  String get none => 'None';
 
   @override
-  String get justNow => 'Justo ahora';
+  String get justNow => 'Just now';
 
   @override
   String get adventureContinues => 'Adventure awaits!';
@@ -1028,8 +1070,101 @@ class AppLocalizationsEn extends AppLocalizations {
   String get xpSourceUpgradeSanctuaries => 'Upgrade sanctuaries';
 
   @override
-  String get levelUpToUnlock => 'Level up to unlock new features';
+  String get levelUpToUnlock => 'Level up to unlock new functionalities';
 
   @override
-  String get understood => 'Got it';
+  String get understood => 'Understood';
+
+  @override
+  String get upgradeTapStrengthName => 'Tap Strength';
+
+  @override
+  String get upgradeTapStrengthDesc => 'Increases Essence generated per tap.';
+
+  @override
+  String get upgradeTapMultiplierName => 'Inner Rhythm';
+
+  @override
+  String get upgradeTapMultiplierDesc => 'Multiplies your tap strength.';
+
+  @override
+  String get upgradeGlobalMultiplierName => 'Essential Flow';
+
+  @override
+  String get upgradeGlobalMultiplierDesc =>
+      'Multiplies all Essence production.';
+
+  @override
+  String get upgradeOfflineEfficiencyName => 'Lingering Echo';
+
+  @override
+  String get upgradeOfflineEfficiencyDesc =>
+      'Increases offline production efficiency.';
+
+  @override
+  String get perLevel => '/ level';
+
+  @override
+  String get building_recolector_name => 'Collector';
+
+  @override
+  String get building_recolector_desc =>
+      'Generates basic essence automatically.';
+
+  @override
+  String get building_mina_name => 'Mine';
+
+  @override
+  String get building_mina_desc => 'Extracts essence from the earth.';
+
+  @override
+  String get building_cantera_name => 'Quarry';
+
+  @override
+  String get building_cantera_desc => 'Industrial essence production.';
+
+  @override
+  String get building_yacimiento_name => 'Deposit';
+
+  @override
+  String get building_yacimiento_desc => 'Massive source of pure essence.';
+
+  @override
+  String get building_fabrica_name => 'Factory';
+
+  @override
+  String get building_fabrica_desc => 'The pinnacle of essence technology.';
+
+  @override
+  String errOrbLimitReached(int max) {
+    return 'Orb limit reached (max $max)';
+  }
+
+  @override
+  String errInventoryLimitReached(int max) {
+    return 'Sanctuary bag full (max $max)';
+  }
+
+  @override
+  String get bagCapacity => 'Bag Capacity';
+
+  @override
+  String lockedAtLevel(int level) {
+    return 'Locked (Level $level)';
+  }
+
+  @override
+  String limitCountReached(int count, int max) {
+    return 'Limit reached ($count/$max)';
+  }
+
+  @override
+  String buildingLimitReached(Object max) {
+    return 'Limit: $max';
+  }
+
+  @override
+  String requiresLevel(Object level) {
+    return 'Required Level $level';
+  }
 }

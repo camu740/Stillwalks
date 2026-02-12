@@ -35,7 +35,7 @@
   "continueButton": "Continuar",
   
   "tutorialWelcomeTitle": "Bienvenido, Explorador",
-  "tutorialWelcomeDesc": "Soy el Guardián Olvidado y voy a necesitar tu ayuda para encontrar a todos los stillwalks que hay perdidos por el mundo.\n\nCuando bloqueas el teléfono, los recolectores de Esencia se ponen a funcionar. Esto te ayudará en tu aventura.\n\nTe he conseguido algo de Esencia para que puedas comprar tu primer orbe sin esperar.",
+  "tutorialWelcomeDesc": "Soy el Guardián Olvidado y necesito tu ayuda para encontrar a los stillwalks perdidos.\n\nToca en la pantalla para generar Esencia. También puedes comprar mejoras para que se genere automáticamente.\n\nTe he concedido algo de Esencia inicial para que compres tu primer orbe ahora mismo.",
   "tutorialShopTitle": "La Tienda",
   "tutorialShopDesc": "Ve a la Tienda y compra tu primer orbe básico. ¡Invito yo!",
   "tutorialSanctuaryTitle": "El Santuario",
@@ -88,6 +88,12 @@
   "sensorsDesc": "Estado del podómetro",
   "trackingStatus": "Estado de seguimiento",
   "trackingStatusDesc": "Ver log de actividad",
+  "googleFit": "Google Fit",
+  "googleFitDesc": "Usar Google Fit para contar pasos",
+  "googleFitNotAvailable": "Google Fit no disponible en este dispositivo",
+  "googleFitEnabled": "Google Fit activado",
+  "googleFitDisabled": "Google Fit desactivado",
+  "googleFitPermissionDenied": "Permisos de Google Fit denegados",
   
   "help": "Ayuda",
   "contact": "Contacto",
@@ -100,6 +106,7 @@
   },
   
   "essence": "Esencia",
+  "buildings": "Edificios",
   "orbs": "Orbes",
   "sanctuary": "Santuario",
   "collection": "Colección",
@@ -181,6 +188,8 @@
   "orbReady": "Orbe listo",
   "milestoneReached": "¡Hito alcanzado!",
   "essenceGenerated": "Esencia generada",
+  "offlineEssenceCollectedTitle": "¡Esencia Recolectada!",
+  "offlineEssenceCollectedBody": "Los recolectores de esencia han seguido trabajando durante tu ausencia",
   
   "locked": "Bloqueado",
   "unlocked": "Desbloqueado",
@@ -200,6 +209,12 @@
   "temporarySanctuaries": "Santuarios Temporales",
   "orbPurchased": "¡Orbe comprado! Revisa tu Bolsa.",
   "sanctuaryPurchased": "¡Santuario comprado! Revisa tu Bolsa.",
+  "purchaseCompleted": "¡Compra de \"{name}\" completada!",
+  "@purchaseCompleted": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "upgradeCompleted": "¡Mejora \"{name}\" realizada!",
   "@upgradeCompleted": {
     "placeholders": {
@@ -215,8 +230,8 @@
   },
   "checkBag": "Revisa tu Bolsa",
   
-  "permanentSanctuaryUpgrades": "Mejora de Santuario Permanente",
-  "globalUpgrades": "Mejoras Globales",
+  "permanentSanctuaryUpgrades": "Mejoras Permanentes de Santuarios",
+  "globalUpgrades": "Mejoras de Esencia",
   "loadingUpgrades": "Cargando mejoras...",
   
   "primordialSanctuaries": "Santuarios Primordiales",
@@ -295,6 +310,10 @@
   
   "useSingular": "uso",
   "usesPlural": "usos",
+  "strengthLabel": "Fuerza",
+  "capacityLabel": "Capacidad",
+  "unlockCapacityLabel": "Desbloquea capacidad",
+  "unlockLevel1": "Desbloquear nivel 1",
   "energyStorage": "Almacén de Energía",
   
   "orbReadyTitle": "✨ Orbe Listo",
@@ -401,7 +420,7 @@
   "upgradeStorageBonus": "+200 capacidad / nivel",
   "upgradeSpeedName": "Mejora de Velocidad",
   
-  "sancPrimordialName": "Primordial",
+  "sancPrimordialName": "Santuario Primordial",
   "sancPrimordialDesc": "El primer santuario descubierto. Un lugar tranquilo donde los Orbes pueden canalizar su energía.",
   "sancFastFlowName": "Flujo Rápido",
   "sancFastFlowDesc": "Reduce en un 10% los pasos requeridos (1 uso)",
@@ -485,5 +504,54 @@
   "xpSourceBuySanctuaries": "Comprar santuarios",
   "xpSourceUpgradeSanctuaries": "Mejorar santuarios",
   "levelUpToUnlock": "Sube de nivel para desbloquear nuevas funcionalidades",
-  "understood": "Entendido"
+  "understood": "Entendido",
+  
+  "upgradeTapStrengthName": "Fuerza de Tap",
+  "upgradeTapStrengthDesc": "Aumenta la Esencia generada por cada tap.",
+  "upgradeTapMultiplierName": "Ritmo Interior",
+  "upgradeTapMultiplierDesc": "Multiplica la fuerza de tus taps.",
+  "upgradeGlobalMultiplierName": "Flujo Esencial",
+  "upgradeGlobalMultiplierDesc": "Multiplica toda la producción de Esencia.",
+  "upgradeOfflineEfficiencyName": "Eco Persistente",
+  "upgradeOfflineEfficiencyDesc": "Aumenta la eficiencia de producción offline.",
+  "upgradeSpeedName": "Mejora de Velocidad",
+  "perLevel": "/ nivel",
+  "building_recolector_name": "Recolector",
+  "building_recolector_desc": "Genera esencia básica automáticamente.",
+  "building_mina_name": "Mina",
+  "building_mina_desc": "Extrae esencia de la tierra.",
+  "building_cantera_name": "Cantera",
+  "building_cantera_desc": "Producción industrial de esencia.",
+  "building_yacimiento_name": "Yacimiento",
+  "building_yacimiento_desc": "Fuente masiva de esencia pura.",
+  "building_fabrica_name": "Fábrica",
+  "building_fabrica_desc": "La cúspide de la tecnología de esencia.",
+  "errOrbLimitReached": "Límite de orbes alcanzado (máx. {max})",
+  "@errOrbLimitReached": {
+    "placeholders": {
+      "max": {"type": "int"}
+    }
+  },
+  "errInventoryLimitReached": "Bolsa de santuarios llena (máx. {max})",
+  "@errInventoryLimitReached": {
+    "placeholders": {
+      "max": {"type": "int"}
+    }
+  },
+  "bagCapacity": "Capacidad de Bolsa",
+  "lockedAtLevel": "Bloqueado (Nv. {level})",
+  "@lockedAtLevel": {
+    "placeholders": {
+      "level": {"type": "int"}
+    }
+  },
+  "limitCountReached": "Límite alcanzado ({count}/{max})",
+  "@limitCountReached": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "buildingLimitReached": "Límite: {max}",
+  "requiresLevel": "Requiere Nivel {level}"
 }

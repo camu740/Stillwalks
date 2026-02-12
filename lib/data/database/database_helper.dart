@@ -25,7 +25,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 9,
+      version: 11,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -43,7 +43,11 @@ class DatabaseHelper {
         storedSteps INTEGER NOT NULL DEFAULT 0,
         explorerLevel INTEGER NOT NULL DEFAULT 1,
         currentXp INTEGER NOT NULL DEFAULT 0,
-        lastBootTime TEXT
+        lastBootTime TEXT,
+        buildings TEXT NOT NULL DEFAULT '{}',
+        tapMultiplier REAL NOT NULL DEFAULT 1.0,
+        lastOfflineCheck TEXT,
+        lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0
       )
     ''');
 
@@ -150,6 +154,10 @@ class DatabaseHelper {
       'explorerLevel': 1,
       'currentXp': 0,
       'lastBootTime': DateTime.now().toIso8601String(),
+      'buildings': '{}',
+      'tapMultiplier': 1.0,
+      'lastOfflineCheck': DateTime.now().toIso8601String(),
+      'lastOfflineEarnedEssence': 0.0,
     });
   }
 
@@ -233,6 +241,29 @@ class DatabaseHelper {
         await db.execute('ALTER TABLE player_state ADD COLUMN currentXp INTEGER NOT NULL DEFAULT 0');
       } catch (e) {
         // Columna ya existe
+      }
+    }
+    
+    // V10: Nuevos campos para el sistema híbrido
+    if (oldVersion < 10) {
+      try {
+        await db.execute("ALTER TABLE player_state ADD COLUMN buildings TEXT NOT NULL DEFAULT '{}'");
+        await db.execute("ALTER TABLE player_state ADD COLUMN tapMultiplier REAL NOT NULL DEFAULT 1.0");
+        await db.execute("ALTER TABLE player_state ADD COLUMN lastOfflineCheck TEXT");
+
+        // Initialize lastOfflineCheck
+        await db.execute("UPDATE player_state SET lastOfflineCheck = '${DateTime.now().toIso8601String()}' WHERE id = 1");
+      } catch (e) {
+        debugPrint('Migration v10 warning: $e');
+      }
+    }
+    
+    // V11: Campo para mostrar esencia offline recolectada
+    if (oldVersion < 11) {
+      try {
+        await db.execute("ALTER TABLE player_state ADD COLUMN lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0");
+      } catch (e) {
+        debugPrint('Migration v11 warning: $e');
       }
     }
   }
@@ -487,6 +518,10 @@ class DatabaseHelper {
       'explorerLevel': 1,
       'currentXp': 0,
       'lastActiveTimestamp': DateTime.now().toIso8601String(),
+      'buildings': '{}',
+      'tapMultiplier': 1.0,
+      'lastOfflineCheck': DateTime.now().toIso8601String(),
+      'lastOfflineEarnedEssence': 0.0,
     }, where: 'id = ?', whereArgs: [1]);
   }
 

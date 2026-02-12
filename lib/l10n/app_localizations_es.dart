@@ -98,7 +98,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tutorialWelcomeDesc =>
-      'Soy el Guardián Olvidado y voy a necesitar tu ayuda para encontrar a todos los stillwalks que hay perdidos por el mundo.\n\nCuando bloqueas el teléfono, los recolectores de Esencia se ponen a funcionar. Esto te ayudará en tu aventura.\n\nTe he conseguido algo de Esencia para que puedas comprar tu primer orbe sin esperar.';
+      'Soy el Guardián Olvidado y necesito tu ayuda para encontrar a los stillwalks perdidos.\n\nToca en la pantalla para generar Esencia. También puedes comprar mejoras para que se genere automáticamente.\n\nTe he concedido algo de Esencia inicial para que compres tu primer orbe ahora mismo.';
 
   @override
   String get tutorialShopTitle => 'La Tienda';
@@ -221,6 +221,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String get trackingStatusDesc => 'Resumen del sistema';
 
   @override
+  String get googleFit => 'Google Fit';
+
+  @override
+  String get googleFitDesc => 'Usar Google Fit para contar pasos';
+
+  @override
+  String get googleFitNotAvailable =>
+      'Google Fit no disponible en este dispositivo';
+
+  @override
+  String get googleFitEnabled => 'Google Fit activado';
+
+  @override
+  String get googleFitDisabled => 'Google Fit desactivado';
+
+  @override
+  String get googleFitPermissionDenied => 'Permisos de Google Fit denegados';
+
+  @override
   String get help => 'Ayuda';
 
   @override
@@ -236,6 +255,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get essence => 'Esencia';
+
+  @override
+  String get buildings => 'Edificios';
 
   @override
   String get orbs => 'Orbes';
@@ -404,6 +426,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get essenceGenerated => 'Esencia generada';
 
   @override
+  String get offlineEssenceCollectedTitle => '¡Esencia Recolectada!';
+
+  @override
+  String get offlineEssenceCollectedBody =>
+      'Los recolectores de esencia han seguido trabajando durante tu ausencia';
+
+  @override
   String get locked => 'Bloqueado';
 
   @override
@@ -449,6 +478,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sanctuaryPurchased => '¡Santuario comprado! Revisa tu Bolsa.';
 
   @override
+  String purchaseCompleted(String name) {
+    return '¡Compra de \"$name\" completada!';
+  }
+
+  @override
   String upgradeCompleted(String name) {
     return '¡Mejora \"$name\" realizada!';
   }
@@ -462,10 +496,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checkBag => 'Revisa tu Bolsa';
 
   @override
-  String get permanentSanctuaryUpgrades => 'Mejora de Santuario Permanente';
+  String get permanentSanctuaryUpgrades => 'Mejoras Permanentes de Santuarios';
 
   @override
-  String get globalUpgrades => 'Mejoras Globales';
+  String get globalUpgrades => 'Mejoras de Esencia';
 
   @override
   String get loadingUpgrades => 'Cargando mejoras...';
@@ -601,6 +635,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get usesPlural => 'usos';
+
+  @override
+  String get strengthLabel => 'Fuerza';
+
+  @override
+  String get capacityLabel => 'Capacidad';
+
+  @override
+  String get unlockCapacityLabel => 'Desbloquea capacidad';
+
+  @override
+  String get unlockLevel1 => 'Desbloquear nivel 1';
 
   @override
   String get energyStorage => 'Almacén de Energía';
@@ -810,7 +856,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get upgradeSpeedName => 'Mejora de Velocidad';
 
   @override
-  String get sancPrimordialName => 'Primordial';
+  String get sancPrimordialName => 'Santuario Primordial';
 
   @override
   String get sancPrimordialDesc =>
@@ -1032,4 +1078,98 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get understood => 'Entendido';
+
+  @override
+  String get upgradeTapStrengthName => 'Fuerza de Tap';
+
+  @override
+  String get upgradeTapStrengthDesc =>
+      'Aumenta la Esencia generada por cada tap.';
+
+  @override
+  String get upgradeTapMultiplierName => 'Ritmo Interior';
+
+  @override
+  String get upgradeTapMultiplierDesc => 'Multiplica la fuerza de tus taps.';
+
+  @override
+  String get upgradeGlobalMultiplierName => 'Flujo Esencial';
+
+  @override
+  String get upgradeGlobalMultiplierDesc =>
+      'Multiplica toda la producción de Esencia.';
+
+  @override
+  String get upgradeOfflineEfficiencyName => 'Eco Persistente';
+
+  @override
+  String get upgradeOfflineEfficiencyDesc =>
+      'Aumenta la eficiencia de producción offline.';
+
+  @override
+  String get perLevel => '/ nivel';
+
+  @override
+  String get building_recolector_name => 'Recolector';
+
+  @override
+  String get building_recolector_desc =>
+      'Genera esencia básica automáticamente.';
+
+  @override
+  String get building_mina_name => 'Mina';
+
+  @override
+  String get building_mina_desc => 'Extrae esencia de la tierra.';
+
+  @override
+  String get building_cantera_name => 'Cantera';
+
+  @override
+  String get building_cantera_desc => 'Producción industrial de esencia.';
+
+  @override
+  String get building_yacimiento_name => 'Yacimiento';
+
+  @override
+  String get building_yacimiento_desc => 'Fuente masiva de esencia pura.';
+
+  @override
+  String get building_fabrica_name => 'Fábrica';
+
+  @override
+  String get building_fabrica_desc => 'La cúspide de la tecnología de esencia.';
+
+  @override
+  String errOrbLimitReached(int max) {
+    return 'Límite de orbes alcanzado (máx. $max)';
+  }
+
+  @override
+  String errInventoryLimitReached(int max) {
+    return 'Bolsa de santuarios llena (máx. $max)';
+  }
+
+  @override
+  String get bagCapacity => 'Capacidad de Bolsa';
+
+  @override
+  String lockedAtLevel(int level) {
+    return 'Bloqueado (Nv. $level)';
+  }
+
+  @override
+  String limitCountReached(int count, int max) {
+    return 'Límite alcanzado ($count/$max)';
+  }
+
+  @override
+  String buildingLimitReached(Object max) {
+    return 'Límite: $max';
+  }
+
+  @override
+  String requiresLevel(Object level) {
+    return 'Requiere Nivel $level';
+  }
 }

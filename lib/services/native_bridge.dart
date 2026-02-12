@@ -240,4 +240,31 @@ class NativeBridge {
       debugPrint('NativeBridge: Error syncing localization: ${e.message}');
     }
   }
+
+  /// Verifica si el servicio de conteo de pasos está funcionando
+  Future<bool> isStepCountingWorking() async {
+    try {
+      final result = await platform.invokeMethod<bool>('isStepCountingWorking');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      debugPrint('NativeBridge: Error checking step counting status: ${e.message}');
+      return false;
+    }
+  }
+
+  /// Obtiene diagnósticos del sistema de conteo de pasos
+  Future<Map<String, dynamic>> getStepCountingDiagnostics() async {
+    try {
+      final result = await platform.invokeMethod('getStepCountingDiagnostics');
+      return Map<String, dynamic>.from(result as Map);
+    } on PlatformException catch (e) {
+      debugPrint('NativeBridge: Error getting step diagnostics: ${e.message}');
+      return {
+        'available': false,
+        'error': e.message ?? 'Unknown error',
+        'lastUpdate': null,
+        'sensorType': 'unknown',
+      };
+    }
+  }
 }

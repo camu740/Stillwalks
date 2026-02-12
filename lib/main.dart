@@ -13,7 +13,8 @@ import 'services/notification_preferences_service.dart';
 import 'services/notification_guard_service.dart';
 import 'services/tutorial_service.dart';
 import 'services/progression_service.dart'; // Added
-import 'services/active_time_tracker.dart'; // Added
+import 'services/google_fit_service.dart';
+// import 'services/active_time_tracker.dart'; // Removed
 import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -44,7 +45,8 @@ class StillwalksApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationGuardService()),
         ChangeNotifierProvider(create: (_) => TutorialService()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(create: (_) => ActiveTimeTracker()), // Added
+        ChangeNotifierProvider(create: (_) => GoogleFitService()..initialize()),
+        // ChangeNotifierProvider(create: (_) => ActiveTimeTracker()), // Removed
         Provider(create: (_) => NativeBridge()),
         Provider(create: (_) => WidgetService()),
         Provider(create: (_) => ProgressionService()), // Added
@@ -58,6 +60,7 @@ class StillwalksApp extends StatelessWidget {
           final widgetService = Provider.of<WidgetService>(context, listen: false);
           final collectionService = Provider.of<CollectionService>(context, listen: false);
           final notificationGuard = Provider.of<NotificationGuardService>(context, listen: false);
+          final googleFitService = Provider.of<GoogleFitService>(context, listen: false);
           
           // Helper to update widget
           void updateWidget() async {
@@ -105,6 +108,43 @@ class StillwalksApp extends StatelessWidget {
             debugPrint('👟 Main: Received $newSteps steps from native (Total: $totalSteps)');
             updateWidget();
           };
+          
+          // Setup Google Fit sync if enabled
+          void syncGoogleFitSteps() async {
+            if (!googleFitService.isEnabled) return;
+            
+            final googleSteps = await googleFitService.getStepsSinceLastSync();
+            if (googleSteps != null && googleSteps > 0) {
+              debugPrint('📊 Synced $googleSteps steps from Google Fit');
+              //  Process Google Fit steps the same way as hardware sensor steps
+              final result = await orbeService.addStepsToActiveOrbes(googleSteps);
+              final activeOrbs = result['count'] as int;
+              final bonusEssence = result['essenceEarned'] as double;
+              
+              if (bonusEssence > 0) {
+                await esenciaService.addEsencia(bonusEssence);
+              }
+              
+              if (activeOrbs == 0) {
+                await esenciaService.addStoredSteps(googleSteps);
+              }
+              
+              updateWidget();
+            }
+          }
+          
+          // Sync Google Fit every 5 minutes if enabled
+          Future<void> startGoogleFitSync() async {
+            while (true) {
+              await Future.delayed(const Duration(minutes: 5));
+              if (googleFitService.isEnabled) {
+                syncGoogleFitSteps(); // No await - function is void
+              }
+            }
+          }
+          
+          // Start background sync
+          startGoogleFitSync();
           
           return Consumer<LocaleProvider>(
             builder: (context, localeProvider, _) {
@@ -171,20 +211,26 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint('📱 App lifecycle changed to $state');
     
-    final activeTimeTracker = Provider.of<ActiveTimeTracker>(context, listen: false);
+    // final activeTimeTracker = Provider.of<ActiveTimeTracker>(context, listen: false); // Removed
     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
     final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
     
     if (state == AppLifecycleState.resumed) {
-      // App volvió a foreground - iniciar tracking de tiempo activo
-      activeTimeTracker.startTracking();
+      // App volvió a foreground
+      // activeTimeTracker.startTracking(); // Removed
       
-      // Calcular esencia pendiente (tiempo bloqueado + tiempo activo)
-      esenciaService.calculatePendingEsencia(nativeBridge, activeTimeTracker);
+      // Calcular esencia pendiente (Offline)
+      esenciaService.calculateOfflineEssence();
+      
+      // Start foreground generation
+      esenciaService.startGenerationTimer();
       
     } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      // App sale de foreground - detener tracking
-      activeTimeTracker.stopTracking();
+      // App sale de foreground
+      // activeTimeTracker.stopTracking(); // Removed
+      
+      // Stop foreground generation
+      esenciaService.stopGenerationTimer();
       
       // Actualizar widget
       _updateWidget();
@@ -266,16 +312,21 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       notificationPreferences.setNativeBridge(nativeBridge);
       notificationGuard.setPreferences(notificationPreferences);
       notificationGuard.setNativeBridge(nativeBridge);
+      notificationGuard.setNativeBridge(nativeBridge);
       orbeService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
       esenciaService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
+      esenciaService.setCollectionService(collectionService); // Added
       
       // Wire game mechanics listeners
       orbeService.setEsenciaService(esenciaService);
       orbeService.listenToEssenceService(esenciaService.onEssenceEarned);
       
-      // Calculate pending Esencia from offline time (locked + active)
-      final activeTimeTracker = Provider.of<ActiveTimeTracker>(context, listen: false);
-      await esenciaService.calculatePendingEsencia(nativeBridge, activeTimeTracker);
+      // Calculate pending Esencia from offline time
+      // final activeTimeTracker = Provider.of<ActiveTimeTracker>(context, listen: false); // Removed
+      await esenciaService.calculateOfflineEssence();
+      
+      // Start foreground generation immediately
+      esenciaService.startGenerationTimer();
       
       // Check permissions
       await permissionService.checkPermission();

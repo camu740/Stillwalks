@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:stillwalks/models/inventory_item.dart';
-import 'package:stillwalks/models/upgrade.dart';
 
 enum ProgressionFeature {
   temporarySanctuarySlot,
@@ -50,43 +48,44 @@ class ProgressionService {
   // Static configuration of levels
   static const List<LevelDefinition> _levels = [
     LevelDefinition(level: 1, requiredXp: 0, unlocks: [
-      Unlock.upgradeCap(0), 
+      Unlock.item('building_recolector', description: "Recolector desbloqueado"),
+      // Caps handled dynamically
     ]),
     LevelDefinition(level: 2, requiredXp: 250, unlocks: [
-      Unlock.upgradeCap(2, description: "Mejoras de Santuario hasta Nivel 2", upgradeType: "sanctuary"),
+      // Caps handled dynamically
     ]),
     LevelDefinition(level: 3, requiredXp: 550, unlocks: [ 
-      Unlock.upgradeCap(2, description: "Mejoras de Recolector hasta Nivel 2", upgradeType: "idle_multiplier"),
+      Unlock.item('building_mina', description: "Mina desbloqueada"),
     ]),
     LevelDefinition(level: 4, requiredXp: 1000, unlocks: [ 
-      Unlock.upgradeCap(2, description: "Mejoras de Almacén hasta Nivel 2", upgradeType: "energy_storage"),
+       // Caps handled dynamically
     ]),
     LevelDefinition(level: 5, requiredXp: 1650, unlocks: [ 
       Unlock.feature(ProgressionFeature.temporarySanctuarySlot, description: "Slot de Santuario Temporal"),
       Unlock.item(InventoryItemTypes.tempSanctuaryFastFlow, description: "Santuario Temporal: Fast Flow"),
+      Unlock.item('building_cantera', description: "Cantera desbloqueada"),
     ]),
     LevelDefinition(level: 6, requiredXp: 2600, unlocks: [ 
       Unlock.item('orbe_advanced', description: "Orbe Avanzado"),
-      Unlock.upgradeCap(4, description: "Todas las mejoras hasta Nivel 4"),
     ]),
     LevelDefinition(level: 7, requiredXp: 3550, unlocks: [ 
       Unlock.item(InventoryItemTypes.tempSanctuarySymbiosis, description: "Santuario Temporal: Simbiosis"),
     ]),
     LevelDefinition(level: 8, requiredXp: 5000, unlocks: [ 
-      Unlock.upgradeCap(6, description: "Todas las mejoras hasta Nivel 6"),
+      Unlock.item('building_yacimiento', description: "Yacimiento desbloqueado"),
     ]),
     LevelDefinition(level: 9, requiredXp: 6500, unlocks: [ 
       Unlock.item('orbe_expert', description: "Orbe Experto"),
       Unlock.item(InventoryItemTypes.tempSanctuaryQuietude, description: "Santuario Temporal: Quietud"),
     ]),
     LevelDefinition(level: 10, requiredXp: 9000, unlocks: [
-      Unlock.upgradeCap(8, description: "Todas las mejoras hasta Nivel 8"),
+       // Caps handled dynamically
     ]),
     LevelDefinition(level: 11, requiredXp: 11500, unlocks: [ 
-      Unlock.upgradeCap(10, description: "Todas las mejoras hasta Nivel 10"),
+      Unlock.item('building_fabrica', description: "Fábrica desbloqueada"),
     ]),
     LevelDefinition(level: 12, requiredXp: 15000, unlocks: [ 
-      Unlock.upgradeCap(12, description: "Todas las mejoras hasta Nivel 12"),
+       // Caps handled dynamically
     ]),
   ];
 
@@ -110,6 +109,7 @@ class ProgressionService {
     }
     return level;
   }
+
 
   /// Checks if an item (ID) is unlocked at the given level.
   bool isItemUnlocked(int currentLevel, String itemId) {
@@ -150,48 +150,55 @@ class ProgressionService {
   }
 
   /// Gets the upgrade level cap for the current explorer level and specific upgrade type.
-  /// If type is 'sanctuary', it checks for sanctuary specific unlocks.
-  /// If type is an UpgradeType enum string (e.g., 'UpgradeType.energyStorage'), it checks for that.
+  /// Standardizes limits based on Balance Document formulas.
   int getUpgradeCap(int currentLevel, {String? type}) {
-    int cap = 0;
-    
-    // Check all levels up to current
-    for (var def in _levels) {
-      if (def.level > currentLevel) break;
-      for (var unlock in def.unlocks) {
-        if (unlock.type == UnlockType.upgradeCap) {
-          final unlockCap = unlock.value as int;
-          
-          // If this is a global cap (no type specified), it applies to everyone
-          if (unlock.upgradeType == null) {
-            if (unlockCap > cap) cap = unlockCap;
-          } 
-          // If this is a specific cap, it applies only if types match
-          else if (type != null && unlock.upgradeType == type) {
-             if (unlockCap > cap) cap = unlockCap;
-          }
-          // Special case: 'sanctuary' type might need to match if we pass 'sanctuary'
-        }
-      }
+    // 1. Building Limits (building_*)
+    if (type != null && type.startsWith('building_')) {
+      // Formula: ((Level - 1) / 2) + 1
+      // L1: 0/2 + 1 = 1
+      // L2: 1/2 + 1 = 1
+      // L3: 2/2 + 1 = 2
+      // Check if the building item itself is unlocked first?
+      // isItemUnlocked checks if it's in the list.
+      if (!isItemUnlocked(currentLevel, type)) return 0;
+      
+      return ((currentLevel - 1) ~/ 2) + 1;
     }
-    return cap;
+
+    // 2. Standard Upgrade Limits (including sanctuary and others not building_*)
+    if (type != null) {
+       // Formula from UpgradeType (L1-3: 1, L4-6: 2...)
+       // Formula: ((Level - 1) / 3) + 1
+       // L1: 0/3 + 1 = 1
+       // L4: 3/3 + 1 = 2
+       return ((currentLevel - 1) ~/ 3) + 1;
+    }
+    
+    // Fallback (should typically not reach here if type is provided)
+    return 0;
   }
   
   /// Helper to find the level required to increase the upgrade cap BEYOND the current cap.
   int? getLevelRequiredForHigherCap(int currentCap, {String? type}) {
-    for (var def in _levels) {
-      for (var unlock in def.unlocks) {
-        if (unlock.type == UnlockType.upgradeCap) {
-           final unlockCap = unlock.value as int;
-           final unlockType = unlock.upgradeType;
-           
-           bool isRelevant = (unlockType == null) || (type != null && unlockType == type);
-           
-           if (isRelevant && unlockCap > currentCap) return def.level;
-        }
-      }
+    // 1. Buildings
+    if (type != null && type.startsWith('building_')) {
+       // Formula: ((Level - 1) / 2) + 1 = Cap
+       // We want next Cap = currentCap + 1
+       // ((L - 1) / 2) + 1 = currentCap + 1
+       // (L - 1) / 2 = currentCap
+       // L - 1 = 2 * currentCap
+       // L = 2 * currentCap + 1
+       return (2 * currentCap) + 1;
     }
-    return null; // Max cap reached
+    
+    // 2. Upgrades (Standard & Sanctuary)
+    // Formula: ((Level - 1) / 3) + 1 = Cap
+    // Target Cap = currentCap + 1
+    // ((L - 1) / 3) + 1 = currentCap + 1
+    // (L - 1) / 3 = currentCap
+    // L - 1 = 3 * currentCap
+    // L = 3 * currentCap + 1
+    return (3 * currentCap) + 1;
   }
   
   /// Helper to get the level required to unlock an item (for UI display)
@@ -204,6 +211,6 @@ class ProgressionService {
         }
       }
     }
-    return null; // Should not happen if item is restricted
+    return null; 
   }
 }

@@ -1,5 +1,6 @@
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/models/upgrade.dart';
+import 'package:stillwalks/models/building.dart';
 import 'package:stillwalks/models/inventory_item.dart';
 
 /// Extension para traducir datos dinámicos (ids de BBDD) a Strings localizados
@@ -13,6 +14,14 @@ extension DataLocalizations on AppLocalizations {
         return upgradeIdleName;
       case UpgradeType.energyStorage:
         return upgradeStorageName;
+      case UpgradeType.tapStrength:
+        return upgradeTapStrengthName;
+      case UpgradeType.tapMultiplier:
+        return upgradeTapMultiplierName;
+      case UpgradeType.globalMultiplier:
+        return upgradeGlobalMultiplierName;
+      case UpgradeType.offlineEfficiency:
+        return upgradeOfflineEfficiencyName;
       default:
         // Fallback genérico o nombre por defecto si existe
         return upgradeSpeedName; 
@@ -25,6 +34,14 @@ extension DataLocalizations on AppLocalizations {
         return upgradeIdleDesc;
       case UpgradeType.energyStorage:
         return upgradeStorageDesc;
+      case UpgradeType.tapStrength:
+        return upgradeTapStrengthDesc;
+      case UpgradeType.tapMultiplier:
+        return upgradeTapMultiplierDesc;
+      case UpgradeType.globalMultiplier:
+        return upgradeGlobalMultiplierDesc;
+      case UpgradeType.offlineEfficiency:
+        return upgradeOfflineEfficiencyDesc;
       default:
         return '';
     }
@@ -36,8 +53,48 @@ extension DataLocalizations on AppLocalizations {
         return upgradeIdleBonus;
       case UpgradeType.energyStorage:
         return upgradeStorageBonus;
+      case UpgradeType.tapStrength:
+        return '+1 ${perLevel}';
+      case UpgradeType.tapMultiplier:
+        return '+10% ${perLevel}';
+      case UpgradeType.globalMultiplier:
+        return '+20% ${perLevel}';
+      case UpgradeType.offlineEfficiency:
+        return '+5% ${perLevel}';
       default:
         return '';
+    }
+  }
+
+  // ==================== BUILDINGS ====================
+
+  String getBuildingName(BuildingType type) {
+    switch (type) {
+      case BuildingType.recolector:
+        return building_recolector_name;
+      case BuildingType.mina:
+        return building_mina_name;
+      case BuildingType.cantera:
+        return building_cantera_name;
+      case BuildingType.yacimiento:
+        return building_yacimiento_name;
+      case BuildingType.fabrica:
+        return building_fabrica_name;
+    }
+  }
+
+  String getBuildingDescription(BuildingType type) {
+    switch (type) {
+      case BuildingType.recolector:
+        return building_recolector_desc;
+      case BuildingType.mina:
+        return building_mina_desc;
+      case BuildingType.cantera:
+        return building_cantera_desc;
+      case BuildingType.yacimiento:
+        return building_yacimiento_desc;
+      case BuildingType.fabrica:
+        return building_fabrica_desc;
     }
   }
 

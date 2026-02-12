@@ -9,6 +9,7 @@ import 'package:stillwalks/screens/sensors_screen.dart';
 import 'package:stillwalks/screens/tracking_status_screen.dart';
 import 'package:stillwalks/screens/help_screen.dart';
 import 'package:stillwalks/screens/credits_screen.dart';
+import 'package:stillwalks/services/google_fit_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -37,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final preferencesService = Provider.of<NotificationPreferencesService>(context);
     final settings = preferencesService.settings;
+    final googleFitService = Provider.of<GoogleFitService>(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -193,6 +195,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => const TrackingStatusScreen()),
               );
             },
+          ),
+          // Google Fit Toggle
+          _buildSwitchTile(
+            icon: Icons.fitness_center,
+            iconColor: googleFitService.isAvailable 
+                ? (googleFitService.isEnabled ? Colors.greenAccent : Colors.grey)
+                : Colors.grey.shade700,
+            title: AppLocalizations.of(context)!.googleFit,
+            subtitle: !googleFitService.isAvailable
+                ? AppLocalizations.of(context)!.googleFitNotAvailable
+                : (googleFitService.isEnabled 
+                    ? AppLocalizations.of(context)!.googleFitEnabled
+                    : AppLocalizations.of(context)!.googleFitDesc),
+            value: googleFitService.isEnabled,
+            onChanged: googleFitService.isAvailable
+                ? (value) async {
+                    if (value) {
+                      // Attempt to enable
+                      final success = await googleFitService.enable();
+                      if (!success && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(AppLocalizations.of(context)!.googleFitPermissionDenied),
+                            backgroundColor: Colors.redAccent,
+                          ),
+                        );
+                      }
+                    } else {
+                      // Disable
+                      await googleFitService.disable();
+                    }
+                  }
+                : null, // Disabled if not available
           ),
 
           // INFORMACIÓN Section

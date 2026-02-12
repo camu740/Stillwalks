@@ -24,6 +24,7 @@ dependencies:
   # Sensors & Permissions
   pedometer: ^4.0.1
   permission_handler: ^11.0.1
+  health: ^13.3.1  # Google Fit / Health Connect integration
   
   # Storage & Preferences
   shared_preferences: ^2.2.2

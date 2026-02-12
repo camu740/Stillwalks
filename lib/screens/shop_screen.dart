@@ -10,8 +10,10 @@ import 'package:stillwalks/models/sanctuary.dart';
 import 'package:stillwalks/models/inventory_item.dart';
 import 'package:stillwalks/services/progression_service.dart';
 import 'package:stillwalks/services/tutorial_service.dart';
+import 'package:stillwalks/models/building.dart'; // Added
 
-/// Pantalla de la tienda para comprar Orbes y mejoras
+import 'dart:math'; // Added
+
 class ShopScreen extends StatefulWidget {
   final int initialTab;
   
@@ -27,7 +29,12 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
+    final tutorialService = Provider.of<TutorialService>(context, listen: false);
+    int startTab = widget.initialTab;
+    if (tutorialService.currentStep == TutorialStep.shop) {
+      startTab = 2; // Force Orbs
+    }
+    _tabController = TabController(length: 4, vsync: this, initialIndex: startTab);
   }
 
   @override
@@ -66,18 +73,20 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           backgroundColor: Colors.deepPurple.withOpacity(0.8),
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: false, // Make tabs fill the width
             onTap: (index) {
-               if (isTutorialShopStep && index != 0) {
-                 _tabController.index = 0; // Force back to Orbs
+               if (isTutorialShopStep && index != 2) {
+                 _tabController.index = 2; // Force back to Orbs
                  ScaffoldMessenger.of(context).showSnackBar(
                    const SnackBar(content: Text('Sigue el tutorial: Compra un orbe básico.')),
                  );
                }
             },
             tabs: [
-              Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
-              Tab(icon: const Icon(Icons.auto_awesome), text: AppLocalizations.of(context)!.sanctuaries),
               Tab(icon: const Icon(Icons.trending_up), text: AppLocalizations.of(context)!.upgrades),
+              Tab(icon: const Icon(Icons.location_city), text: AppLocalizations.of(context)!.buildings),
+              Tab(icon: const Icon(Icons.circle), text: AppLocalizations.of(context)!.orbs),
+              Tab(icon: const Icon(Icons.fort), text: AppLocalizations.of(context)!.sanctuaries),
             ],
           ),
         ),
@@ -117,6 +126,15 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                           color: Colors.amberAccent,
                         ),
                       ),
+                      const SizedBox(width: 16),
+                       // Show Passive Rate too
+                      Text(
+                        '(+${esenciaService.passiveEssencePerSecond.toStringAsFixed(1)}/s)',
+                         style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white70,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -128,9 +146,10 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                   controller: _tabController,
                   physics: isTutorialShopStep ? const NeverScrollableScrollPhysics() : null, // Disable swipe
                   children: [
-                     _buildOrbesTab(currentLevel, isTutorialShopStep),
-                     _buildSanctuariesTab(currentLevel),
-                     _buildUpgradesTab(currentLevel),
+                    _buildUpgradesTab(currentLevel),
+                    _buildBuildingsTab(currentLevel),
+                    _buildOrbesTab(currentLevel, isTutorialShopStep),
+                    _buildSanctuariesTab(currentLevel),
                   ],
                 ),
               ),
@@ -154,7 +173,37 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: allOrbes.map((type) {
+      children: [
+        // Inventory Counter for Orbs
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Bolsa de Orbes',
+                style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: orbeService.currentOrbsCount >= OrbeService.maxOrbs ? Colors.redAccent.withOpacity(0.2) : Colors.white10,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: orbeService.currentOrbsCount >= OrbeService.maxOrbs ? Colors.redAccent : Colors.white24),
+                ),
+                child: Text(
+                  '${orbeService.currentOrbsCount} / ${OrbeService.maxOrbs}',
+                  style: TextStyle(
+                    color: orbeService.currentOrbsCount >= OrbeService.maxOrbs ? Colors.redAccent : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...allOrbes.map((type) {
+
          // LOCK LOGIC
          bool isLockedByLevel = !progressionService.isItemUnlocked(currentLevel, type.id);
          bool isLockedByTutorial = isTutorialMode && type.id != 'orbe_basic';
@@ -169,8 +218,9 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
          return _buildOrbItem(type, currentEsencia, orbeService, esenciaService, lockReason, tutorialService);
       }).toList(),
-    );
-  }
+    ],
+  );
+}
 
   Widget _buildOrbItem(OrbeType type, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService, String? lockReason, TutorialService tutorialService) {
       final cost = orbeService.getOrbeCost(type.id);
@@ -212,7 +262,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                   if (mounted) {
                     Navigator.of(context).pop(); // Return to Home
                   }
-                  return; // Exit function to avoid showing purchase snackbar which might be confusing during transition
+                    return; // Exit function to avoid showing purchase snackbar which might be confusing during transition
                 }
 
                 if (mounted) {
@@ -222,14 +272,266 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 }
               } else {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
-                  );
+                  // If not enough essence, show that. Otherwise, it must be the limit.
+                  if (currentEsencia < cost) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.errOrbLimitReached(OrbeService.maxOrbs)))
+                    );
+                  }
                 }
               }
             },
+
           ),
         ),
+      );
+  }
+
+  Widget _buildBuildingsTab(int currentLevel) {
+    final esenciaService = Provider.of<EsenciaService>(context);
+    final currentEsencia = esenciaService.playerState.totalEsencia;
+    final progressionService = Provider.of<ProgressionService>(context);
+    
+    // Lista de edificios
+    final buildings = BuildingType.values;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: buildings.map((type) {
+         final count = esenciaService.getBuildingCount(type);
+         final cost = esenciaService.getBuildingCost(type);
+         
+         // Level Locks and Limits
+         final isUnlocked = progressionService.isItemUnlocked(currentLevel, type.id);
+         final limit = progressionService.getUpgradeCap(currentLevel, type: type.id);
+         final isLimitReached = count >= limit && isUnlocked;
+         
+         final canAfford = currentEsencia >= cost && isUnlocked && !isLimitReached;
+
+         // Calculate next required level if limit is reached
+         int? nextReqLevel;
+         if (isLimitReached) {
+           nextReqLevel = progressionService.getLevelRequiredForHigherCap(limit, type: type.id);
+         }
+
+         String buttonText = AppLocalizations.of(context)!.buy;
+         if (!isUnlocked) {
+           buttonText = AppLocalizations.of(context)!.locked;
+         } else if (isLimitReached) {
+           buttonText = 'Nivel ${nextReqLevel ?? "?"}'; 
+         }
+
+         return Padding(
+           padding: const EdgeInsets.only(bottom: 12.0),
+           child: Container(
+             padding: const EdgeInsets.all(16),
+             decoration: BoxDecoration(
+               color: Colors.white.withOpacity(0.05),
+               borderRadius: BorderRadius.circular(16),
+               border: Border.all(color: !isUnlocked ? Colors.redAccent.withOpacity(0.3) : Colors.white24),
+             ),
+             child: Row(
+               children: [
+                 Container(
+                   padding: const EdgeInsets.all(12),
+                   decoration: BoxDecoration(
+                     color: !isUnlocked ? Colors.grey.withOpacity(0.2) : Colors.blueGrey.withOpacity(0.3),
+                     shape: BoxShape.circle,
+                   ),
+                   child: Icon(
+                     !isUnlocked ? Icons.lock : _getBuildingIcon(type), 
+                     color: !isUnlocked ? Colors.grey : Colors.cyanAccent, 
+                     size: 32
+                   ),
+                 ),
+                 const SizedBox(width: 16),
+                 Expanded(
+                   child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       Row(
+                         children: [
+                           Text(
+                             AppLocalizations.of(context)!.getBuildingName(type),
+                             style: TextStyle(
+                               color: !isUnlocked ? Colors.grey : Colors.white,
+                               fontWeight: FontWeight.bold,
+                               fontSize: 16,
+                             ),
+                           ),
+                           const SizedBox(width: 8),
+                           if (isUnlocked)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  'Nv. $count',
+                                  style: const TextStyle(
+                                    fontSize: 12, 
+                                    color: Colors.blueAccent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                         ],
+                       ),
+                       const SizedBox(height: 4),
+                       Text(
+                         !isUnlocked 
+                          ? AppLocalizations.of(context)!.requiresLevel(progressionService.getRequiredLevelForItem(type.id) ?? 0)
+                          : type.description,
+                         style: TextStyle(
+                           color: !isUnlocked ? Colors.redAccent.withOpacity(0.7) : Colors.white70, 
+                           fontSize: 13,
+                           fontStyle: !isUnlocked ? FontStyle.italic : null,
+                         ),
+                       ),
+                       const SizedBox(height: 4),
+                       if (isUnlocked)
+                         Text(
+                           '+${type.baseProduction}/s',
+                           style: const TextStyle(color: Colors.greenAccent, fontSize: 12),
+                         ),
+                       const SizedBox(height: 8),
+                       if (!isLimitReached && isUnlocked)
+                         Row(
+                           children: [
+                             const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 16),
+                             const SizedBox(width: 4),
+                             Text(
+                               cost.toStringAsFixed(0),
+                               style: const TextStyle(
+                                 color: Colors.amberAccent,
+                                 fontWeight: FontWeight.bold,
+                               ),
+                             ),
+                           ],
+                         ),
+                     ],
+                   ),
+                 ),
+                 ElevatedButton(
+                   onPressed: canAfford ? () async {
+                      final success = await esenciaService.buyBuilding(type);
+                      if (success) {
+                         if (context.mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                             SnackBar(content: Text(AppLocalizations.of(context)!.purchaseCompleted(
+                               AppLocalizations.of(context)!.getBuildingName(type)
+                             ))),
+                           );
+                         }
+                      }
+                   } : null,
+                   style: ElevatedButton.styleFrom(
+                     backgroundColor: canAfford ? Colors.cyan : Colors.grey[800],
+                     foregroundColor: Colors.white,
+                     disabledBackgroundColor: isLimitReached ? Colors.redAccent.withOpacity(0.1) : null,
+                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                   ),
+                   child: Text(
+                     buttonText,
+                     style: TextStyle(
+                       fontSize: !isUnlocked || isLimitReached ? 11 : 13,
+                       fontWeight: FontWeight.bold,
+                     ),
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         );
+      }).toList(),
+    );
+  }
+
+  Widget _buildEnergyStorageUpgrade(EsenciaService esenciaService, double currentEsencia, int currentLevel) {
+      final type = UpgradeType.energyStorage;
+      final isOwned = esenciaService.hasUpgrade(type);
+      
+      Upgrade upgrade;
+      double cost;
+      String bonusText = '';
+      
+      if (isOwned) {
+          upgrade = esenciaService.getUpgrade(type)!;
+          if (type.costs.isNotEmpty) {
+              cost = upgrade.calculateNextLevelCost(); 
+          } else {
+              // Dynamic calculation
+              cost = type.baseCost * pow(1.5, upgrade.currentLevel);
+          }
+          final nextCapacity = 100 + ((upgrade.currentLevel + 1) * 200);
+          bonusText = '${AppLocalizations.of(context)!.capacityLabel}: ${100 + (upgrade.currentLevel * 200)} \u2192 $nextCapacity';
+      } else {
+          upgrade = Upgrade(
+            id: 'temp_${type.name}',
+            type: type,
+            currentLevel: 0,
+            name: getTypeDisplayName(type, context),
+            description: getTypeDescription(type, context),
+          );
+          if (type.costs.isNotEmpty) {
+            cost = type.costs[0]; 
+          } else {
+            cost = type.baseCost;
+          }
+          bonusText = '${AppLocalizations.of(context)!.unlockCapacityLabel}: 100';
+      }
+
+      final progressionService = Provider.of<ProgressionService>(context);
+      final upgradeCap = progressionService.getUpgradeCap(currentLevel, type: 'energy_storage');
+      final isCappedByLevel = upgrade.currentLevel >= upgradeCap;
+      final isMaxLevel = isOwned && upgrade.currentLevel >= type.maxLevel;
+      
+      int? nextReqLevel; 
+      if (isCappedByLevel) {
+           nextReqLevel = progressionService.getLevelRequiredForHigherCap(upgradeCap, type: 'energy_storage');
+      }
+
+      return _UpgradeItem(
+        icon: Icons.battery_charging_full,
+        iconColor: Colors.blueAccent, 
+        bonusTextColor: Colors.blueAccent,
+        title: AppLocalizations.of(context)!.upgradeStorageName, 
+        description: AppLocalizations.of(context)!.upgradeStorageDesc,
+        currentLevel: isOwned ? upgrade.currentLevel : 0,
+        maxLevel: type.maxLevel,
+        cost: isMaxLevel ? 0 : cost.toDouble(),
+        currentEsencia: currentEsencia,
+        onPurchase: () async {
+            if (isCappedByLevel || isMaxLevel) return;
+
+            final success = await esenciaService.purchaseUpgradeByType(type);
+            if (success) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.upgradeCompleted(
+                      AppLocalizations.of(context)!.upgradeStorageName
+                  ))),
+                );
+              }
+            } else {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
+                );
+              }
+            }
+        },
+        // Add required parameters
+        bonusText: bonusText,
+        isCappedByLevel: isCappedByLevel,
+        nextRequiredLevel: nextReqLevel,
+        isMaxLevel: isMaxLevel,
+        multiplier: '',
       );
   }
 
@@ -265,7 +567,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
           ),
         ),
         const SizedBox(height: 8),
-        
+
         ...permanentSanctuaries.map((sanctuary) {
           final cost = Sanctuary.getUpgradeCost(sanctuary.speedUpgradeLevel);
           final currentLevelVal = sanctuary.speedUpgradeLevel;
@@ -313,6 +615,11 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             ),
           );
         }).toList(),
+
+        const SizedBox(height: 12),
+
+        // Energy Storage Upgrade (Moved here, below Primordial)
+        _buildEnergyStorageUpgrade(esenciaService, currentEsencia, currentLevel),
         
         const SizedBox(height: 24),
         const Divider(color: Colors.white24),
@@ -321,21 +628,42 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         // Sección: Santuarios Temporales (Compra)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            AppLocalizations.of(context)!.temporarySanctuaries,
-            style: const TextStyle(
-              color: Colors.cyanAccent,
-              fontStyle: FontStyle.italic,
-              fontSize: 16,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.temporarySanctuaries,
+                style: const TextStyle(
+                  color: Colors.cyanAccent,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 16,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: orbeService.currentTempSanctuariesCount >= OrbeService.maxTempSanctuaries ? Colors.redAccent.withOpacity(0.2) : Colors.white10,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: orbeService.currentTempSanctuariesCount >= OrbeService.maxTempSanctuaries ? Colors.redAccent : Colors.white24),
+                ),
+                child: Text(
+                  '${orbeService.currentTempSanctuariesCount} / ${OrbeService.maxTempSanctuaries}',
+                  style: TextStyle(
+                    color: orbeService.currentTempSanctuariesCount >= OrbeService.maxTempSanctuaries ? Colors.redAccent : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
+
         const SizedBox(height: 8),
         _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuaryFastFlow, 1200.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
         const SizedBox(height: 12),
-        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuarySymbiosis, 2000.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
+        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuarySymbiosis, 2500.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
         const SizedBox(height: 12),
-        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuaryQuietude, 4000.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
+        _buildLockedSanctuaryItem(InventoryItemTypes.tempSanctuaryQuietude, 5000.0, currentEsencia, orbeService, esenciaService, progressionService, currentLevel),
       ],
     );
   }
@@ -379,8 +707,21 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                   SnackBar(content: Text(AppLocalizations.of(context)!.sanctuaryPurchased)),
                 );
               }
+            } else {
+              if (mounted) {
+                if (currentEsencia < cost) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence)),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.errInventoryLimitReached(OrbeService.maxTempSanctuaries))),
+                  );
+                }
+              }
             }
           },
+
         ),
       );
   }
@@ -416,63 +757,70 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         ),
         const SizedBox(height: 8),
         
-        // Mostrar mejoras globales
-        if (false) // Disabled loading check since we build from types
-          const Center(child: Text('...'))
-        else
-          ...[UpgradeType.idleMultiplier, UpgradeType.energyStorage].map((type) {
+          ...[
+            UpgradeType.tapStrength,
+            UpgradeType.tapMultiplier,
+            UpgradeType.globalMultiplier,
+            UpgradeType.offlineEfficiency,
+          ].map((type) {
              final isOwned = esenciaService.hasUpgrade(type);
              
              Upgrade upgrade;
-             int cost;
+             double cost; // Changed to double
              String bonusText = '';
              
              if (isOwned) {
                upgrade = esenciaService.getUpgrade(type)!;
-               // Cost for NEXT level (from currentLevel + 1)
-               if (upgrade.currentLevel >= type.maxLevel) {
-                 cost = 0; 
+               
+               if (type.costs.isNotEmpty) {
+                   cost = upgrade.calculateNextLevelCost(); // uses costs list
                } else {
-                 final nextLevelIndex = upgrade.currentLevel + 1;
-                 if (nextLevelIndex < type.costs.length) {
-                    cost = type.costs[nextLevelIndex].toInt();
-                 } else {
-                    cost = 0; // Should not happen if maxLevel matches costs length
-                 }
+                   // Dynamic calculation
+                   double scale = 1.6;
+                   if (type == UpgradeType.tapMultiplier) scale = 1.6;
+                   if (type == UpgradeType.globalMultiplier) scale = 2.5;
+                   // tapStrength: 25 * 1.5^L
+                   cost = type.baseCost * pow(scale, upgrade.currentLevel);
                }
                
-               if (type == UpgradeType.energyStorage) {
-                 final nextCapacity = 100 + ((upgrade.currentLevel + 1) * 200);
-                 bonusText = 'Capacidad: ${100 + (upgrade.currentLevel * 200)} \u2192 $nextCapacity';
+               if (type == UpgradeType.tapStrength) {
+                    bonusText = '${AppLocalizations.of(context)!.strengthLabel}: + ${upgrade.currentLevel} \u2192 ${upgrade.currentLevel + 1}'; 
                } else {
-                 bonusText =  AppLocalizations.of(context)!.getUpgradeBonusText(type);
+                    bonusText =  AppLocalizations.of(context)!.getUpgradeBonusText(type);
                }
              } else {
-                // Unowned ... (rest same) -> NO, need to copy rest or use strict replacement range.
-                // Since I am replacing the `if (isOwned)` block essentially.
-                // I'll rewrite the whole block from `if (isOwned)` down to `else` closing brace.
-                
                upgrade = Upgrade(
                  id: 'temp_${type.name}',
                  type: type,
                  currentLevel: 0,
-                 name: AppLocalizations.of(context)!.getUpgradeName(type),
-                 description: AppLocalizations.of(context)!.getUpgradeDescription(type),
+                 name: getTypeDisplayName(type, context), // Helper
+                 description: getTypeDescription(type, context), // Helper
                );
-               cost = type.costs[0].toInt(); // Unlock cost
-               
-               if (type == UpgradeType.energyStorage) {
-                 bonusText = 'Desbloquea capacidad: 100';
+               // Level 0 -> 1 cost is Base Cost (or costs[0])
+               if (type.costs.isNotEmpty) {
+                 cost = type.costs[0]; 
                } else {
-                 bonusText = 'Desbloquear mejora';
+                 cost = type.baseCost;
                }
+               
+               bonusText = AppLocalizations.of(context)!.unlockLevel1;
              }
 
             // Check Upgrade Cap with Type
             final progressionService = Provider.of<ProgressionService>(context);
-            String upgradeTypeId = type == UpgradeType.idleMultiplier ? 'idle_multiplier' : 'energy_storage';
+            String upgradeTypeId = '';
+            if (type == UpgradeType.idleMultiplier) upgradeTypeId = 'idle_multiplier';
+            else if (type == UpgradeType.energyStorage) upgradeTypeId = 'energy_storage';
+            else if (type == UpgradeType.tapStrength) upgradeTypeId = 'tap_strength';
+            else if (type == UpgradeType.tapMultiplier) upgradeTypeId = 'tap_multiplier';
+            else if (type == UpgradeType.globalMultiplier) upgradeTypeId = 'global_multiplier';
+            else if (type == UpgradeType.offlineEfficiency) upgradeTypeId = 'offline_efficiency';
+
             
-            final upgradeCap = progressionService.getUpgradeCap(currentLevel, type: upgradeTypeId);
+            int upgradeCap = 999;
+            if (upgradeTypeId.isNotEmpty) {
+               upgradeCap = progressionService.getUpgradeCap(currentLevel, type: upgradeTypeId);
+            }
             // If unowned (level 0), and cap is 0, then 0 >= 0 is true -> Capped.
             // If cap is 2 (level 4 reached), then 0 >= 2 is false -> Not capped.
             final isCappedByLevel = upgrade.currentLevel >= upgradeCap;
@@ -526,14 +874,61 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
     );
   }
 
+  // Helpers for text (since L10n might not be updated yet)
+  String getTypeDisplayName(UpgradeType type, BuildContext context) {
+      // Try L10n first or fallback
+      try {
+        return AppLocalizations.of(context)!.getUpgradeName(type);
+      } catch (_) {
+        switch(type) {
+            case UpgradeType.tapStrength: return 'Fuerza de Tap';
+            case UpgradeType.tapMultiplier: return 'Ritmo Interior';
+            case UpgradeType.globalMultiplier: return 'Flujo Esencial';
+            case UpgradeType.offlineEfficiency: return 'Eco Persistente';
+            default: return type.name;
+        }
+      }
+  }
+
+  String getTypeDescription(UpgradeType type, BuildContext context) {
+      try {
+        return AppLocalizations.of(context)!.getUpgradeDescription(type);
+      } catch (_) {
+         switch(type) {
+            case UpgradeType.tapStrength: return '+1 Esencia por tap';
+            case UpgradeType.tapMultiplier: return '+10% fuerza de tap';
+            case UpgradeType.globalMultiplier: return '+20% producción global';
+            case UpgradeType.offlineEfficiency: return 'Mejora producción offline';
+            default: return '';
+        }
+      }
+  }
+
   IconData _getUpgradeIcon(UpgradeType type) {
     if (type == UpgradeType.idleMultiplier) return Icons.schedule;
     if (type == UpgradeType.energyStorage) return Icons.battery_charging_full;
+    if (type == UpgradeType.tapStrength) return Icons.touch_app;
+    if (type == UpgradeType.tapMultiplier) return Icons.speed;
+    if (type == UpgradeType.globalMultiplier) return Icons.public;
+    if (type == UpgradeType.offlineEfficiency) return Icons.bedtime;
     return Icons.star;
   }
 
-
-}
+  IconData _getBuildingIcon(BuildingType type) {
+    switch (type) {
+      case BuildingType.recolector:
+        return Icons.eco;
+      case BuildingType.mina:
+        return Icons.landscape;
+      case BuildingType.cantera:
+        return Icons.construction;
+      case BuildingType.yacimiento:
+        return Icons.layers;
+      case BuildingType.fabrica:
+        return Icons.factory;
+    }
+  }
+}    
 
 class _ShopItem extends StatelessWidget {
   final IconData icon;
@@ -654,7 +1049,9 @@ class _UpgradeItem extends StatelessWidget {
   final VoidCallback onPurchase;
   final bool isCappedByLevel;
   final int? nextRequiredLevel;
-  final bool isMaxLevel; // Added field
+  final bool isMaxLevel;
+  final Color? iconColor; 
+  final Color? bonusTextColor;
 
   const _UpgradeItem({
     required this.icon,
@@ -669,7 +1066,9 @@ class _UpgradeItem extends StatelessWidget {
     required this.onPurchase,
     this.isCappedByLevel = false,
     this.nextRequiredLevel,
-    this.isMaxLevel = false, // Added parameter
+    this.isMaxLevel = false,
+    this.iconColor,
+    this.bonusTextColor,
   });
 
   @override
@@ -688,7 +1087,7 @@ class _UpgradeItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 40, color: Colors.greenAccent),
+              Icon(icon, size: 40, color: iconColor ?? Colors.greenAccent),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -729,7 +1128,11 @@ class _UpgradeItem extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       bonusText,
-                      style: const TextStyle(fontSize: 13, color: Colors.greenAccent, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 13, 
+                        color: bonusTextColor ?? Colors.greenAccent, 
+                        fontWeight: FontWeight.bold
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(

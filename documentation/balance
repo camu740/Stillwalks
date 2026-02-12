@@ -1,0 +1,71 @@
+Game Balancing & Progression
+This document details the costs, rewards, XP gains, and unlock requirements for all game elements.
+
+1. Player Level & Progression
+Leveling Up: Requires converting Essence to XP.
+Benefits: Unlocks higher caps for Upgrades and Buildings.
+2. Buildings (Edificios)
+Buildings generate passive Essence per second.
+
+Unlock Formula: Max Count = (Player Level / 2) + 1 L1-2: 1 Building, L3-4: 2 Buildings, etc.
+
+Building	Base Cost	Cost Scale	Production/sec	XP Reward	Description
+Recolector	100	x1.7	1.0	5 XP	Genera esencia básica
+Mina	750	x1.8	5.0	5 XP	Extrae esencia de la tierra
+Cantera	4,000	x1.9	20.0	5 XP	Producción industrial
+Yacimiento	15,000	x2.0	75.0	5 XP	Fuente masiva de esencia
+Fábrica	75,000	x2.1	250.0	5 XP	Tecnología punta
+> Note: Cost Formula = Base * Scale^Count
+
+3. Upgrades (Mejoras)
+Upgrades enhance active or passive play.
+
+Unlock Formula: Tiered System L1-3: Max Level 1 | L4-6: Max Level 2 | ... | L51+: Max Level 12 (or absolute max)
+
+Global Upgrades
+XP Reward: 10 XP (Unlock), 20 XP (Level Up)
+
+Upgrade	Base Cost	Cost Scaling	Max Level	Effect per Level	Note
+Fuerza de Tap	25	x1.5	30	+1 Essence/tap	Manual Tap
+Ritmo Interior	100	x1.6	15	+5% Tap Power	Multiplier
+Flujo Esencial	2,000	x2.5	15	+5% Global Prod	Multiplier
+Eco Persistente	2,000	Fixed List*	5	+15% Offline Eff	Starts at 5% base
+Almacén Energía	500	500 * 1.6^L	12	+200 Steps Cap	Dynamic Cost
+Eco Persistente Costs:
+
+L1: 2,000
+L2: 6,000
+L3: 15,000
+L4: 30,000
+L5: 50,000
+4. Orbs (Orbes)
+Orbs are purchased to be hatched in Sanctuaries.
+
+Orb Type	Cost	XP Reward	Hatch Req	Rarity Chance
+Básico	500	5 XP	2,000 steps	Common
+Avanzado	1,200	15 XP	5,000 steps	Uncommon+
+Experto	2,500	25 XP	10,000 steps	Rare+
+5. Sanctuaries (Santuarios)
+Permanent Sanctuary Upgrades
+Upgrading the speed of your main sanctuary. XP Reward: 20 XP per level.
+
+Level	Cost	Speed Bonus
+1	300	+2%
+2	600	+4%
+3	1,000	+6%
+4	1,500	+8%
+5	2,200	+10%
+6	3,000	+12%
+7	4,000	+14%
+8	5,200	+16%
+9	6,500	+18%
+10	8,000	+20%
+11	10,000	+22%
+12	12,500	+24%
+Temporary Sanctuaries (Consumables)
+Bought in shop, break after use. XP Reward: 20 XP per purchase.
+
+Sanctuary	Cost	Effect
+Flujo Rápido	1,200	x1.5 Hatch Speed
+Simbiosis	2,500	+Chance Rare Species
+Quietud	5,000	Converts Essence to Steps

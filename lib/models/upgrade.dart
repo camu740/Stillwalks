@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Representa una mejora comprable con Esencia
 class Upgrade {
   final String id;
@@ -14,9 +16,17 @@ class Upgrade {
     required this.description,
   });
 
-  /// Calcula el coste para el siguiente nivel usando tablas fijas
+  /// Calcula el coste para el siguiente nivel usando tablas fijas o fórmula dinámica
   double calculateNextLevelCost() {
     final costs = type.getCosts();
+    
+    // Si la lista de costos está vacía, usar cálculo dinámico
+    if (costs.isEmpty) {
+      if (currentLevel >= type.maxLevel) return double.infinity;
+      
+      return type.baseCost * math.pow(type.costScale, currentLevel);
+    }
+    
     if (currentLevel >= costs.length) return double.infinity; // Máximo nivel alcanzado
     return costs[currentLevel];
   }
@@ -70,20 +80,49 @@ class Upgrade {
   }
 }
 
-/// Tipos de mejoras disponibles
+  /// Tipos de mejoras disponibles
 enum UpgradeType {
   idleMultiplier(
     baseCost: 1000,
-    incrementPerLevel: 0.02, // 2% per level? 
+    incrementPerLevel: 0.05, 
     maxLevel: 12,
-    // New costs for 12 levels. Smoother progression.
-    costs: [1000, 2000, 3500, 5500, 8000, 11000, 15000, 20000, 26000, 33000, 41000, 50000], 
+    costScale: 2.5,
+    costs: [], 
   ),
   energyStorage(
     baseCost: 500,
-    incrementPerLevel: 200.0, // Requested: 200 per level
+    incrementPerLevel: 200.0, // Capacity +200 per level
     maxLevel: 12,
-    costs: [500, 1200, 2200, 3500, 5000, 7000, 9500, 12500, 16000, 20000, 25000, 31000],
+    costScale: 1.6,
+    costs: [], 
+  ),
+  tapStrength(
+    baseCost: 25,
+    incrementPerLevel: 1.0, 
+    maxLevel: 30, 
+    costScale: 1.5,
+    costs: [], 
+  ),
+  tapMultiplier(
+    baseCost: 100,
+    incrementPerLevel: 0.05, 
+    maxLevel: 15, 
+    costScale: 1.6,
+    costs: [],
+  ),
+  globalMultiplier(
+    baseCost: 2000,
+    incrementPerLevel: 0.05, 
+    maxLevel: 15, 
+    costScale: 2.5,
+    costs: [],
+  ),
+  offlineEfficiency(
+    baseCost: 2000,
+    incrementPerLevel: 0.15, 
+    maxLevel: 5,
+    costScale: 0.0, // Uses fixed costs
+    costs: [2000, 6000, 15000, 30000, 50000], 
   );
 
   const UpgradeType({
@@ -91,13 +130,35 @@ enum UpgradeType {
     required this.incrementPerLevel,
     required this.maxLevel,
     required this.costs,
+    required this.costScale,
   });
 
   final double baseCost;
   final double incrementPerLevel;
   final int maxLevel;
   final List<double> costs;
+  final double costScale;
 
   /// Obtiene la lista de costes por nivel
   List<double> getCosts() => costs;
+  
+  /// Returns the maximum upgrade level allowed for a given player level
+  /// This enforces progressive unlocking tied to player progression
+  int getMaxAllowedLevel(int playerLevel) {
+    // Tiered approach: every 3-5 levels unlocks more upgrade levels
+    if (playerLevel <= 3) return 1;
+    if (playerLevel <= 6) return 2;
+    if (playerLevel <= 10) return 3;
+    if (playerLevel <= 15) return 4;
+    if (playerLevel <= 20) return 5;
+    if (playerLevel <= 25) return 6;
+    if (playerLevel <= 30) return 7;
+    if (playerLevel <= 35) return 8;
+    if (playerLevel <= 40) return 9;
+    if (playerLevel <= 45) return 10;
+    if (playerLevel <= 50) return 11;
+    
+    // Cap at the absolute max for this upgrade type
+    return maxLevel < 12 ? maxLevel : 12;
+  }
 }

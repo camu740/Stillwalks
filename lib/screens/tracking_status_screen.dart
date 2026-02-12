@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:stillwalks/services/notification_preferences_service.dart';
 import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/permission_service.dart';
+import 'package:stillwalks/services/native_bridge.dart';
+import 'package:stillwalks/services/google_fit_service.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Diagnostic screen showing overall system tracking status
@@ -81,6 +83,9 @@ class TrackingStatusScreen extends StatelessWidget {
           ),
           
           const SizedBox(height: 24),
+          
+          // Step Counting Diagnostics
+          _buildStepDiagnosticsSection(context, l10n),
         ],
       ),
     );
@@ -285,6 +290,166 @@ class TrackingStatusScreen extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildStepDiagnosticsSection(BuildContext context, AppLocalizations l10n) {
+    final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
+    final googleFitService = Provider.of<GoogleFitService>(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.stepCounter,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        
+        // Native Sensor Status
+        FutureBuilder<bool>(
+          future: nativeBridge.isStepCountingWorking(),
+          builder: (context, snapshot) {
+            final isWorking = snapshot.data ?? false;
+            return _buildSourceCard(
+              icon: Icons.smartphone,
+              iconColor: isWorking ? Colors.greenAccent : Colors.redAccent,
+              title: l10n.deviceSensor,
+              status: isWorking ? l10n.sensorActive : l10n.sensorInactive,
+              statusColor: isWorking ? Colors.greenAccent : Colors.redAccent,
+              details: isWorking 
+                  ? 'Conteo de pasos del hardware del dispositivo'
+                  : 'Sensor nativo no disponible o sin permisos',
+            );
+          },
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Google Fit Status
+        _buildSourceCard(
+          icon: Icons.track_changes,
+          iconColor: googleFitService.isEnabled 
+              ? Colors.blueAccent 
+              : Colors.grey,
+          title: 'Google Fit / Health Connect',
+          status: googleFitService.isEnabled 
+              ? l10n.sensorActive 
+              : 'Desactivado',
+          statusColor: googleFitService.isEnabled 
+              ? Colors.blueAccent 
+              : Colors.grey,
+          details: googleFitService.isEnabled
+              ? 'Sincronización automática de pasos cada 5 minutos'
+              : 'Activa Google Fit en Ajustes para mayor precisión',
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Info Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.blue.withOpacity(0.1),
+                Colors.purple.withOpacity(0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lightbulb_outline, color: Colors.blue, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Tip: Habilita Google Fit para validación cruzada y mayor precisión en el conteo de pasos',
+                  style: TextStyle(
+                    color: Colors.blue.shade200,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildSourceCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String status,
+    required Color statusColor,
+    required String details,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: iconColor, size: 32),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      status.contains('Activo') || status.contains('Active') 
+                          ? Icons.check_circle 
+                          : Icons.cancel,
+                      color: statusColor,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      status,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  details,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white60,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

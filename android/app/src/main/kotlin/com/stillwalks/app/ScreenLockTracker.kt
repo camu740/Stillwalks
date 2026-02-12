@@ -67,6 +67,9 @@ class ScreenLockTracker private constructor(
         Log.d(TAG, "MethodChannel detached")
     }
     
+    private var accumulatedLockedMillis: Long = 0
+    private var screenOffTimestamp: Long = 0
+
     fun start() {
         if (isTracking) return
         
@@ -100,19 +103,22 @@ class ScreenLockTracker private constructor(
     private fun loadState() {
         lastUnlockTime = prefs.getLong(KEY_LAST_UNLOCK_TIME, System.currentTimeMillis())
         lastBootTime = prefs.getLong(KEY_LAST_BOOT_TIME, SystemClock.elapsedRealtime())
+        accumulatedLockedMillis = prefs.getLong("accumulated_locked_millis", 0)
     }
     
     private fun saveState() {
         prefs.edit().apply {
             putLong(KEY_LAST_UNLOCK_TIME, lastUnlockTime)
             putLong(KEY_LAST_BOOT_TIME, lastBootTime)
+            putLong("accumulated_locked_millis", accumulatedLockedMillis)
             apply()
         }
     }
     
     private fun onScreenOff() {
-        // Pantalla apagada - comienza generación de Esencia
-        Log.d(TAG, "Screen OFF - Starting Esencia generation")
+        // Pantalla apagada - comienza sesión de bloqueo
+        screenOffTimestamp = System.currentTimeMillis()
+        Log.d(TAG, "Screen OFF - Starting lock session at $screenOffTimestamp")
         updateNotification()
     }
     
@@ -123,10 +129,20 @@ class ScreenLockTracker private constructor(
     }
     
     private fun onDeviceUnlocked() {
-        // Usuario desbloqueó - solo actualizamos timestamps
+        // Usuario desbloqueó - calculamos duración de la sesión
         val currentTime = System.currentTimeMillis()
         val currentBootTime = SystemClock.elapsedRealtime()
         
+        // Si teníamos una sesión activa (screenOffTimestamp > 0)
+        if (screenOffTimestamp > 0) {
+            val sessionDuration = currentTime - screenOffTimestamp
+            if (sessionDuration > 0) {
+                accumulatedLockedMillis += sessionDuration
+                Log.d(TAG, "Lock session ended. Duration: ${sessionDuration}ms. Total accumulated: ${accumulatedLockedMillis}ms")
+            }
+            screenOffTimestamp = 0 // Reset sesión actual
+        }
+
         // Anti-cheat: verificar manipulación de hora del sistema
         if (!isTimeValid(currentTime, currentBootTime)) {
             Log.w(TAG, "Time manipulation detected! Resetting timestamps without accumulation")
@@ -190,11 +206,17 @@ class ScreenLockTracker private constructor(
      * Para que Flutter lo combine con tiempo activo en app
      */
     fun getAccumulatedLockedMinutes(): Int {
-        val currentTime = System.currentTimeMillis()
-        val elapsedMillis = currentTime - lastUnlockTime
-        val elapsedMinutes = (elapsedMillis / 60000).toInt()  // millis a minutos
+        // Devolvemos lo acumulado en sesiones cerradas + la sesión actual si está bloqueado
+        var totalMillis = accumulatedLockedMillis
         
-        Log.d(TAG, "Accumulated locked time: $elapsedMinutes minutes")
+        if (screenOffTimestamp > 0) {
+            // Actualmente bloqueado, sumar tiempo transcurrido
+            totalMillis += (System.currentTimeMillis() - screenOffTimestamp)
+        }
+        
+        val elapsedMinutes = (totalMillis / 60000).toInt()
+        
+        Log.d(TAG, "Accumulated locked time requested: $elapsedMinutes minutes ($totalMillis ms)")
         return elapsedMinutes
     }
     
@@ -203,6 +225,11 @@ class ScreenLockTracker private constructor(
      * Llamar después de que Flutter haya procesado la esencia
      */
     fun resetAccumulatedTime() {
+        accumulatedLockedMillis = 0
+        // Si estamos bloqueados, reiniciamos el timestamp de inicio de sesión actual para no contar doble
+        if (screenOffTimestamp > 0) {
+            screenOffTimestamp = System.currentTimeMillis()
+        }
         lastUnlockTime = System.currentTimeMillis()
         lastBootTime = SystemClock.elapsedRealtime()
         saveState()

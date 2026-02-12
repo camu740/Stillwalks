@@ -85,62 +85,92 @@ class InventoryScreen extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: availableOrbes.length,
-      itemBuilder: (context, index) {
-        final orbe = availableOrbes[index];
-        final type = orbeService.getOrbeType(orbe.orbeTypeId);
-        
-        Color iconColor = Colors.grey;
-        if (type?.id == 'orbe_advanced') {
-          iconColor = Colors.green;
-        } else if (type?.id == 'orbe_expert') {
-          iconColor = Colors.blue;
-        }
-
-        return Card(
-          color: Colors.white.withValues(alpha: 0.05),
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: Icon(Icons.circle_outlined, color: iconColor, size: 40),
-            title: Text(
-              type != null 
-                  ? AppLocalizations.of(context)!.getOrbName(type.id, type.name) 
-                  : AppLocalizations.of(context)!.unknownOrb, 
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)
-            ),
-            subtitle: Text(
-              AppLocalizations.of(context)!.stepsRequired(type?.requiredSteps ?? 0),
-              style: const TextStyle(color: Colors.white70),
-            ),
-            trailing: isSelectionMode 
-              ? ElevatedButton(
-                  onPressed: () async {
-                    if (sanctuaryId != null) {
-                      final tutorialService = Provider.of<TutorialService>(context, listen: false);
-                      await orbeService.assignOrbeToSanctuary(orbe.id, sanctuaryId!);
-                      
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-                      
-                      if (tutorialService.currentStep == TutorialStep.sanctuary) {
-                        await Future.delayed(const Duration(milliseconds: 300));
-                        await tutorialService.nextStep();
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                  child: Text(AppLocalizations.of(context)!.assign),
-                )
-              : null,
+      children: [
+        // Bolsa Capacity Counter
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.bagCapacity,
+                style: const TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: orbeService.currentOrbsCount >= OrbeService.maxOrbs ? Colors.redAccent.withValues(alpha: 0.2) : Colors.white10,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: orbeService.currentOrbsCount >= OrbeService.maxOrbs ? Colors.redAccent : Colors.white24),
+                ),
+                child: Text(
+                  '${orbeService.currentOrbsCount} / ${OrbeService.maxOrbs}',
+                  style: TextStyle(
+                    color: orbeService.currentOrbsCount >= OrbeService.maxOrbs ? Colors.redAccent : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+
+        ...availableOrbes.map((orbe) {
+          final type = orbeService.getOrbeType(orbe.orbeTypeId);
+          
+          Color iconColor = Colors.grey;
+          if (type?.id == 'orbe_advanced') {
+            iconColor = Colors.green;
+          } else if (type?.id == 'orbe_expert') {
+            iconColor = Colors.blue;
+          }
+
+          return Card(
+            color: Colors.white.withValues(alpha: 0.05),
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              leading: Icon(Icons.circle_outlined, color: iconColor, size: 40),
+              title: Text(
+                type != null 
+                    ? AppLocalizations.of(context)!.getOrbName(type.id, type.name) 
+                    : AppLocalizations.of(context)!.unknownOrb, 
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)
+              ),
+              subtitle: Text(
+                AppLocalizations.of(context)!.stepsRequired(type?.requiredSteps ?? 0),
+                style: const TextStyle(color: Colors.white70),
+              ),
+              trailing: isSelectionMode 
+                ? ElevatedButton(
+                    onPressed: () async {
+                      if (sanctuaryId != null) {
+                        final tutorialService = Provider.of<TutorialService>(context, listen: false);
+                        await orbeService.assignOrbeToSanctuary(orbe.id, sanctuaryId!);
+                        
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                        
+                        if (tutorialService.currentStep == TutorialStep.sanctuary) {
+                          await Future.delayed(const Duration(milliseconds: 300));
+                          await tutorialService.nextStep();
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+                    child: Text(AppLocalizations.of(context)!.assign),
+                  )
+                : null,
+            ),
+          );
+        }).toList(),
+      ],
     );
+
   }
 
   Widget _buildSantuariosTab(BuildContext context, OrbeService orbeService, List<InventoryItem> inventoryItems) {
@@ -154,70 +184,100 @@ class InventoryScreen extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: inventoryItems.length,
-      itemBuilder: (context, index) {
-        final item = inventoryItems[index];
-        final name = AppLocalizations.of(context)!.getSanctuaryName('', item.typeId, 'Item');
-        final desc = AppLocalizations.of(context)!.getSanctuaryDescription('', item.typeId, '');
-        
-        return Card(
-          color: Colors.white.withValues(alpha: 0.05),
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: Icon(
-              InventoryItemTypes.getIcon(item.typeId),
-              color: Colors.cyanAccent,
-              size: 40,
-            ),
-            title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-            subtitle: Text(
-              '$desc\n${AppLocalizations.of(context)!.quantityDisplay(item.quantity)}',
-              style: const TextStyle(color: Colors.white70),
-            ),
-            isThreeLine: true,
-            trailing: ElevatedButton(
-              onPressed: () async {
-                final success = await orbeService.activateTemporarySanctuary(item.typeId);
-                if (success && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.itemActivated(name))),
-                  );
-                  
-                  try {
-                    final tempSanctuary = orbeService.sanctuaries.firstWhere((s) => s.isTemporary);
-                    if (context.mounted) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => InventoryScreen(
-                            isSelectionMode: true,
-                            sanctuaryId: tempSanctuary.id,
-                          )
-                        )
-                      );
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                    }
-                  }
-                } else if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.tempSanctuaryAlreadyActive)),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan[700]),
-              child: Text(AppLocalizations.of(context)!.use),
-            ),
+      children: [
+        // Bolsa Capacity Counter
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.bagCapacity,
+                style: const TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: orbeService.currentTempSanctuariesCount >= OrbeService.maxTempSanctuaries ? Colors.redAccent.withValues(alpha: 0.2) : Colors.white10,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: orbeService.currentTempSanctuariesCount >= OrbeService.maxTempSanctuaries ? Colors.redAccent : Colors.white24),
+                ),
+                child: Text(
+                  '${orbeService.currentTempSanctuariesCount} / ${OrbeService.maxTempSanctuaries}',
+                  style: TextStyle(
+                    color: orbeService.currentTempSanctuariesCount >= OrbeService.maxTempSanctuaries ? Colors.redAccent : Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+
+        ...inventoryItems.map((item) {
+          final name = AppLocalizations.of(context)!.getSanctuaryName('', item.typeId, 'Item');
+          final desc = AppLocalizations.of(context)!.getSanctuaryDescription('', item.typeId, '');
+          
+          return Card(
+            color: Colors.white.withValues(alpha: 0.05),
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              leading: Icon(
+                InventoryItemTypes.getIcon(item.typeId),
+                color: Colors.cyanAccent,
+                size: 40,
+              ),
+              title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+              subtitle: Text(
+                '$desc\n${AppLocalizations.of(context)!.quantityDisplay(item.quantity)}',
+                style: const TextStyle(color: Colors.white70),
+              ),
+              isThreeLine: true,
+              trailing: ElevatedButton(
+                onPressed: () async {
+                  final success = await orbeService.activateTemporarySanctuary(item.typeId);
+                  if (success && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.itemActivated(name))),
+                    );
+                    
+                    try {
+                      final tempSanctuary = orbeService.sanctuaries.firstWhere((s) => s.isTemporary);
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InventoryScreen(
+                              isSelectionMode: true,
+                              sanctuaryId: tempSanctuary.id,
+                            )
+                          )
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    }
+                  } else if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(AppLocalizations.of(context)!.tempSanctuaryAlreadyActive)),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan[700]),
+                child: Text(AppLocalizations.of(context)!.use),
+              ),
+            ),
+          );
+        }).toList(),
+      ],
     );
+
   }
 
   Widget _buildEmptyState(BuildContext context, String title, String subtitle, IconData icon, int shopTab) {

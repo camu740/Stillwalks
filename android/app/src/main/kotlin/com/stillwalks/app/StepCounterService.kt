@@ -76,9 +76,11 @@ class StepCounterService private constructor(
 
     fun start() {
         if (isTracking) {
-            Log.d(TAG, "Step counter already tracking")
+            Log.d(TAG, "⚠️ Step counter already tracking (session: $sessionSteps steps)")
             return
         }
+        
+        Log.i(TAG, "🚀 Starting step counter service...")
         
         // Verificar permiso de ACTIVITY_RECOGNITION en runtime
         val hasPermission = ContextCompat.checkSelfPermission(
@@ -88,13 +90,18 @@ class StepCounterService private constructor(
         
         if (!hasPermission) {
             Log.e(TAG, "❌ ACTIVITY_RECOGNITION permission not granted! Cannot start step counter.")
-            Log.e(TAG, "Please ensure the permission is granted in the app settings.")
+            Log.e(TAG, "   Please ensure the permission is granted in the app settings.")
             return
         }
         
         Log.d(TAG, "✅ ACTIVITY_RECOGNITION permission granted")
         
         if (stepSensor != null) {
+            Log.d(TAG, "📱 Sensor Info:")
+            Log.d(TAG, "   - Name: ${stepSensor.name}")
+            Log.d(TAG, "   - Vendor: ${stepSensor.vendor}")
+            Log.d(TAG, "   - Power: ${stepSensor.power}mA")
+            
             // Cargar estado guardado
             loadState()
             
@@ -106,12 +113,14 @@ class StepCounterService private constructor(
             
             if (registered) {
                 isTracking = true
-                Log.d(TAG, "✅ Step counter started successfully and sensor registered")
+                Log.i(TAG, "✅ Step counter started successfully (restored session: $sessionSteps steps)")
+                Log.d(TAG, "   Anti-cheat limits: $MAX_STEPS_PER_SECOND steps/sec, $MAX_STEPS_PER_UPDATE max batch")
             } else {
                 Log.e(TAG, "❌ Failed to register step sensor listener")
             }
         } else {
-            Log.e(TAG, "❌ Step counter sensor not available on this device")
+            Log.e(TAG, "❌ Step counter sensor (TYPE_STEP_COUNTER) not available on this device")
+            Log.e(TAG, "   This device may not support hardware step counting.")
         }
     }
 
@@ -129,7 +138,11 @@ class StepCounterService private constructor(
         sessionSteps = prefs.getInt(KEY_SESSION_STEPS, 0)
         lastUpdateTime = prefs.getLong(KEY_LAST_UPDATE_TIME, System.currentTimeMillis())
         
-        Log.d(TAG, "State loaded: lastCount=$lastStepCount, session=$sessionSteps")
+        val timeSinceLastUpdate = (System.currentTimeMillis() - lastUpdateTime) / 1000.0
+        Log.d(TAG, "📂 State loaded from SharedPreferences:")
+        Log.d(TAG, "   - Last sensor count: $lastStepCount")
+        Log.d(TAG, "   - Session steps: $sessionSteps")
+        Log.d(TAG, "   - Time since last update: ${timeSinceLastUpdate.toInt()}s ago")
     }
     
     private fun saveState() {
@@ -144,41 +157,56 @@ class StepCounterService private constructor(
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_STEP_COUNTER) {
             val totalSteps = event.values[0].toInt()
+            val currentTime = System.currentTimeMillis()
+            val timeDelta = (currentTime - lastUpdateTime) / 1000.0
             
             // Primera lectura o después de reinicio del dispositivo
             // Handle device reboot (sensor resets to 0)
             if (lastStepCount == 0 || totalSteps < lastStepCount) {
                 lastStepCount = totalSteps
-                lastUpdateTime = System.currentTimeMillis()
-                Log.d(TAG, "Sensor reset detected or first run. Validating base: $lastStepCount")
+                lastUpdateTime = currentTime
+                if (totalSteps < lastStepCount) {
+                    Log.w(TAG, "📱 Device reboot detected! Sensor reset from $lastStepCount to $totalSteps")
+                    Log.w(TAG, "   Session steps preserved: $sessionSteps")
+                } else {
+                    Log.d(TAG, "🎯 First sensor reading: $totalSteps steps (baseline set)")
+                }
                 return
             }
             
             val newSteps = totalSteps - lastStepCount
             
             // Anti-cheat: validar que el incremento sea razonable
-            if (!isStepIncrementValid(newSteps)) {
-                Log.w(TAG, "Suspicious step increment detected: $newSteps steps. Ignoring.")
+            if (!isStepIncrementValid(newSteps, timeDelta)) {
+                Log.w(TAG, "⚠️ Invalid step increment REJECTED: $newSteps steps")
+                Log.w(TAG, "   Time delta: ${timeDelta.toInt()}s, Rate: ${if(timeDelta > 0) (newSteps/timeDelta).toInt() else "N/A"} steps/sec")
+                Log.w(TAG, "   Current sensor: $totalSteps, Last: $lastStepCount")
                 return
             }
             
             if (newSteps > 0) {
                 lastStepCount = totalSteps
                 sessionSteps += newSteps
-                val now = System.currentTimeMillis()
-                lastUpdateTime = now
+                lastUpdateTime = currentTime
                 
-                Log.d(TAG, "New steps: $newSteps (Total session: $sessionSteps)")
+                val stepsPerSec = if (timeDelta > 0) newSteps / timeDelta else 0.0
+                val logLevel = if (newSteps > 100) "INFO" else "DEBUG"
+                
+                if (newSteps > 100) {
+                    Log.i(TAG, "👣 Step batch: +$newSteps steps (${stepsPerSec.toInt()}/s over ${timeDelta.toInt()}s) → Session: $sessionSteps")
+                } else {
+                    Log.d(TAG, "👣 +$newSteps steps → Session total: $sessionSteps")
+                }
                 
                 // Guardar periódicamente (cada 50 pasos)
-                if (sessionSteps % 50 == 0) {
+                if (sessionSteps % 50 < newSteps) { // Crossed a 50-step boundary
                     saveState()
+                    Log.d(TAG, "💾 State saved at $sessionSteps steps")
                 }
                 
                 // Notificar a Flutter
                 onStepsDetected(newSteps, sessionSteps)
                 
-                // Update notification in foreground service
                 // Update notification in foreground service
                 val intent = Intent(context, TrackingForegroundService::class.java)
                 intent.action = TrackingForegroundService.ACTION_UPDATE_NOTIFICATION
@@ -188,42 +216,64 @@ class StepCounterService private constructor(
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+        val accuracyStr = when (accuracy) {
+            SensorManager.SENSOR_STATUS_UNRELIABLE -> "UNRELIABLE"
+            SensorManager.SENSOR_STATUS_ACCURACY_LOW -> "LOW"
+            SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> "MEDIUM"
+            SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> "HIGH"
+            else -> "UNKNOWN($accuracy)"
+        }
+        
         when (accuracy) {
             SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                Log.w(TAG, "Step sensor accuracy is unreliable")
+                Log.w(TAG, "⚠️ Sensor accuracy changed: $accuracyStr")
+                Log.w(TAG, "   Step counting may be temporarily impacted")
             }
             SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                Log.w(TAG, "Step sensor accuracy is low")
+                Log.w(TAG, "📉 Sensor accuracy: $accuracyStr (reduced precision)")
+            }
+            SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM,
+            SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
+                Log.d(TAG, "📊 Sensor accuracy: $accuracyStr")
             }
         }
     }
     
     /**
      * Valida que el incremento de pasos sea realista
+     * @param steps Número de pasos nuevos detectados
+     * @param timeDelta Tiempo transcurrido desde última actualización (segundos)
      */
-    private fun isStepIncrementValid(steps: Int): Boolean {
-        // Rechazar incrementos negativos
+    private fun isStepIncrementValid(steps: Int, timeDelta: Double): Boolean {
+        // Rechazar incrementos negativos (nunca deberían ocurrir)
         if (steps < 0) {
-            Log.w(TAG, "Negative step increment detected")
+            Log.e(TAG, "❌ VALIDATION FAILED: Negative increment ($steps steps)")
             return false
         }
         
-        // Rechazar saltos absurdamente grandes (más allá de lo posible en un día)
+        // Rechazar saltos absurdamente grandes
         if (steps > MAX_STEPS_PER_UPDATE) {
-            Log.w(TAG, "Step increment too large: $steps > $MAX_STEPS_PER_UPDATE")
+            Log.e(TAG, "❌ VALIDATION FAILED: Batch too large")
+            Log.e(TAG, "   Steps: $steps > MAX: $MAX_STEPS_PER_UPDATE")
+            Log.e(TAG, "   This could indicate sensor malfunction or tampering")
             return false
         }
         
         // Validar velocidad (pasos por segundo) solo si el intervalo es significativo
-        val currentTime = System.currentTimeMillis()
-        val timeDelta = (currentTime - lastUpdateTime) / 1000.0 // en segundos
-        
+        // For very short intervals, we can't reliably calculate rate
         if (timeDelta > 1.0) { // Solo chequear rate si ha pasado al menos 1 segundo
             val stepsPerSecond = steps / timeDelta
             if (stepsPerSecond > MAX_STEPS_PER_SECOND) {
-                Log.w(TAG, "Steps per second too high: $stepsPerSecond (steps=$steps, time=${timeDelta}s)")
+                Log.e(TAG, "❌ VALIDATION FAILED: Step rate too high")
+                Log.e(TAG, "   Rate: ${stepsPerSecond.toInt()} steps/sec > MAX: $MAX_STEPS_PER_SECOND")
+                Log.e(TAG, "   Steps: $steps over ${timeDelta.toInt()}s")
+                Log.e(TAG, "   Normal walking: 2-4 steps/sec, running: 5-8 steps/sec")
                 return false
             }
+        } else if (timeDelta > 0.1 && steps > 20) {
+            // For sub-second intervals with suspiciously high counts
+            Log.w(TAG, "⚠️ Validation warning: $steps steps in ${(timeDelta*1000).toInt()}ms")
+            Log.w(TAG, "   Allowing but flagging for monitoring")
         }
         
         return true
@@ -237,7 +287,13 @@ class StepCounterService private constructor(
             "timestamp" to System.currentTimeMillis()
         )
         
-        methodChannel?.invokeMethod("onStepsUpdated", data)
+        if (methodChannel != null) {
+            methodChannel?.invokeMethod("onStepsUpdated", data)
+            Log.d(TAG, "📤 Sent to Flutter: +$newSteps steps (total: $totalSessionSteps)")
+        } else {
+            Log.w(TAG, "⚠️ Cannot notify Flutter: MethodChannel not attached")
+            Log.w(TAG, "   Steps will be queued until Flutter is ready")
+        }
     }
 
     /**

@@ -263,7 +263,7 @@ abstract class AppLocalizations {
   /// No description provided for @tutorialWelcomeDesc.
   ///
   /// In es, this message translates to:
-  /// **'Soy el Guardián Olvidado y voy a necesitar tu ayuda para encontrar a todos los stillwalks que hay perdidos por el mundo.\n\nCuando bloqueas el teléfono, los recolectores de Esencia se ponen a funcionar. Esto te ayudará en tu aventura.\n\nTe he conseguido algo de Esencia para que puedas comprar tu primer orbe sin esperar.'**
+  /// **'Soy el Guardián Olvidado y necesito tu ayuda para encontrar a los stillwalks perdidos.\n\nToca en la pantalla para generar Esencia. También puedes comprar mejoras para que se genere automáticamente.\n\nTe he concedido algo de Esencia inicial para que compres tu primer orbe ahora mismo.'**
   String get tutorialWelcomeDesc;
 
   /// No description provided for @tutorialShopTitle.
@@ -488,6 +488,42 @@ abstract class AppLocalizations {
   /// **'Resumen del sistema'**
   String get trackingStatusDesc;
 
+  /// No description provided for @googleFit.
+  ///
+  /// In es, this message translates to:
+  /// **'Google Fit'**
+  String get googleFit;
+
+  /// No description provided for @googleFitDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar Google Fit para contar pasos'**
+  String get googleFitDesc;
+
+  /// No description provided for @googleFitNotAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Google Fit no disponible en este dispositivo'**
+  String get googleFitNotAvailable;
+
+  /// No description provided for @googleFitEnabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Google Fit activado'**
+  String get googleFitEnabled;
+
+  /// No description provided for @googleFitDisabled.
+  ///
+  /// In es, this message translates to:
+  /// **'Google Fit desactivado'**
+  String get googleFitDisabled;
+
+  /// No description provided for @googleFitPermissionDenied.
+  ///
+  /// In es, this message translates to:
+  /// **'Permisos de Google Fit denegados'**
+  String get googleFitPermissionDenied;
+
   /// No description provided for @help.
   ///
   /// In es, this message translates to:
@@ -517,6 +553,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Esencia'**
   String get essence;
+
+  /// No description provided for @buildings.
+  ///
+  /// In es, this message translates to:
+  /// **'Edificios'**
+  String get buildings;
 
   /// No description provided for @orbs.
   ///
@@ -836,6 +878,18 @@ abstract class AppLocalizations {
   /// **'Esencia generada'**
   String get essenceGenerated;
 
+  /// No description provided for @offlineEssenceCollectedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Esencia Recolectada!'**
+  String get offlineEssenceCollectedTitle;
+
+  /// No description provided for @offlineEssenceCollectedBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Los recolectores de esencia han seguido trabajando durante tu ausencia'**
+  String get offlineEssenceCollectedBody;
+
   /// No description provided for @locked.
   ///
   /// In es, this message translates to:
@@ -926,6 +980,12 @@ abstract class AppLocalizations {
   /// **'¡Santuario comprado! Revisa tu Bolsa.'**
   String get sanctuaryPurchased;
 
+  /// No description provided for @purchaseCompleted.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Compra de \"{name}\" completada!'**
+  String purchaseCompleted(String name);
+
   /// No description provided for @upgradeCompleted.
   ///
   /// In es, this message translates to:
@@ -947,13 +1007,13 @@ abstract class AppLocalizations {
   /// No description provided for @permanentSanctuaryUpgrades.
   ///
   /// In es, this message translates to:
-  /// **'Mejora de Santuario Permanente'**
+  /// **'Mejoras Permanentes de Santuarios'**
   String get permanentSanctuaryUpgrades;
 
   /// No description provided for @globalUpgrades.
   ///
   /// In es, this message translates to:
-  /// **'Mejoras Globales'**
+  /// **'Mejoras de Esencia'**
   String get globalUpgrades;
 
   /// No description provided for @loadingUpgrades.
@@ -1195,6 +1255,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'usos'**
   String get usesPlural;
+
+  /// No description provided for @strengthLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuerza'**
+  String get strengthLabel;
+
+  /// No description provided for @capacityLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Capacidad'**
+  String get capacityLabel;
+
+  /// No description provided for @unlockCapacityLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquea capacidad'**
+  String get unlockCapacityLabel;
+
+  /// No description provided for @unlockLevel1.
+  ///
+  /// In es, this message translates to:
+  /// **'Desbloquear nivel 1'**
+  String get unlockLevel1;
 
   /// No description provided for @energyStorage.
   ///
@@ -1559,7 +1643,7 @@ abstract class AppLocalizations {
   /// No description provided for @sancPrimordialName.
   ///
   /// In es, this message translates to:
-  /// **'Primordial'**
+  /// **'Santuario Primordial'**
   String get sancPrimordialName;
 
   /// No description provided for @sancPrimordialDesc.
@@ -1963,6 +2047,162 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Entendido'**
   String get understood;
+
+  /// No description provided for @upgradeTapStrengthName.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuerza de Tap'**
+  String get upgradeTapStrengthName;
+
+  /// No description provided for @upgradeTapStrengthDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aumenta la Esencia generada por cada tap.'**
+  String get upgradeTapStrengthDesc;
+
+  /// No description provided for @upgradeTapMultiplierName.
+  ///
+  /// In es, this message translates to:
+  /// **'Ritmo Interior'**
+  String get upgradeTapMultiplierName;
+
+  /// No description provided for @upgradeTapMultiplierDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Multiplica la fuerza de tus taps.'**
+  String get upgradeTapMultiplierDesc;
+
+  /// No description provided for @upgradeGlobalMultiplierName.
+  ///
+  /// In es, this message translates to:
+  /// **'Flujo Esencial'**
+  String get upgradeGlobalMultiplierName;
+
+  /// No description provided for @upgradeGlobalMultiplierDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Multiplica toda la producción de Esencia.'**
+  String get upgradeGlobalMultiplierDesc;
+
+  /// No description provided for @upgradeOfflineEfficiencyName.
+  ///
+  /// In es, this message translates to:
+  /// **'Eco Persistente'**
+  String get upgradeOfflineEfficiencyName;
+
+  /// No description provided for @upgradeOfflineEfficiencyDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aumenta la eficiencia de producción offline.'**
+  String get upgradeOfflineEfficiencyDesc;
+
+  /// No description provided for @perLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'/ nivel'**
+  String get perLevel;
+
+  /// No description provided for @building_recolector_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Recolector'**
+  String get building_recolector_name;
+
+  /// No description provided for @building_recolector_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Genera esencia básica automáticamente.'**
+  String get building_recolector_desc;
+
+  /// No description provided for @building_mina_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Mina'**
+  String get building_mina_name;
+
+  /// No description provided for @building_mina_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Extrae esencia de la tierra.'**
+  String get building_mina_desc;
+
+  /// No description provided for @building_cantera_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantera'**
+  String get building_cantera_name;
+
+  /// No description provided for @building_cantera_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Producción industrial de esencia.'**
+  String get building_cantera_desc;
+
+  /// No description provided for @building_yacimiento_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Yacimiento'**
+  String get building_yacimiento_name;
+
+  /// No description provided for @building_yacimiento_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'Fuente masiva de esencia pura.'**
+  String get building_yacimiento_desc;
+
+  /// No description provided for @building_fabrica_name.
+  ///
+  /// In es, this message translates to:
+  /// **'Fábrica'**
+  String get building_fabrica_name;
+
+  /// No description provided for @building_fabrica_desc.
+  ///
+  /// In es, this message translates to:
+  /// **'La cúspide de la tecnología de esencia.'**
+  String get building_fabrica_desc;
+
+  /// No description provided for @errOrbLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Límite de orbes alcanzado (máx. {max})'**
+  String errOrbLimitReached(int max);
+
+  /// No description provided for @errInventoryLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Bolsa de santuarios llena (máx. {max})'**
+  String errInventoryLimitReached(int max);
+
+  /// No description provided for @bagCapacity.
+  ///
+  /// In es, this message translates to:
+  /// **'Capacidad de Bolsa'**
+  String get bagCapacity;
+
+  /// No description provided for @lockedAtLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'Bloqueado (Nv. {level})'**
+  String lockedAtLevel(int level);
+
+  /// No description provided for @limitCountReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Límite alcanzado ({count}/{max})'**
+  String limitCountReached(int count, int max);
+
+  /// No description provided for @buildingLimitReached.
+  ///
+  /// In es, this message translates to:
+  /// **'Límite: {max}'**
+  String buildingLimitReached(Object max);
+
+  /// No description provided for @requiresLevel.
+  ///
+  /// In es, this message translates to:
+  /// **'Requiere Nivel {level}'**
+  String requiresLevel(Object level);
 }
 
 class _AppLocalizationsDelegate
