@@ -136,6 +136,17 @@ class MainActivity: FlutterActivity() {
                     editor.apply()
                     result.success(true)
                 }
+                "getLastSyncedFlutterSteps" -> {
+                    val prefs = context.getSharedPreferences("StillwalksNativePrefs", android.content.Context.MODE_PRIVATE)
+                    val steps = prefs.getLong("last_synced_flutter_steps", 0L)
+                    result.success(steps)
+                }
+                "setLastSyncedFlutterSteps" -> {
+                    val steps = (call.arguments as? Number)?.toLong() ?: 0L
+                    val prefs = context.getSharedPreferences("StillwalksNativePrefs", android.content.Context.MODE_PRIVATE)
+                    prefs.edit().putLong("last_synced_flutter_steps", steps).apply()
+                    result.success(true)
+                }
                 else -> {
                     result.notImplemented()
                 }

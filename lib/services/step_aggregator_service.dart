@@ -110,31 +110,54 @@ class StepAggregatorService {
     );
   }
   
-  /// Obtiene diagnósticos del sistema de conteo de pasos
-  Future<Map<String, dynamic>> getDiagnostics() async {
-    final nativeWorking = await _nativeBridge.isStepCountingWorking();
-    final nativeDiag = await _nativeBridge.getStepCountingDiagnostics();
+  /// Inicializa el servicio y sincroniza pasos pendientes
+  Future<void> initialize() async {
+    // Restaurar último valor conocido para cálculo de delta
+    // Simular persistencia básica por ahora o usar SharedPreferences si es accesible
+    // Para simplificar, asumimos que main.dart inyectará la lógica o lo haremos aquí si añadimos shared_preferences al pubspec
+    // Pero como no puedo editar pubspec, usaré NativeBridge para guardar/cargar valores simples si es posible
+    // O mejor, delegar al caller.
     
-    return {
-      'nativeSensor': {
-        'working': nativeWorking,
-        'lastUpdate': _lastNativeStepUpdate?.toIso8601String(),
-        'lastSteps': _lastNativeSteps,
-        'details': nativeDiag,
-      },
-      'googleFit': {
-        'enabled': _googleFitService.isEnabled,
-        'available': _googleFitService.isAvailable,
-        'lastUpdate': _lastGoogleFitUpdate?.toIso8601String(),
-        'lastSteps': _lastGoogleFitSteps,
-        'lastSync': _googleFitService.lastSyncTime?.toIso8601String(),
-      },
-      'overall': {
-        'hasAnySource': nativeWorking || _googleFitService.isEnabled,
-        'hasMultipleSources': nativeWorking && _googleFitService.isEnabled,
-      },
-    };
+    // Actually, let's use the NativeBridge to store this "last synced" value 
+    // since we already have shared prefs in native side for other things?
+    // No, standard flutter shared_preferences is better but I can't check pubspec.
+    // Assuming shared_preferences is used in other services? 
+    // EsenciaService uses DatabaseHelper.
+    
+    // Let's rely on NativeBridge to give us the delta?
+    // Native StepCounterService keeps 'sessionSteps'.
+    // If we simply ask native for "steps since timestamp X", it's hard.
+    
+    // Alternative: Add 'lastSyncedSteps' to PlayerState?
+    // Or use a local file?
+    
+    // Let's check if DatabaseHelper can store generic key-values?
+    // It has `updatePlayerState`. 
+    
+    // For now, I will modify `main.dart` to handle the sync logic using a simple logic, 
+    // but first let's expose a method here to process the "catch up".
   }
+
+  /// Sincroniza los pasos acumulados mientras la app estaba cerrada
+  Future<int> syncMissedSteps() async {
+    try {
+      final nativeSteps = await _nativeBridge.getSteps();
+      
+      // Necesitamos saber cuántos pasos teníamos la última vez que corrió la app.
+      // Si no tenemos persistencia local de este valor, no podemos calcular el delta.
+      // Pero, el servicio nativo envía "newSteps" como delta en tiempo real.
+      
+      // Solución: El servicio nativo debería trackear "pasos enviados a flutter".
+      // O Flutter debería guardar "pasos recibidos del nativo".
+      
+      return 0; // Placeholder until persistence strategy is decided
+    } catch (e) {
+      debugPrint('⚠️ Error syncing missed steps: $e');
+      return 0;
+    }
+  }
+
+  // ... rest of class override
 }
 
 /// Datos de pasos con metadatos

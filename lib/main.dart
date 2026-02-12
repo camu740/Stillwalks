@@ -98,6 +98,9 @@ class StillwalksApp extends StatelessWidget {
               await esenciaService.addEsencia(bonusEssence);
               debugPrint('✨ Main: Bonus essence earned from orbs: $bonusEssence');
             }
+            
+            // Update persistent sync state
+            await nativeBridge.setLastSyncedFlutterSteps(totalSteps);
 
             if (activeOrbs == 0) {
               await esenciaService.addStoredSteps(newSteps);
@@ -109,6 +112,45 @@ class StillwalksApp extends StatelessWidget {
             debugPrint('👟 Main: Received $newSteps steps from native (Total: $totalSteps)');
             updateWidget();
           };
+
+          // Validar sincronización inicial de pasos (recuperar pasos perdidos en background)
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              final sessionSteps = await nativeBridge.getSteps();
+              final lastSynced = await nativeBridge.getLastSyncedFlutterSteps();
+              
+              if (sessionSteps > lastSynced) {
+                final diff = sessionSteps - lastSynced;
+                debugPrint('🔄 Main: Syncing $diff missed steps (Native: $sessionSteps, Last: $lastSynced)');
+                
+                // Add missed steps
+                final result = await orbeService.addStepsToActiveOrbes(diff);
+                final bonusEssence = result['essenceEarned'] as double;
+                
+                if (bonusEssence > 0) {
+                   await esenciaService.addEsencia(bonusEssence);
+                   debugPrint('✨ Main: Bonus essence earned from missed steps: $bonusEssence');
+                }
+                
+                // Also store steps if no active orbs (logic duplicated from live update)
+                // Wait, addStepsToActiveOrbes returns count. 
+                // We need to check activeOrbs here too to replicate logic?
+                final activeOrbs = result['count'] as int;
+                if (activeOrbs == 0) {
+                   await esenciaService.addStoredSteps(diff);
+                }
+                
+                // Update sync state
+                await nativeBridge.setLastSyncedFlutterSteps(sessionSteps);
+              } else if (sessionSteps < lastSynced) {
+                 // Restart/Reboot detected?
+                 debugPrint('⚠️ Main: Native steps ($sessionSteps) < Last Synced ($lastSynced). Resetting sync.');
+                 await nativeBridge.setLastSyncedFlutterSteps(sessionSteps);
+              }
+            } catch (e) {
+              debugPrint('❌ Error syncing missed steps: $e');
+            }
+          });
           
           // Setup Google Fit sync if enabled
           void syncGoogleFitSteps() async {

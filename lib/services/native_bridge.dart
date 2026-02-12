@@ -252,7 +252,7 @@ class NativeBridge {
     }
   }
 
-  /// Obtiene diagnósticos del sistema de conteo de pasos
+  /// Obtiene los diagnósticos del sistema de conteo de pasos
   Future<Map<String, dynamic>> getStepCountingDiagnostics() async {
     try {
       final result = await platform.invokeMethod('getStepCountingDiagnostics');
@@ -265,6 +265,26 @@ class NativeBridge {
         'lastUpdate': null,
         'sensorType': 'unknown',
       };
+    }
+  }
+
+  /// Obtiene el último conteo de pasos sincronizado con Flutter (persiste en nativo)
+  Future<int> getLastSyncedFlutterSteps() async {
+    try {
+      final result = await platform.invokeMethod('getLastSyncedFlutterSteps');
+      return (result as num).toInt(); // Ensure int
+    } on PlatformException catch (e) {
+      debugPrint('NativeBridge: Error getting last synced steps: ${e.message}');
+      return 0;
+    }
+  }
+
+  /// Guarda el último conteo de pasos sincronizado con Flutter
+  Future<void> setLastSyncedFlutterSteps(int steps) async {
+    try {
+      await platform.invokeMethod('setLastSyncedFlutterSteps', steps);
+    } on PlatformException catch (e) {
+      debugPrint('NativeBridge: Error setting last synced steps: ${e.message}');
     }
   }
 }
