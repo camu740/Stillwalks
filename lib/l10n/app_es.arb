@@ -94,6 +94,11 @@
   "googleFitEnabled": "Google Fit activado",
   "googleFitDisabled": "Google Fit desactivado",
   "googleFitPermissionDenied": "Permisos de Google Fit denegados",
+  "googleFitTitle": "Conecta con Google Fit",
+  "googleFitDescription": "Conecta con Google Fit para sincronizar pasos de tus relojes inteligentes y otras apps de fitness, mejorando tu generación de Esencia.",
+  "connectGoogleFit": "Conectar",
+  "maybeLater": "Quizás luego",
+  "googleFitConnected": "¡Google Fit conectado!",
   
   "help": "Ayuda",
   "contact": "Contacto",

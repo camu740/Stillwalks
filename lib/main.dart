@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/permissions_screen.dart';
+import 'screens/google_fit_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/shop_screen.dart';
 import 'services/permission_service.dart';
@@ -436,6 +437,14 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
     // Show permissions screen if not granted
     if (!permissionService.hasPermission) {
       return const PermissionsScreen();
+    }
+
+    // Show Google Fit screen if not connected and not skipped
+    final googleFitService = Provider.of<GoogleFitService>(context);
+    // Note: googleFitService.isEnabled is true if user has connected.
+    // hasSeenGoogleFitPrompt tracks if they already made a choice (skip/connect).
+    if (!googleFitService.isEnabled && !notificationPreferences.settings.hasSeenGoogleFitPrompt) {
+      return const GoogleFitScreen();
     }
     
     // Show home if permissions granted

@@ -524,6 +524,36 @@ abstract class AppLocalizations {
   /// **'Permisos de Google Fit denegados'**
   String get googleFitPermissionDenied;
 
+  /// No description provided for @googleFitTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Conecta con Google Fit'**
+  String get googleFitTitle;
+
+  /// No description provided for @googleFitDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Conecta con Google Fit para sincronizar pasos de tus relojes inteligentes y otras apps de fitness, mejorando tu generación de Esencia.'**
+  String get googleFitDescription;
+
+  /// No description provided for @connectGoogleFit.
+  ///
+  /// In es, this message translates to:
+  /// **'Conectar'**
+  String get connectGoogleFit;
+
+  /// No description provided for @maybeLater.
+  ///
+  /// In es, this message translates to:
+  /// **'Quizás luego'**
+  String get maybeLater;
+
+  /// No description provided for @googleFitConnected.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Google Fit conectado!'**
+  String get googleFitConnected;
+
   /// No description provided for @help.
   ///
   /// In es, this message translates to:

@@ -25,6 +25,9 @@ class StillwalksSettings {
   final int dailyStepGoal; // 0 = Sin objetivo
   final bool dailyGoalNotificationEnabled;
 
+  // Google Fit
+  final bool hasSeenGoogleFitPrompt;
+
   const StillwalksSettings({
     this.language = 'es',
     this.hasLanguageBeenSelected = false,
@@ -40,6 +43,7 @@ class StillwalksSettings {
     this.dndEndTime = '08:00',
     this.dailyStepGoal = 5000,
     this.dailyGoalNotificationEnabled = false,
+    this.hasSeenGoogleFitPrompt = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -58,6 +62,7 @@ class StillwalksSettings {
       'dndEndTime': dndEndTime,
       'dailyStepGoal': dailyStepGoal,
       'dailyGoalNotificationEnabled': dailyGoalNotificationEnabled,
+      'hasSeenGoogleFitPrompt': hasSeenGoogleFitPrompt,
     };
   }
 
@@ -82,6 +87,7 @@ class StillwalksSettings {
       dndEndTime: json['dndEndTime'] ?? '08:00',
       dailyStepGoal: json['dailyStepGoal'] ?? 5000,
       dailyGoalNotificationEnabled: json['dailyGoalNotificationEnabled'] ?? false,
+      hasSeenGoogleFitPrompt: json['hasSeenGoogleFitPrompt'] ?? false,
     );
   }
 
@@ -100,6 +106,7 @@ class StillwalksSettings {
     String? dndEndTime,
     int? dailyStepGoal,
     bool? dailyGoalNotificationEnabled,
+    bool? hasSeenGoogleFitPrompt,
   }) {
     return StillwalksSettings(
       language: language ?? this.language,
@@ -116,6 +123,7 @@ class StillwalksSettings {
       dndEndTime: dndEndTime ?? this.dndEndTime,
       dailyStepGoal: dailyStepGoal ?? this.dailyStepGoal,
       dailyGoalNotificationEnabled: dailyGoalNotificationEnabled ?? this.dailyGoalNotificationEnabled,
+      hasSeenGoogleFitPrompt: hasSeenGoogleFitPrompt ?? this.hasSeenGoogleFitPrompt,
     );
   }
 }

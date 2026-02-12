@@ -239,6 +239,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get googleFitPermissionDenied => 'Google Fit permissions denied';
 
   @override
+  String get googleFitTitle => 'Connect with Google Fit';
+
+  @override
+  String get googleFitDescription =>
+      'Connect to Google Fit to sync steps from your smartwatches and other fitness apps, improving your Essence generation.';
+
+  @override
+  String get connectGoogleFit => 'Connect';
+
+  @override
+  String get maybeLater => 'Maybe Later';
+
+  @override
+  String get googleFitConnected => 'Google Fit connected!';
+
+  @override
   String get help => 'Help';
 
   @override

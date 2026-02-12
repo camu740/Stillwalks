@@ -94,6 +94,11 @@
   "googleFitEnabled": "Google Fit enabled",
   "googleFitDisabled": "Google Fit disabled",
   "googleFitPermissionDenied": "Google Fit permissions denied",
+  "googleFitTitle": "Connect with Google Fit",
+  "googleFitDescription": "Connect to Google Fit to sync steps from your smartwatches and other fitness apps, improving your Essence generation.",
+  "connectGoogleFit": "Connect",
+  "maybeLater": "Maybe Later",
+  "googleFitConnected": "Google Fit connected!",
   
   "help": "Help",
   "contact": "Contact",

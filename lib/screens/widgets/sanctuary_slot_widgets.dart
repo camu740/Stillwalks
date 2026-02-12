@@ -57,6 +57,13 @@ class SanctuarySlot extends StatelessWidget {
       isReadyToChannel = currentSteps >= requiredSteps;
     }
     
+
+    // Calculate if extra buttons will be shown
+    bool showStorageButton = hasOrbe && !isReadyToChannel && storedSteps > 0;
+    // Infusion button logic (matches condition below)
+    bool showInfuseButton = hasOrbe && !isReadyToChannel && canInfuse && currentEsencia >= 50;
+    bool showExtraButtons = showStorageButton || showInfuseButton;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 160),
       key: containerKey,
@@ -136,9 +143,11 @@ class SanctuarySlot extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
+                // Center content if no buttons, Top aligned if buttons exist to avoid overflow
+                mainAxisAlignment: showExtraButtons ? MainAxisAlignment.start : MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 35), // Espacio reducido para evitar overflow cuando sale el botón de almacén
+                  if (showExtraButtons)
+                    const SizedBox(height: 35), // Only add top spacing if top-aligned
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -554,6 +563,9 @@ class TemporarySanctuarySlot extends StatelessWidget {
       isReadyToChannel = currentSteps >= requiredSteps;
     }
 
+    // Calculate if storage button will be shown
+    bool showStorageButton = hasTemp && orbe != null && !isReadyToChannel && storedSteps > 0;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 160),
       decoration: BoxDecoration(
@@ -648,15 +660,16 @@ class TemporarySanctuarySlot extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                // Alineación superior si hay santuario activo (para igualar al primordial), centrada si está vacío (buy/activate)
-                  mainAxisAlignment: hasTemp ? MainAxisAlignment.start : MainAxisAlignment.center,
+                  // Center content if no buttons, Top aligned if buttons exist
+                  mainAxisAlignment: showStorageButton ? MainAxisAlignment.start : MainAxisAlignment.center,
                   children: [
                     if (hasTemp)
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 35),
+                          if (showStorageButton)
+                            const SizedBox(height: 35),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,

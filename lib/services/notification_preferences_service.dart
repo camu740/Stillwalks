@@ -220,4 +220,12 @@ class NotificationPreferencesService extends ChangeNotifier {
     await _saveSettings();
     notifyListeners();
   }
+
+  // --- GOOGLE FIT ---
+
+  Future<void> setHasSeenGoogleFitPrompt(bool seen) async {
+    _settings = _settings.copyWith(hasSeenGoogleFitPrompt: seen);
+    await _saveSettings();
+    notifyListeners();
+  }
 }
