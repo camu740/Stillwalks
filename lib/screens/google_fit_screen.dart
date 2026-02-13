@@ -78,13 +78,7 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> with WidgetsBindingOb
         _finish(context);
       } else if (mounted) {
          // Denied
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Permisos denegados. Por favor, habilítalos en Ajustes.'),
-              action: SnackBarAction(label: 'Ajustes', onPressed: () => service.openHealthConnectSettings()), // Instance method via service
-              duration: const Duration(seconds: 5),
-            ),
-          );
+         _showPermissionExplanationDialog(context, service);
       }
     } catch (e) {
       debugPrint('Error connecting: $e');
@@ -184,6 +178,34 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> with WidgetsBindingOb
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showPermissionExplanationDialog(BuildContext context, GoogleFitService service) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Permisos Necesarios'),
+        content: const Text(
+          'Para sincronizar tus pasos, es necesario otorgar permisos de "Actividad Física" y acceso a "Health Connect".\n\n'
+          'Si el sistema no muestra la solicitud, por favor ve a Ajustes y actívalos manualmente.'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              service.openHealthConnectSettings();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurpleAccent),
+            child: const Text('Ir a Ajustes'),
+          ),
+        ],
       ),
     );
   }

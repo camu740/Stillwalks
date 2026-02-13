@@ -461,17 +461,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final success = await service.enable();
     if (!success && mounted) {
        // Permission denied
-       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Permisos denegados. Habilítalos en Ajustes.'),
-          action: SnackBarAction(
-            label: 'Ajustes',
-            onPressed: () => service.openHealthConnectSettings(),
-          ),
-          duration: const Duration(seconds: 5),
-        ),
-      );
+       _showPermissionExplanationDialog(context, service);
     }
+  }
+
+  void _showPermissionExplanationDialog(BuildContext context, GoogleFitService service) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Permisos Requeridos'),
+        content: const Text(
+          'Google Fit necesita acceso a "Actividad Física" y "Health Connect" para contar tus pasos.\n\n'
+          'Por favor, habilítalos en Ajustes > Permisos.'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              service.openHealthConnectSettings();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.tealAccent, foregroundColor: Colors.black),
+            child: const Text('Abrir Ajustes'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSwitchTile({
