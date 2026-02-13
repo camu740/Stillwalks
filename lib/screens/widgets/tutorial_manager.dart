@@ -67,9 +67,10 @@ class _TutorialManagerState extends State<TutorialManager> {
             title: l10n.tutorialWelcomeTitle,
             description: l10n.tutorialWelcomeDesc,
             onNext: () async {
+              // Close dialog first
+              Navigator.of(context).pop();
               await esenciaService.addEsencia(basicOrbCost);
               await tutorialService.nextStep();
-              if (context.mounted) Navigator.of(context).pop();
             },
           ),
         ),
@@ -130,8 +131,8 @@ class _TutorialManagerState extends State<TutorialManager> {
             description: l10n.tutorialAdventureDesc,
             isLast: true,
             onNext: () async {
+              Navigator.of(context).pop();
               await tutorialService.completeTutorial();
-              if (context.mounted) Navigator.of(context).pop();
             },
           ),
         ),

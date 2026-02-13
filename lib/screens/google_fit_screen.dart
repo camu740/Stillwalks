@@ -18,14 +18,10 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> {
   void _finish(BuildContext context) {
     if (!mounted) return;
     
-    // Mark as seen
+    // Mark as seen - this will trigger a rebuild in main.dart
+    // which effectively switches the screen to HomeScreen
     Provider.of<NotificationPreferencesService>(context, listen: false)
         .setHasSeenGoogleFitPrompt(true);
-
-    // Navigate to Home
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
   }
 
   Future<void> _connectGoogleFit() async {
