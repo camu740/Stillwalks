@@ -4,6 +4,7 @@ import 'package:stillwalks/services/google_fit_service.dart';
 import 'package:stillwalks/services/notification_preferences_service.dart';
 import 'package:stillwalks/screens/home_screen.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
+import 'package:health/health.dart'; // Needed for HealthConnectSdkStatus
 
 class GoogleFitScreen extends StatefulWidget {
   const GoogleFitScreen({super.key});
@@ -12,68 +13,117 @@ class GoogleFitScreen extends StatefulWidget {
   State<GoogleFitScreen> createState() => _GoogleFitScreenState();
 }
 
-class _GoogleFitScreenState extends State<GoogleFitScreen> {
+class _GoogleFitScreenState extends State<GoogleFitScreen> with WidgetsBindingObserver {
   bool _isLoading = false;
+  HealthConnectSdkStatus? _hcStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkStatus();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkStatus();
+    }
+  }
+
+  Future<void> _checkStatus() async {
+    final service = Provider.of<GoogleFitService>(context, listen: false);
+    final status = await service.getHealthConnectStatus();
+    if (mounted) {
+      setState(() {
+        _hcStatus = status;
+      });
+    }
+  }
 
   void _finish(BuildContext context) {
     if (!mounted) return;
     
     // Mark as seen - this will trigger a rebuild in main.dart
-    // which effectively switches the screen to HomeScreen
     Provider.of<NotificationPreferencesService>(context, listen: false)
         .setHasSeenGoogleFitPrompt(true);
   }
 
-  Future<void> _connectGoogleFit() async {
+  Future<void> _handlePrimaryAction() async {
+    final service = Provider.of<GoogleFitService>(context, listen: false);
+
+    if (_hcStatus == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired || 
+        _hcStatus == HealthConnectSdkStatus.sdkUnavailable) {
+      // Install flow
+      await service.installHealthConnect();
+      return; 
+    }
+
+    // Connect flow
     setState(() => _isLoading = true);
     
     try {
-      final googleFitService = Provider.of<GoogleFitService>(context, listen: false);
-      final granted = await googleFitService.enable();
+      final granted = await service.enable();
       
       if (granted && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.googleFitConnected)),
         );
-        // Only finish if successful
         _finish(context);
       } else if (mounted) {
-         // Show error or denial message
-         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudieron obtener los permisos. Asegúrate de tener Health Connect instalado y configurado.'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 4),
-          ),
-        );
+         // Denied
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Permisos denegados. Por favor, habilítalos en Ajustes.'),
+              action: SnackBarAction(label: 'Ajustes', onPressed: () => service.openHealthConnectSettings()), // Instance method via service
+              duration: const Duration(seconds: 5),
+            ),
+          );
       }
     } catch (e) {
-      debugPrint('Error connecting Google Fit: $e');
+      debugPrint('Error connecting: $e');
       if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al conectar: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-        // Do NOT automatically finish on failure, let the user try again or skip manually
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Fallback if strings not yet available (though they should be)
-    final title = AppLocalizations.of(context)?.googleFitTitle ?? 'Connect Google Fit';
-    final desc = AppLocalizations.of(context)?.googleFitDescription ?? 
-        'Sync your steps from smartwatches and other apps to generate more Essence.';
-    final connectBtn = AppLocalizations.of(context)?.connectGoogleFit ?? 'Connect';
-    final skipBtn = AppLocalizations.of(context)?.maybeLater ?? 'Maybe Later';
+    final l10n = AppLocalizations.of(context)!;
+    
+    String title = l10n.googleFitTitle;
+    String desc = l10n.googleFitDescription;
+    String btnLabel = l10n.connectGoogleFit;
+    IconData btnIcon = Icons.check;
+    Color btnColor = Colors.redAccent;
+
+    // Adjust UI based on status
+    if (_hcStatus == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+      title = 'Instalar Health Connect';
+      desc = 'Para sincronizar tus pasos, necesitas instalar o actualizar Health Connect (de Google).';
+      btnLabel = 'Instalar / Actualizar';
+      btnIcon = Icons.download;
+      btnColor = Colors.blue;
+    } else if (_hcStatus == HealthConnectSdkStatus.sdkUnavailable) {
+      title = 'No compatible';
+      desc = 'Tu dispositivo no parece soportar Health Connect. Verifica tu versión de Android.';
+      btnLabel = 'Instalar (Intentar)';
+      btnIcon = Icons.warning;
+      btnColor = Colors.grey;
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -84,10 +134,10 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              const Icon(
+              Icon(
                 Icons.favorite,
                 size: 80,
-                color: Colors.redAccent,
+                color: btnColor,
               ),
               const SizedBox(height: 32),
               Text(
@@ -112,12 +162,12 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> {
                 const Center(child: CircularProgressIndicator())
               else ...[
                 ElevatedButton.icon(
-                  onPressed: _connectGoogleFit,
-                  icon: const Icon(Icons.check),
-                  label: Text(connectBtn),
+                  onPressed: _handlePrimaryAction,
+                  icon: Icon(btnIcon),
+                  label: Text(btnLabel),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor: btnColor,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -125,7 +175,7 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> {
                 TextButton(
                   onPressed: () => _finish(context),
                   child: Text(
-                    skipBtn,
+                    l10n.maybeLater,
                     style: const TextStyle(color: Colors.white54),
                   ),
                 ),

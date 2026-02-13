@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Servicio opcional para obtener pasos desde Google Fit / Health Connect
 /// Solo se usa si el usuario lo habilita en configuración
@@ -39,41 +40,97 @@ class GoogleFitService extends ChangeNotifier {
     try {
       // Intentar obtener tipos de datos soportados
       final types = [HealthDataType.STEPS];
-      final permissions = [HealthDataAccess.READ];
       
+      // Check status separately
+      try {
+        final status = await _health.getHealthConnectSdkStatus();
+        debugPrint('📊 Health Connect Status: $status');
+        
+        if (status == HealthConnectSdkStatus.sdkUnavailable) {
+          _isAvailable = false;
+          return;
+        }
+        
+        if (status == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+          _isAvailable = true; // Available but needs update/install
+          return;
+        }
+      } catch (e) {
+          debugPrint('⚠️ Error checking Health Connect status: $e');
+      }
+
       // Esto NO pide permisos, solo verifica disponibilidad
-      _isAvailable = await _health.hasPermissions(types, permissions: permissions) != null;
-      debugPrint('📊 Google Fit availability: $_isAvailable');
+      // _health.hasPermissions isn't reliable for "is it installed?"
+      _isAvailable = true;
     } catch (e) {
       debugPrint('⚠️ Error checking Google Fit availability: $e');
       _isAvailable = false;
     }
   }
-  
+
+  Future<HealthConnectSdkStatus?> getHealthConnectStatus() async {
+    try {
+      return await _health.getHealthConnectSdkStatus();
+    } catch (e) {
+      debugPrint('Error getting HC status: $e');
+      return null;
+    }
+  }
+
+  Future<void> installHealthConnect() async {
+    await _health.installHealthConnect();
+  }
+
+  Future<void> openHealthConnectSettings() async {
+    // Falls back to App Settings, where user can manage permissions
+    await openAppSettings();
+  }
+
   /// Habilita Google Fit (requiere permisos del usuario)
   Future<bool> enable() async {
-    // We attempt to enable even if _isAvailable is false, because 
-    // _isAvailable depends on having permissions, which we are about to request.
-    
     try {
-      debugPrint('🔑 Requesting Google Fit permissions...');
-      
+      debugPrint('🔑 Starting Google Fit enablement...');
+
+      // 1. Request Android Activity Recognition (often needed for steps on some devices)
+      // This is distinct from Health Connect but often related for "fitness" apps
+      var arStatus = await Permission.activityRecognition.status;
+      if (!arStatus.isGranted) {
+        debugPrint('🔑 Requesting Activity Recognition permission...');
+        arStatus = await Permission.activityRecognition.request();
+        debugPrint('📊 Activity Recognition result: $arStatus');
+      }
+
+      // 2. Request Health Connect permissions
+      debugPrint('🔑 Requesting Health Connect permissions...');
       final types = [HealthDataType.STEPS];
       final permissions = [HealthDataAccess.READ];
       
-      // Solicitar permisos
-      final granted = await _health.requestAuthorization(types, permissions: permissions);
-      
-      if (granted) {
+      // On Android 14+ this should show the system dialog if not permanently denied
+      bool granted = false;
+      try {
+        granted = await _health.requestAuthorization(types, permissions: permissions);
+      } catch (e) {
+        debugPrint('⚠️ Error requesting authorization: $e');
+      }
+      debugPrint('📊 Health Connect requestAuthorization result: $granted');
+
+      // 3. Double check with hasPermissions (sometimes request returns false but it IS granted)
+      bool hasPermissions = await _health.hasPermissions(types, permissions: permissions) == true;
+      debugPrint('📊 Health Connect hasPermissions check: $hasPermissions');
+
+      if (granted || hasPermissions) {
         _isEnabled = true;
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool(_prefKeyEnabled, true);
         
+        // Force a sync immediately to prove it works
+        getStepsSinceLastSync().ignore();
+
         debugPrint('✅ Google Fit enabled successfully');
         notifyListeners();
         return true;
       } else {
-        debugPrint('❌ Google Fit permissions denied by user');
+        debugPrint('❌ Google Fit permissions denied by user or system');
         return false;
       }
     } catch (e) {

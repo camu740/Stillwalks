@@ -10,6 +10,7 @@ import 'package:stillwalks/screens/tracking_status_screen.dart';
 import 'package:stillwalks/screens/help_screen.dart';
 import 'package:stillwalks/screens/credits_screen.dart';
 import 'package:stillwalks/services/google_fit_service.dart';
+import 'package:health/health.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -197,38 +198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           // Google Fit Toggle
-          _buildSwitchTile(
-            icon: Icons.fitness_center,
-            iconColor: googleFitService.isAvailable 
-                ? (googleFitService.isEnabled ? Colors.greenAccent : Colors.grey)
-                : Colors.grey.shade700,
-            title: AppLocalizations.of(context)!.googleFit,
-            subtitle: !googleFitService.isAvailable
-                ? AppLocalizations.of(context)!.googleFitNotAvailable
-                : (googleFitService.isEnabled 
-                    ? AppLocalizations.of(context)!.googleFitEnabled
-                    : AppLocalizations.of(context)!.googleFitDesc),
-            value: googleFitService.isEnabled,
-            onChanged: googleFitService.isAvailable
-                ? (value) async {
-                    if (value) {
-                      // Attempt to enable
-                      final success = await googleFitService.enable();
-                      if (!success && mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(AppLocalizations.of(context)!.googleFitPermissionDenied),
-                            backgroundColor: Colors.redAccent,
-                          ),
-                        );
-                      }
-                    } else {
-                      // Disable
-                      await googleFitService.disable();
-                    }
-                  }
-                : null, // Disabled if not available
-          ),
+          _buildGoogleFitTile(context, googleFitService),
 
           // INFORMACIÓN Section
           _buildSectionHeader(AppLocalizations.of(context)!.information),
@@ -438,6 +408,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onTap: onTap,
       ),
     );
+  }
+
+  Widget _buildGoogleFitTile(BuildContext context, GoogleFitService service) {
+    return FutureBuilder<HealthConnectSdkStatus?>(
+      future: service.getHealthConnectStatus(),
+      builder: (context, snapshot) {
+        final status = snapshot.data;
+        bool isInstalled = status != HealthConnectSdkStatus.sdkUnavailable && 
+                           status != HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired;
+        
+        // If loaded and not installed, we want to show "Install" flow
+        // If installed, we show the toggle for "Connect/Disconnect"
+        
+        String subtitle;
+        if (!isInstalled) {
+           subtitle = 'Requiere Health Connect (Instalar/Actualizar)';
+        } else if (service.isEnabled) {
+           subtitle = AppLocalizations.of(context)!.googleFitEnabled;
+        } else {
+           subtitle = AppLocalizations.of(context)!.googleFitDesc;
+        }
+
+        return _buildSwitchTile(
+            icon: Icons.fitness_center,
+            iconColor: service.isEnabled ? Colors.greenAccent : Colors.grey,
+            title: AppLocalizations.of(context)!.googleFit,
+            subtitle: subtitle,
+            value: service.isEnabled,
+            onChanged: (value) => _handleGoogleFitToggle(value, service, status),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleGoogleFitToggle(bool value, GoogleFitService service, HealthConnectSdkStatus? status) async {
+    if (!value) {
+      // Disable
+      await service.disable();
+      return;
+    }
+
+    // Enable Flow
+    if (status == HealthConnectSdkStatus.sdkUnavailable || 
+        status == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+       // Install
+       await service.installHealthConnect();
+       return;
+    }
+
+    // Connect
+    final success = await service.enable();
+    if (!success && mounted) {
+       // Permission denied
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Permisos denegados. Habilítalos en Ajustes.'),
+          action: SnackBarAction(
+            label: 'Ajustes',
+            onPressed: () => service.openHealthConnectSettings(),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
   Widget _buildSwitchTile({
