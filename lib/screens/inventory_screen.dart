@@ -105,7 +105,7 @@ class InventoryScreen extends StatelessWidget {
         AppLocalizations.of(context)!.noOrbsAvailable,
         AppLocalizations.of(context)!.noOrbsInstructions,
         Icons.shopping_bag_outlined,
-        0, // Orbs Tab
+        2, // Orbs Tab
       );
     }
 
@@ -204,7 +204,7 @@ class InventoryScreen extends StatelessWidget {
         AppLocalizations.of(context)!.noItemsAvailable,
         AppLocalizations.of(context)!.noItemsInstructions,
         Icons.grid_view_outlined,
-        1, // Sanctuaries Tab
+        3, // Sanctuaries Tab
       );
     }
 

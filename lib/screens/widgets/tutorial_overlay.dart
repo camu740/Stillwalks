@@ -33,7 +33,9 @@ class TutorialOverlay extends StatelessWidget {
             
             if (tutorialService.currentStep != TutorialStep.none && 
                 tutorialService.currentStep != TutorialStep.completed)
-              _buildStepOverlay(context, tutorialService),
+              Positioned.fill(
+                child: _buildStepOverlay(context, tutorialService),
+              ),
           ],
         );
       },
@@ -63,7 +65,6 @@ class TutorialOverlay extends StatelessWidget {
   }
 }
 
-/// A specialized widget to "punch a hole" in a barrier
 class SpotlightBarrier extends StatelessWidget {
   final Rect targetRect;
   final VoidCallback? onTapOutside;
@@ -72,66 +73,79 @@ class SpotlightBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    
+    // Create 4 blocks around the target rect
     return Stack(
       children: [
-        IgnorePointer(
-          child: ColorFiltered(
-            colorFilter: const ColorFilter.mode(
-              Colors.black54,
-              BlendMode.srcOut,
-            ),
-            child: Stack(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    backgroundBlendMode: BlendMode.dstOut,
-                  ),
-                ),
-                Positioned.fromRect(
-                  rect: targetRect,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Tap handler for outside
-        Positioned.fill(
+        // Top
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: targetRect.top,
           child: GestureDetector(
             onTap: onTapOutside,
-            behavior: HitTestBehavior.deferToChild,
-            child: CustomPaint(
-              painter: _HolePainter(targetRect),
-            ),
+            behavior: HitTestBehavior.opaque,
+            child: Container(color: Colors.black54),
           ),
         ),
+        // Bottom
+        Positioned(
+          top: targetRect.bottom,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: GestureDetector(
+            onTap: onTapOutside,
+            behavior: HitTestBehavior.opaque,
+            child: Container(color: Colors.black54),
+          ),
+        ),
+        // Left
+        Positioned(
+          top: targetRect.top,
+          left: 0,
+          width: targetRect.left,
+          height: targetRect.height,
+          child: GestureDetector(
+            onTap: onTapOutside,
+            behavior: HitTestBehavior.opaque,
+             child: Container(color: Colors.black54),
+          ),
+        ),
+        // Right
+        Positioned(
+          top: targetRect.top,
+          left: targetRect.right,
+          right: 0,
+          height: targetRect.height,
+           child: GestureDetector(
+            onTap: onTapOutside,
+            behavior: HitTestBehavior.opaque,
+             child: Container(color: Colors.black54),
+          ),
+        ),
+        // Border around target (optional visual flair)
+         Positioned.fromRect(
+           rect: targetRect.inflate(4), // Little padding
+           child: IgnorePointer(
+             child: Container(
+               decoration: BoxDecoration(
+                 borderRadius: BorderRadius.circular(12),
+                 border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                 boxShadow: [
+                   BoxShadow(
+                     color: Colors.white.withOpacity(0.2),
+                     blurRadius: 8,
+                     spreadRadius: 2,
+                   )
+                 ]
+               ),
+             ),
+           ),
+         ),
       ],
     );
-  }
-}
-
-class _HolePainter extends CustomPainter {
-  final Rect holeRect;
-
-  _HolePainter(this.holeRect);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Just for hit testing logic visualization if needed
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-  
-  @override
-  bool? hitTest(Offset position) {
-    // Return true (handle tap) if OUTSIDE the hole
-    return !holeRect.contains(position);
   }
 }

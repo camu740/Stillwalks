@@ -39,13 +39,33 @@ class _GoogleFitScreenState extends State<GoogleFitScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.googleFitConnected)),
         );
+        // Only finish if successful
+        _finish(context);
+      } else if (mounted) {
+         // Show error or denial message
+         ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudieron obtener los permisos. Asegúrate de tener Health Connect instalado y configurado.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 4),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Error connecting Google Fit: $e');
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al conectar: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-        _finish(context);
+        // Do NOT automatically finish on failure, let the user try again or skip manually
       }
     }
   }

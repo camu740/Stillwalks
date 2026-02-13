@@ -1071,21 +1071,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   void _updateTutorialTarget(GlobalKey key, TutorialService service) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (key.currentContext == null || !key.currentContext!.mounted) return;
+    if (key.currentContext == null || !key.currentContext!.mounted) return;
+    
+    final RenderBox? renderBox = key.currentContext!.findRenderObject() as RenderBox?;
+    if (renderBox != null && renderBox.attached) {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
+      final rect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
       
-      final RenderBox? renderBox = key.currentContext!.findRenderObject() as RenderBox?;
-      if (renderBox != null && renderBox.attached) {
-        final position = renderBox.localToGlobal(Offset.zero);
-        final size = renderBox.size;
-        final rect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
-        
-        // Update service only if changed significantly
-        if (service.targetRect != rect) {
-          service.setTarget(rect);
-        }
+      // Update service only if changed significantly
+      if (service.targetRect != rect) {
+        service.setTarget(rect);
       }
-    });
+    }
   }
 }
 
