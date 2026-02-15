@@ -732,24 +732,26 @@ class _HomeScreenState extends State<HomeScreen> {
   
 
 
-                    if (_cooldownDuration != null)
-                       Padding(
-                         padding: const EdgeInsets.symmetric(horizontal: 32.0).copyWith(top: 4),
-                         child: SizedBox(
-                           height: 4,
-                           child: CooldownIndicator(
-                             key: ValueKey('cooldown_${_lastTapTime?.millisecondsSinceEpoch}'), 
-                             duration: _cooldownDuration!,
-                             onComplete: () {
-                               if (mounted) {
-                                 setState(() {
-                                   _cooldownDuration = null;
-                                 });
-                               }
-                             },
-                           ),
-                         ),
+                    // Cooldown Indicator (Persistent height to avoid layout shift)
+                     Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 32.0).copyWith(top: 4),
+                       child: SizedBox(
+                         height: 4,
+                         child: _cooldownDuration != null 
+                           ? CooldownIndicator(
+                               key: ValueKey('cooldown_${_lastTapTime?.millisecondsSinceEpoch}'), 
+                               duration: _cooldownDuration!,
+                               onComplete: () {
+                                 if (mounted) {
+                                   setState(() {
+                                     _cooldownDuration = null;
+                                   });
+                                 }
+                               },
+                             )
+                           : const SizedBox(), // Placeholder
                        ),
+                     ),
 
                     // Espacio flexible superior
                     const Spacer(),
@@ -1067,7 +1069,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   ),
-                  ),
+                ),
 
                 
               // Floating animations (restore)
