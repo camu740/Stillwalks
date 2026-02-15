@@ -2105,7 +2105,7 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeTapMultiplierDesc.
   ///
   /// In es, this message translates to:
-  /// **'Multiplica la fuerza de tus taps.'**
+  /// **'Reduce el enfriamiento del tap.'**
   String get upgradeTapMultiplierDesc;
 
   /// No description provided for @upgradeGlobalMultiplierName.
@@ -2117,7 +2117,7 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeGlobalMultiplierDesc.
   ///
   /// In es, this message translates to:
-  /// **'Multiplica toda la producción de Esencia.'**
+  /// **'Multiplica la producción pasiva de Esencia.'**
   String get upgradeGlobalMultiplierDesc;
 
   /// No description provided for @upgradeOfflineEfficiencyName.

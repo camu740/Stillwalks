@@ -1109,14 +1109,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get upgradeTapMultiplierName => 'Ritmo Interior';
 
   @override
-  String get upgradeTapMultiplierDesc => 'Multiplica la fuerza de tus taps.';
+  String get upgradeTapMultiplierDesc => 'Reduce el enfriamiento del tap.';
 
   @override
   String get upgradeGlobalMultiplierName => 'Flujo Esencial';
 
   @override
   String get upgradeGlobalMultiplierDesc =>
-      'Multiplica toda la producción de Esencia.';
+      'Multiplica la producción pasiva de Esencia.';
 
   @override
   String get upgradeOfflineEfficiencyName => 'Eco Persistente';

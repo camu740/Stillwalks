@@ -1104,14 +1104,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upgradeTapMultiplierName => 'Inner Rhythm';
 
   @override
-  String get upgradeTapMultiplierDesc => 'Multiplies your tap strength.';
+  String get upgradeTapMultiplierDesc => 'Reduce tap cooling.';
 
   @override
   String get upgradeGlobalMultiplierName => 'Essential Flow';
 
   @override
   String get upgradeGlobalMultiplierDesc =>
-      'Multiplies all Essence production.';
+      'Multiply the passive production of Essence.';
 
   @override
   String get upgradeOfflineEfficiencyName => 'Lingering Echo';

@@ -56,7 +56,7 @@ extension DataLocalizations on AppLocalizations {
       case UpgradeType.tapStrength:
         return '+1 ${perLevel}';
       case UpgradeType.tapMultiplier:
-        return '+10% ${perLevel}';
+        return 'x1.5 ${perLevel}';
       case UpgradeType.globalMultiplier:
         return '+20% ${perLevel}';
       case UpgradeType.offlineEfficiency:
