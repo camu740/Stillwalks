@@ -156,6 +156,14 @@ class ProgressionService {
   int getUpgradeCap(int currentLevel, {String? type}) {
     if (type == null) return 0;
 
+    // Energy Storage specific logic
+    if (type == 'energy_storage') {
+      if (currentLevel < 4) return 0;
+      // Formula: Cap 2 at L4, +2 every 2 levels. Max 15.
+      int cap = 2 + ((currentLevel - 4) ~/ 2) * 2;
+      return cap.clamp(0, 15);
+    }
+
     // Hardcode limits based on Level 1-11+ tables
     
     // Limits map key: type, value: maxLevel
@@ -298,17 +306,6 @@ class ProgressionService {
         // Let's say: Level 1 -> Cap 5. Level 10 -> Cap 15.
         // Formula: currentLevel + 4?
         return currentLevel + 4;
-    }
-    // Maintain existing logic if it was dynamic, OR if it's not restricted, allow it?
-    // Use fallback for energy_storage if not restricted by doc.
-    if (type == 'energy_storage') {
-         // Existing formula was: ((Level - 1) / 3) + 1 approx?
-         // Let's use generic formula: Level based cap?
-         // Doc doesn't restrict Energy Storage explicitly in Section 8.
-         // But "Almacén de Energía" is unlocked at L4 in old code.
-         // Let's unlock at L1 (always useful) or keep at L4?
-         // Let's keep existing logic if any, or default to reasonable cap.
-         return currentLevel + 2; // Loose cap
     }
 
     return 0; // Default locked if not matched
