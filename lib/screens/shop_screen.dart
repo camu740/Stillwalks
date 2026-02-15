@@ -431,10 +431,17 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                       }
                    } : null,
                    style: ElevatedButton.styleFrom(
-                     backgroundColor: canAfford ? Colors.cyan : Colors.grey[800],
+                     elevation: 0,
+                     shadowColor: Colors.transparent,
+                     backgroundColor: !isUnlocked || isLimitReached
+                         ? Colors.redAccent.withOpacity(0.5)
+                         : (canAfford ? Colors.green : Colors.white10),
                      foregroundColor: Colors.white,
-                     disabledBackgroundColor: isLimitReached ? Colors.redAccent.withOpacity(0.1) : null,
+                     disabledForegroundColor: Colors.white38,
+                     disabledBackgroundColor: (!isUnlocked || isLimitReached) ? Colors.redAccent.withOpacity(0.5) : Colors.white10,
                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                     minimumSize: const Size(120, 36),
+                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                    ),
                    child: Text(
                      buttonText,
@@ -1072,10 +1079,16 @@ class _ShopItem extends StatelessWidget {
         trailing: ElevatedButton(
           onPressed: isLocked ? onPurchase : (currentEsencia >= cost ? onPurchase : null),
           style: ElevatedButton.styleFrom(
-            backgroundColor: isLocked ? Colors.grey : (currentEsencia >= cost ? Colors.deepPurple : Colors.grey[800]),
-            foregroundColor: Colors.white,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            backgroundColor: isLocked 
+                ? Colors.redAccent.withOpacity(0.5) 
+                : (currentEsencia >= cost ? Colors.green : Colors.white10),
+            foregroundColor: isLocked ? Colors.white38 : Colors.white,
+            disabledForegroundColor: Colors.white38,
+            minimumSize: const Size(120, 36),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(30),
             ),
           ),
           child: Text(isLocked ? 'Bloqueado' : AppLocalizations.of(context)!.buy),
@@ -1235,9 +1248,20 @@ class _UpgradeItem extends StatelessWidget {
                 ElevatedButton(
                   onPressed: isLocked ? onPurchase : (isCappedByLevel ? null : (canAfford ? onPurchase : null)), 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isLocked ? Colors.grey : (isCappedByLevel ? Colors.grey.withOpacity(0.5) : Colors.greenAccent.withOpacity(0.8)),
-                    foregroundColor: isLocked ? Colors.white : (isCappedByLevel ? Colors.white70 : Colors.black),
-                    disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                    backgroundColor: isLocked 
+                        ? Colors.redAccent.withOpacity(0.5) 
+                        : (isCappedByLevel 
+                            ? Colors.redAccent.withOpacity(0.5) 
+                            : (canAfford ? Colors.green : Colors.white10)),
+                    foregroundColor: isLocked ? Colors.white38 : Colors.white,
+                    disabledForegroundColor: Colors.white38,
+                    disabledBackgroundColor: isCappedByLevel ? Colors.redAccent.withOpacity(0.5) : Colors.white10,
+                    minimumSize: const Size(120, 36),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                   child: Text(
                     isLocked ? (lockedMessage ?? AppLocalizations.of(context)?.locked ?? 'Bloqueado') :
@@ -1376,11 +1400,20 @@ class _SanctuaryUpgradeItem extends StatelessWidget {
                 ),
               if (!isMaxLevel)
                 ElevatedButton(
-                  onPressed: isCappedByLevel ? null : (canAfford ? onPurchase : null), // Disable if capped
+                  onPressed: isCappedByLevel ? null : (canAfford ? onPurchase : null), 
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isCappedByLevel ? Colors.grey.withOpacity(0.5) : Colors.purpleAccent.withOpacity(0.8),
-                    foregroundColor: isCappedByLevel ? Colors.white70 : Colors.white,
-                    disabledBackgroundColor: Colors.grey.withOpacity(0.3),
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
+                    backgroundColor: isCappedByLevel 
+                        ? Colors.redAccent.withOpacity(0.5) 
+                        : (canAfford ? Colors.green : Colors.white10),
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white38,
+                    disabledBackgroundColor: isCappedByLevel ? Colors.redAccent.withOpacity(0.5) : Colors.white10, // Handle disabled color
+                    minimumSize: const Size(120, 36),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                   child: Text(
                     isCappedByLevel 

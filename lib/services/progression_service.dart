@@ -59,6 +59,7 @@ class ProgressionService {
     ]),
     LevelDefinition(level: 4, requiredXp: 1000, unlocks: [ 
         Unlock.item('building_cantera', description: "Cantera desbloqueada"),
+        Unlock.item('energy_storage', description: "Almacén de Energía desbloqueado"),
     ]),
     LevelDefinition(level: 5, requiredXp: 1650, unlocks: [ 
       Unlock.item('upgrade_global_multiplier', description: "Flujo Esencial desbloqueado"),
@@ -284,9 +285,20 @@ class ProgressionService {
             if (type == 'building_yacimiento') return 4;
             if (type == 'building_fabrica') return 1;
             break;
+            if (type == 'building_fabrica') return 1;
+            break;
     }
     
-    // Also check Energy Storage? Not in document, assume open or existing logic?
+    // Sanctuary Logic
+    if (type == 'sanctuary') {
+        // Allow sanctuary speed upgrades to scale with level, slightly ahead
+        // Start at 5, +1 per level? 
+        // Or uncap it? If uncapped, return high value.
+        // But Shop checks cap to show "Level X". 
+        // Let's say: Level 1 -> Cap 5. Level 10 -> Cap 15.
+        // Formula: currentLevel + 4?
+        return currentLevel + 4;
+    }
     // Maintain existing logic if it was dynamic, OR if it's not restricted, allow it?
     // Use fallback for energy_storage if not restricted by doc.
     if (type == 'energy_storage') {
