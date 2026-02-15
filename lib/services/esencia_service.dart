@@ -57,11 +57,33 @@ class EsenciaService extends ChangeNotifier {
 
     // Verificación de integridad: Asegurar que existe Energy Storage
     // REMOVED: We want Energy Storage to be initially UNOWNED (not in list)
-    /*
-    if (!_upgrades.any((u) => u.type == UpgradeType.energyStorage)) {
-       // ... removed logic ...
+    
+    // Repair: Force Tap Strength to be at least Level 1
+    bool needsUpdate = false;
+    for (var u in _upgrades) {
+      if (u.type == UpgradeType.tapStrength && u.currentLevel < 1) {
+        // Upgrade to Level 1
+        final index = _upgrades.indexOf(u);
+        _upgrades[index] = u.copyWith(currentLevel: 1);
+        _db.updateUpgrade(u.id, {'currentLevel': 1}).ignore();
+        needsUpdate = true;
+      }
     }
-    */
+    
+    // If tapStrength is missing entirely (e.g. old save), add it?
+    // It should be handled by seedUpgrades or orElse logic, but better to be safe.
+    if (!_upgrades.any((u) => u.type == UpgradeType.tapStrength)) {
+        final newUpgrade = Upgrade(
+          id: 'upgrade_tap_strength',
+          type: UpgradeType.tapStrength,
+          currentLevel: 1,
+          name: 'Fuerza de Tap',
+          description: 'Aumenta la cantidad de Esencia generada por click.',
+        );
+        _upgrades.add(newUpgrade);
+        _db.insertUpgrade(newUpgrade.toJson()).ignore();
+        needsUpdate = true;
+    }
 
     // Recalcular multiplicador basado en mejoras
     _updateMultipliers();

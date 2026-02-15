@@ -24,7 +24,11 @@ class Upgrade {
     if (costs.isEmpty) {
       if (currentLevel >= type.maxLevel) return double.infinity;
       
-      return type.baseCost * math.pow(type.costScale, currentLevel);
+      // Calculate effective level (e.g. if startLevel is 1, currentLevel 1 -> 0)
+      final effectiveLevel = currentLevel - type.startLevel;
+      final calcLevel = effectiveLevel < 0 ? 0 : effectiveLevel;
+
+      return type.baseCost * math.pow(type.costScale, calcLevel);
     }
     
     if (currentLevel >= costs.length) return double.infinity; // Máximo nivel alcanzado
@@ -102,6 +106,7 @@ enum UpgradeType {
     maxLevel: 30, // Expanded from 20 to 30 as per doc recommendation
     costScale: 1.5,
     costs: [], 
+    startLevel: 1,
   ),
   tapMultiplier( // Represents "Inner Rhythm"
     baseCost: 150,
@@ -138,6 +143,7 @@ enum UpgradeType {
     required this.maxLevel,
     required this.costs,
     required this.costScale,
+    this.startLevel = 0,
   });
 
   final double baseCost;
@@ -145,6 +151,7 @@ enum UpgradeType {
   final int maxLevel;
   final List<double> costs;
   final double costScale;
+  final int startLevel;
 
   /// Obtiene la lista de costes por nivel
   List<double> getCosts() => costs;

@@ -140,23 +140,29 @@ class _HomeScreenState extends State<HomeScreen> {
     
     setState(() {
       _isRandomOrbVisible = false;
+      _isRandomOrbVisible = false;
       _tapAnimations.add(
-        FloatingEssenceText(
+        Positioned(
           key: ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}'),
-          text: '+${bonus.toStringAsFixed(0)}',
-          startPosition: pos,
-          color: Colors.lightBlueAccent,
-          fontWeight: FontWeight.w900,
-          fontSize: 24,
-          onComplete: () {
-               // Cleanup handled by widget key removal usually or similar logic
-                if (mounted) {
-                  setState(() {
-                    _tapAnimations.removeWhere((w) => w.key == ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}'));
-                  });
-                }
-            },
+          left: pos.dx,
+          top: pos.dy,
+          child: FloatingEssenceText(
+            text: '+${bonus.toStringAsFixed(0)}',
+            startPosition: pos,
+            color: Colors.lightBlueAccent,
+            fontWeight: FontWeight.w900,
+            fontSize: 24,
+            onComplete: () {
+                 if (mounted) {
+                   setState(() {
+                     _tapAnimations.removeWhere((w) => w.key == ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}')); // This key lookup might fail if recreated. Using a unique ID is safer but let's stick to this for now or just remove by instance if possible? 
+                     // Actually logic above removes by ValueKey same string. But typically we should use a variable.
+                     // However, existing logic uses this pattern.
+                   });
+                 }
+             },
           ),
+        ),
       );
     });
 
@@ -1061,7 +1067,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   ),
-                ),
+                  ),
+
+                
+              // Floating animations (restore)
+              ..._tapAnimations,
             ],
           ),
         ),

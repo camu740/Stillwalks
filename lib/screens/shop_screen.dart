@@ -814,16 +814,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
              if (isOwned) {
                upgrade = esenciaService.getUpgrade(type)!;
                
-               if (type.costs.isNotEmpty) {
-                   cost = upgrade.calculateNextLevelCost(); // uses costs list
-               } else {
-                   // Dynamic calculation
-                   double scale = 1.6;
-                   if (type == UpgradeType.tapMultiplier) scale = 1.6;
-                   if (type == UpgradeType.globalMultiplier) scale = 2.5;
-                   // tapStrength: 25 * 1.5^L
-                   cost = type.baseCost * pow(scale, upgrade.currentLevel);
-               }
+               cost = upgrade.calculateNextLevelCost();
                
                if (type == UpgradeType.tapStrength) {
                     bonusText = '${AppLocalizations.of(context)!.strengthLabel}: + ${upgrade.currentLevel} \u2192 ${upgrade.currentLevel + 1}'; 

@@ -146,6 +146,13 @@ class InitialData {
         name: 'Recolector de Esencia',
         description: 'Aumenta la velocidad de generación pasiva de Esencia.',
       ),
+      Upgrade(
+        id: 'upgrade_tap_strength',
+        type: UpgradeType.tapStrength,
+        currentLevel: 1,
+        name: 'Fuerza de Tap',
+        description: 'Aumenta la cantidad de Esencia generada por click.',
+      ),
     ];
 
     for (final upgrade in upgrades) {
