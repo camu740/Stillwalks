@@ -22,6 +22,8 @@ extension DataLocalizations on AppLocalizations {
         return upgradeGlobalMultiplierName;
       case UpgradeType.offlineEfficiency:
         return upgradeOfflineEfficiencyName;
+      case UpgradeType.offlineTime:
+        return upgradeOfflineTimeName ?? 'Memoria Persistente';
       default:
         // Fallback genérico o nombre por defecto si existe
         return upgradeSpeedName; 
@@ -42,6 +44,8 @@ extension DataLocalizations on AppLocalizations {
         return upgradeGlobalMultiplierDesc;
       case UpgradeType.offlineEfficiency:
         return upgradeOfflineEfficiencyDesc;
+      case UpgradeType.offlineTime:
+        return upgradeOfflineTimeDesc ?? 'Aumenta el tiempo máximo de inactividad.';
       default:
         return '';
     }
@@ -60,7 +64,10 @@ extension DataLocalizations on AppLocalizations {
       case UpgradeType.globalMultiplier:
         return '+20% ${perLevel}';
       case UpgradeType.offlineEfficiency:
-        return '+5% ${perLevel}';
+        return '+1% ${perLevel}'; // Fixed from 5% to 1% per doc
+      case UpgradeType.offlineTime:
+         // Implementation detail: Logic usually handles specifics, but safe defaults here
+         return 'Max Time \u2191'; 
       default:
         return '';
     }

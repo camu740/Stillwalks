@@ -2129,8 +2129,20 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeOfflineEfficiencyDesc.
   ///
   /// In es, this message translates to:
-  /// **'Aumenta la eficiencia de producción offline.'**
+  /// **'Aumenta la eficiencia de producción desconectado.'**
   String get upgradeOfflineEfficiencyDesc;
+
+  /// No description provided for @upgradeOfflineTimeName.
+  ///
+  /// In es, this message translates to:
+  /// **'Eco Duradero'**
+  String get upgradeOfflineTimeName;
+
+  /// No description provided for @upgradeOfflineTimeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Aumenta el tiempo de producción desconectado.'**
+  String get upgradeOfflineTimeDesc;
 
   /// No description provided for @perLevel.
   ///

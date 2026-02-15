@@ -1121,6 +1121,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Increases offline production efficiency.';
 
   @override
+  String get upgradeOfflineTimeName => 'Durable Echo';
+
+  @override
+  String get upgradeOfflineTimeDesc => 'Increases offline production time.';
+
+  @override
   String get perLevel => '/ level';
 
   @override

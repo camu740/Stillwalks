@@ -128,7 +128,23 @@ class EsenciaService extends ChangeNotifier {
       // 3. Sumar ambos tiempos
       final totalMinutes = lockedMinutes + activeMinutes;
       
-      // 4. Aplicar límite basado en Memoria Persistente (Offline Time)
+      // 4. Time Limit Calculation
+      // Logic:
+      // - Eco Persistent (Offline Efficiency) Level >= 1 grants BASE 15 minutes (Level 1 equivalent).
+      // - Persistent Memory (Offline Time) adds levels on top of that base.
+      
+       // Check Eco Upgrade existence first
+      final echoUpgrade = _upgrades.firstWhere(
+        (u) => u.type == UpgradeType.offlineEfficiency,
+        orElse: () => Upgrade(
+            id: 'temp_offline_efficiency',
+            type: UpgradeType.offlineEfficiency,
+            currentLevel: 0,
+            name: 'Eco Persistente',
+            description: '',
+        )
+      );
+
       final memoryUpgrade = _upgrades.firstWhere(
         (u) => u.type == UpgradeType.offlineTime,
         orElse: () => Upgrade(
@@ -141,24 +157,18 @@ class EsenciaService extends ChangeNotifier {
       );
 
       double maxOfflineMinutes = 0.0;
-      if (memoryUpgrade.currentLevel > 0) {
-          maxOfflineMinutes = _getOfflineTimeLimit(memoryUpgrade.currentLevel);
+      
+      if (echoUpgrade.currentLevel > 0) {
+          int effectiveTimeLevel = 1; // Base 15 min
+          if (memoryUpgrade.currentLevel > 0) {
+              effectiveTimeLevel += memoryUpgrade.currentLevel;
+          }
+          maxOfflineMinutes = _getOfflineTimeLimit(effectiveTimeLevel);
       } else {
-        maxOfflineMinutes = 0.0;
+          maxOfflineMinutes = 0.0;
       }
 
-      // Check Eco Upgrade existence
-      final echoUpgrade = _upgrades.firstWhere(
-        (u) => u.type == UpgradeType.offlineEfficiency,
-        orElse: () => Upgrade(
-            id: 'temp_offline_efficiency',
-            type: UpgradeType.offlineEfficiency,
-            currentLevel: 0,
-            name: 'Eco Persistente',
-            description: '',
-        )
-      );
-      
+
       if (echoUpgrade.currentLevel == 0) {
          maxOfflineMinutes = 0.0; // Hard lock if Eco not unlocked
       }

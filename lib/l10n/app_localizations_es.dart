@@ -1123,7 +1123,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get upgradeOfflineEfficiencyDesc =>
-      'Aumenta la eficiencia de producción offline.';
+      'Aumenta la eficiencia de producción desconectado.';
+
+  @override
+  String get upgradeOfflineTimeName => 'Eco Duradero';
+
+  @override
+  String get upgradeOfflineTimeDesc =>
+      'Aumenta el tiempo de producción desconectado.';
 
   @override
   String get perLevel => '/ nivel';

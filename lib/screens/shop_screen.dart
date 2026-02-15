@@ -804,6 +804,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             UpgradeType.tapMultiplier,
             UpgradeType.globalMultiplier,
             UpgradeType.offlineEfficiency,
+            UpgradeType.offlineTime,
           ].map((type) {
              final isOwned = esenciaService.hasUpgrade(type);
              
@@ -865,6 +866,19 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                  nextReqLevel = progressionService.getLevelRequiredForHigherCap(upgradeCap, type: upgradeTypeId);
             }
 
+            // Dependency Check (Eco Duradero requires Eco Persistente)
+            bool isLockedByDependency = false;
+            String? dependencyMessage;
+            
+            if (type == UpgradeType.offlineTime) {
+                final echo = esenciaService.getUpgrade(UpgradeType.offlineEfficiency);
+                if (echo == null || echo.currentLevel < 1) {
+                    isLockedByDependency = true;
+                    // TODO: Use localized string if possible, but hardcoding based on known strings for now
+                    dependencyMessage = "Requiere Eco Persistente";
+                }
+            }
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _UpgradeItem(
@@ -880,8 +894,10 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 isCappedByLevel: isCappedByLevel,
                 nextRequiredLevel: nextReqLevel,
                 isMaxLevel: isMaxLevel,
+                isLocked: isLockedByDependency,
+                lockedMessage: dependencyMessage,
                 onPurchase: () async {
-                  if (isCappedByLevel || isMaxLevel) return;
+                  if (isCappedByLevel || isMaxLevel || isLockedByDependency) return;
 
                   final success = await esenciaService.purchaseUpgradeByType(type);
                   if (success) {
@@ -1104,7 +1120,11 @@ class _UpgradeItem extends StatelessWidget {
     this.iconColor,
     this.bonusTextColor,
     this.isLocked = false, // Added
+    this.lockedMessage,
   });
+
+  final String? lockedMessage;
+
 
   @override
   Widget build(BuildContext context) {
@@ -1220,7 +1240,7 @@ class _UpgradeItem extends StatelessWidget {
                     disabledBackgroundColor: Colors.grey.withOpacity(0.3),
                   ),
                   child: Text(
-                    isLocked ? (AppLocalizations.of(context)?.locked ?? 'Bloqueado') :
+                    isLocked ? (lockedMessage ?? AppLocalizations.of(context)?.locked ?? 'Bloqueado') :
                     (isCappedByLevel 
                       ? 'Nivel ${nextRequiredLevel ?? "?"}' 
                       : AppLocalizations.of(context)!.upgrade)

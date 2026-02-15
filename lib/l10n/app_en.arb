@@ -520,6 +520,8 @@
   "upgradeGlobalMultiplierDesc": "Multiply the passive production of Essence.",
   "upgradeOfflineEfficiencyName": "Lingering Echo",
   "upgradeOfflineEfficiencyDesc": "Increases offline production efficiency.",
+  "upgradeOfflineTimeName": "Durable Echo",
+  "upgradeOfflineTimeDesc": "Increases offline production time.",
   "upgradeSpeedName": "Speed Upgrade",
   "perLevel": "/ level",
   "building_recolector_name": "Collector",
