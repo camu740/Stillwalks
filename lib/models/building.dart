@@ -2,7 +2,7 @@ enum BuildingType {
   recolector(
     id: 'building_recolector',
     name: 'Recolector',
-    baseProduction: 1.0, 
+    baseProduction: 0.1, 
     baseCost: 100.0,
     costScale: 1.7,
     description: 'Genera esencia básica automáticamente.',
@@ -10,7 +10,7 @@ enum BuildingType {
   mina(
     id: 'building_mina',
     name: 'Mina',
-    baseProduction: 5.0,
+    baseProduction: 0.5,
     baseCost: 750.0,
     costScale: 1.8,
     description: 'Extrae esencia de la tierra.',
@@ -18,7 +18,7 @@ enum BuildingType {
   cantera(
     id: 'building_cantera',
     name: 'Cantera',
-    baseProduction: 20.0,
+    baseProduction: 2.0,
     baseCost: 4000.0,
     costScale: 1.9,
     description: 'Producción industrial de esencia.',
@@ -26,7 +26,7 @@ enum BuildingType {
   yacimiento(
     id: 'building_yacimiento',
     name: 'Yacimiento',
-    baseProduction: 75.0,
+    baseProduction: 7.5,
     baseCost: 15000.0,
     costScale: 2.0,
     description: 'Fuente masiva de esencia pura.',
@@ -34,7 +34,7 @@ enum BuildingType {
   fabrica(
     id: 'building_fabrica',
     name: 'Fábrica',
-    baseProduction: 250.0,
+    baseProduction: 25.0,
     baseCost: 75000.0,
     costScale: 2.1,
     description: 'La cúspide de la tecnología de esencia.',

@@ -115,41 +115,23 @@ class StillwalksApp extends StatelessWidget {
           };
 
           // Validar sincronización inicial de pasos (recuperar pasos perdidos en background)
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            try {
-              final sessionSteps = await nativeBridge.getSteps();
-              final lastSynced = await nativeBridge.getLastSyncedFlutterSteps();
-              
-              if (sessionSteps > lastSynced) {
-                final diff = sessionSteps - lastSynced;
-                debugPrint('🔄 Main: Syncing $diff missed steps (Native: $sessionSteps, Last: $lastSynced)');
-                
-                // Add missed steps
-                final result = await orbeService.addStepsToActiveOrbes(diff);
-                final bonusEssence = result['essenceEarned'] as double;
-                final unusedSteps = result['unusedSteps'] as int; // Get unused steps
-                
-                if (bonusEssence > 0) {
-                   await esenciaService.addEsencia(bonusEssence);
-                   debugPrint('✨ Main: Bonus essence earned from missed steps: $bonusEssence');
-                }
-                
-                // Add unused steps to storage
-                if (unusedSteps > 0) {
-                   await esenciaService.addStoredSteps(unusedSteps);
-                }
-                
-                // Update sync state
-                await nativeBridge.setLastSyncedFlutterSteps(sessionSteps);
-              } else if (sessionSteps < lastSynced) {
-                 // Restart/Reboot detected?
-                 debugPrint('⚠️ Main: Native steps ($sessionSteps) < Last Synced ($lastSynced). Resetting sync.');
-                 await nativeBridge.setLastSyncedFlutterSteps(sessionSteps);
-              }
-            } catch (e) {
-              debugPrint('❌ Error syncing missed steps: $e');
-            }
-          });
+          // Esto se maneja ahora en _AppInitializerState via _syncNativeSteps
+          // pero como _AppInitializerState.initState/didChangeApp works on its own context/services,
+          // we might want it there. 
+          // Actually, AppInitializer is the HOME widget.
+          // The code block lines 118-152 was inside `StillwalksApp.build` -> `MultiProvider` -> `Builder`.
+          // This creates a duplicate logic issue if I moved it to `AppInitializer`.
+          // BUT `AppInitializer` is stateful and has lifecycle access.
+          // The code in `StillwalksApp` `addPostFrameCallback` runs once when the App Widget is built.
+          // I should REMOVE it from here and let `AppInitializer` handle it entirely, 
+          // OR expose the method.
+          
+          // Since I added `_syncNativeSteps` to `_AppInitializerState`, I can remove this block 
+          // from `StillwalksApp` to avoid duplication/race conditions, 
+          // AS LONG AS `AppInitializer` calls it on init.
+          // `AppInitializer._initialize` handles service init. I should call `_syncNativeSteps` there too.
+          
+          // Removing this block to cleanup.
           
           // Setup Google Fit sync if enabled
           void syncGoogleFitSteps() async {
@@ -259,23 +241,65 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
     
     if (state == AppLifecycleState.resumed) {
       // App volvió a foreground
-      // activeTimeTracker.startTracking(); // Removed
       
       // Calcular esencia pendiente (Offline)
       esenciaService.calculateOfflineEssence();
+      
+      // Sincronizar pasos (Native -> Flutter)
+      _syncNativeSteps();
       
       // Start foreground generation
       esenciaService.startGenerationTimer();
       
     } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       // App sale de foreground
-      // activeTimeTracker.stopTracking(); // Removed
       
       // Stop foreground generation
       esenciaService.stopGenerationTimer();
       
       // Actualizar widget
       _updateWidget();
+    }
+  }
+
+  Future<void> _syncNativeSteps() async {
+    if (!mounted) return;
+    try {
+      final nativeBridge = Provider.of<NativeBridge>(context, listen: false);
+      final orbeService = Provider.of<OrbeService>(context, listen: false);
+      final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+      
+      final sessionSteps = await nativeBridge.getSteps();
+      final lastSynced = await nativeBridge.getLastSyncedFlutterSteps();
+      
+      if (sessionSteps > lastSynced) {
+        final diff = sessionSteps - lastSynced;
+        debugPrint('🔄 Main: Syncing $diff missed steps (Native: $sessionSteps, Last: $lastSynced)');
+        
+        // Add missed steps
+        final result = await orbeService.addStepsToActiveOrbes(diff);
+        final bonusEssence = result['essenceEarned'] as double;
+        final unusedSteps = result['unusedSteps'] as int; 
+        
+        if (bonusEssence > 0) {
+           await esenciaService.addEsencia(bonusEssence);
+           debugPrint('✨ Main: Bonus essence earned from missed steps: $bonusEssence');
+        }
+        
+        // Add unused steps to storage
+        if (unusedSteps > 0) {
+           await esenciaService.addStoredSteps(unusedSteps);
+        }
+        
+        // Update sync state
+        await nativeBridge.setLastSyncedFlutterSteps(sessionSteps);
+      } else if (sessionSteps < lastSynced) {
+         // Restart/Reboot detected?
+         debugPrint('⚠️ Main: Native steps ($sessionSteps) < Last Synced ($lastSynced). Resetting sync.');
+         await nativeBridge.setLastSyncedFlutterSteps(sessionSteps);
+      }
+    } catch (e) {
+      debugPrint('❌ Error syncing missed steps: $e');
     }
   }
 
@@ -383,6 +407,9 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
           // Non-fatal, can continue without native tracking
         }
       }
+
+      // Initial Sync of steps
+      if (context.mounted) await _syncNativeSteps();
       
       setState(() {
         _isInitialized = true;

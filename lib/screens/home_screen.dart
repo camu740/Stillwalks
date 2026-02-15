@@ -163,6 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
     final earned = esenciaService.handleTap();
     
+    if (earned <= 0) return; // Don't show floating text if no essence earned (cooldown)
+
     // Add floating text animation
     final id = _tapIdCounter++;
     
@@ -487,24 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Mirando EsenciaService.dart linea 75: _playerState.esenciaPerHour * hoursElapsed. SI EXISTE.
     final esenciaPerHour = esenciaService.playerState.esenciaPerHour; 
     
-    // Get Collector Level (Safe lookup)
-    int collectorLevel = 0;
-    try {
-      final collectorUpgrade = esenciaService.upgrades.firstWhere(
-        (u) => u.type == UpgradeType.idleMultiplier,
-        orElse: () => Upgrade(
-          id: 'temp', 
-          type: UpgradeType.idleMultiplier, 
-          currentLevel: 0, 
-          name: '', 
-          description: ''
-        ),
-      );
-      collectorLevel = collectorUpgrade.currentLevel;
-    } catch (e) {
-      // Fallback
-      collectorLevel = 0;
-    } 
+ 
     
 
     
@@ -626,23 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           '+${esenciaService.passiveEssencePerSecond.toStringAsFixed(1)}/s',
                                           style: const TextStyle(fontSize: 14, color: Colors.white70),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.amber.withValues(alpha: 0.2),
-                                            borderRadius: BorderRadius.circular(4),
-                                            border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
-                                          ),
-                                          child: Text(
-                                            '${AppLocalizations.of(context)!.levelAbbr} $collectorLevel',
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.amber,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
+
                                       ],
                                     ),
                                   ],

@@ -443,9 +443,10 @@ class OrbeService extends ChangeNotifier {
     _orbes[orbeIdx] = channeledOrbe;
 
     // XP Award: Canalizar Orbe (25/50/100 XP según rareza)
-    int channelingXp = 60; // Basic
-    if (type.id == 'orbe_advanced') channelingXp = 150;
-    if (type.id == 'orbe_expert') channelingXp = 350;
+    // XP Award: Canalizar Orbe (100/250/400 XP según rareza - New Balance)
+    int channelingXp = 100; // Basic
+    if (type.id == 'orbe_advanced') channelingXp = 250;
+    if (type.id == 'orbe_expert') channelingXp = 400;
     _esenciaService?.addXp(channelingXp);
 
     // XP Award: Descubrimiento (50 XP)

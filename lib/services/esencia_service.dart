@@ -106,39 +106,88 @@ class EsenciaService extends ChangeNotifier {
       // 3. Sumar ambos tiempos
       final totalMinutes = lockedMinutes + activeMinutes;
       
-      // 4. Aplicar límite de 24 horas
-      final cappedMinutes = totalMinutes > (24 * 60) ? 24 * 60 : totalMinutes;
+      // 4. Aplicar límite basado en Memoria Persistente (Offline Time)
+      final memoryUpgrade = _upgrades.firstWhere(
+        (u) => u.type == UpgradeType.offlineTime,
+        orElse: () => Upgrade(
+          id: 'temp_offline_time',
+          type: UpgradeType.offlineTime,
+          currentLevel: 0,
+          name: 'Memoria Persistente',
+          description: '',
+        ),
+      );
+
+      double maxOfflineMinutes = 0.0;
+      if (memoryUpgrade.currentLevel > 0) {
+          maxOfflineMinutes = _getOfflineTimeLimit(memoryUpgrade.currentLevel);
+      } else {
+        maxOfflineMinutes = 0.0;
+      }
+
+      // Check Eco Upgrade existence
+      final echoUpgrade = _upgrades.firstWhere(
+        (u) => u.type == UpgradeType.offlineEfficiency,
+        orElse: () => Upgrade(
+            id: 'temp_offline_efficiency',
+            type: UpgradeType.offlineEfficiency,
+            currentLevel: 0,
+            name: 'Eco Persistente',
+            description: '',
+        )
+      );
+      
+      if (echoUpgrade.currentLevel == 0) {
+         maxOfflineMinutes = 0.0; // Hard lock if Eco not unlocked
+      }
+
+      final cappedMinutes = totalMinutes > maxOfflineMinutes ? maxOfflineMinutes : totalMinutes;
       final hoursElapsed = cappedMinutes / 60.0;
       
-      // 5. Calcular esencia generada
-      final esenciaGenerated = _playerState.esenciaPerHour * hoursElapsed;
+      // 5. Calcular esencia generada (Base pasiva * Eco Efficiency)
+      final passiveRate = passiveEssencePerSecond; 
+      final passivePerHour = passiveRate * 3600;
       
-      debugPrint('💎 EsenciaService: Locked: ${lockedMinutes}min, Active: ${activeMinutes}min, Total: ${cappedMinutes}min (${hoursElapsed.toStringAsFixed(2)}h)');
+      // Eco Efficiency: 1% per level (Max 15%)
+      double efficiency = echoUpgrade.currentLevel * 0.01;
       
-      if (esenciaGenerated <= 0) {
-        debugPrint('💎 EsenciaService: No essence to generate');
-        return;
-      }
+      final esenciaGenerated = passivePerHour * hoursElapsed * efficiency;
       
-      // 6. Actualizar timestamp ANTES de añadir esencia (evitar feedback loop)
+      debugPrint('💎 EsenciaService: Total: ${totalMinutes}min. Capped: ${maxOfflineMinutes}min. Eff: ${(efficiency*100).toStringAsFixed(1)}%');
+      
+      if (esenciaGenerated <= 0) return;
+      
       final now = DateTime.now();
       _playerState = _playerState.copyWith(
         lastActiveTimestamp: now,
+        lastOfflineEarnedEssence: esenciaGenerated,
+        lastOfflineCheck: now,
       );
       await _db.updatePlayerState(_playerState.toJson());
       
-      // 7. Añadir esencia
       await addEsencia(esenciaGenerated);
       
-      // 8. Reset contadores en ambos trackers
       await nativeBridge.resetAccumulatedTime();
       activeTimeTracker.reset();
-      
-      debugPrint('💰 EsenciaService: Generated $esenciaGenerated essence from ${hoursElapsed.toStringAsFixed(2)} hours (locked + active)');
       
     } catch (e) {
       debugPrint('❌ EsenciaService: Error calculating pending essence: $e');
     }
+  }
+
+  double _getOfflineTimeLimit(int level) {
+      // Nivel 1 desbloquea 15 min. Max(15) es 8h.
+      // 1: 15m
+      // 5: 90m
+      // 10: 300m
+      // 15: 480m
+      if (level <= 0) return 0.0;
+      if (level == 1) return 15.0;
+      
+      // Linear interpolation between breakpoints?
+      if (level <= 5) return 15.0 + ((level - 1) * (75.0 / 4)); // 1->15, 5->90. Diff 75 in 4 steps. 18.75/lvl
+      if (level <= 10) return 90.0 + ((level - 5) * (210.0 / 5)); // 5->90, 10->300. Diff 210 in 5 steps. 42/lvl
+      return 300.0 + ((level - 10) * (180.0 / 5)); // 10->300, 15->480. Diff 180 in 5 steps. 36/lvl
   }
 
   // Stream for notifying when essence is earned
@@ -168,13 +217,13 @@ class EsenciaService extends ChangeNotifier {
     notifyListeners();
     
     // Notify specific event listeners (Game mechanics)
-    debugPrint('💰 EsenciaService: Broadcasting $amount essence to stream listeners...');
+    // debugPrint('💰 EsenciaService: Broadcasting $amount essence to stream listeners...');
     _essenceEarnedController.add(amount);
 
     _checkMilestoneNotification();
 
     final source = fromNative ? 'native Android' : 'app calculation';
-    debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
+    // debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
     
     // Sync with native for persistent notification
     _syncToNative();
@@ -312,20 +361,24 @@ class EsenciaService extends ChangeNotifier {
       description = 'Aumenta la generación pasiva.';
     } else if (type == UpgradeType.tapStrength) {
       id = 'upgrade_tap_strength';
-      name = 'Fuerza de Toque';
+      name = 'Fuerza de Tap'; // Updated name
       description = 'Aumenta la esencia ganada por cada toque.';
     } else if (type == UpgradeType.tapMultiplier) {
-      id = 'upgrade_tap_multiplier';
-      name = 'Ritmo Interior';
-      description = 'Multiplica la esencia de los toques.';
+      id = 'upgrade_tap_multiplier'; // Keep ID
+      name = 'Ritmo Interior'; // Updated name
+      description = 'Reduce el tiempo entre toques.'; // Updated desc
     } else if (type == UpgradeType.globalMultiplier) {
       id = 'upgrade_global_multiplier';
-      name = 'Sincronía Global';
-      description = 'Aumenta toda la ganancia de esencia.';
+      name = 'Flujo Esencial'; // Updated name
+      description = 'Multiplicador global de producción.';
     } else if (type == UpgradeType.offlineEfficiency) {
       id = 'upgrade_offline_efficiency';
-      name = 'Meditación Profunda';
-      description = 'Mejora la recolección offline.';
+      name = 'Eco Persistente'; // Updated name
+      description = 'Genera un % de producción estando offline.';
+    } else if (type == UpgradeType.offlineTime) {
+      id = 'upgrade_offline_time';
+      name = 'Memoria Persistente';
+      description = 'Aumenta el tiempo máximo de producción offline.';
     } else {
       // Fallback for safety
       id = 'upgrade_${type.name}';
@@ -376,6 +429,8 @@ class EsenciaService extends ChangeNotifier {
     else if (upgrade.type == UpgradeType.tapMultiplier) upgradeTypeId = 'tap_multiplier';
     else if (upgrade.type == UpgradeType.globalMultiplier) upgradeTypeId = 'global_multiplier';
     else if (upgrade.type == UpgradeType.offlineEfficiency) upgradeTypeId = 'offline_efficiency';
+    else if (upgrade.type == UpgradeType.offlineTime) upgradeTypeId = 'offline_time';
+    else if (upgrade.type == UpgradeType.offlineTime) upgradeTypeId = 'offline_time';
     // Add sanctuary if it was an upgrade type, but it handles separately in OrbeService for Sanctuaries
 
     // Verificar límite por Nivel de Explorador
@@ -403,8 +458,6 @@ class EsenciaService extends ChangeNotifier {
     );
 
     // Update in DB (using index logic or ID)
-    // Note: DatabaseHelper might need 'type' if ID isn't unique, but usually ID is unique key.
-    // However, if we inserted them manually...
     await _db.updateUpgrade(upgrade.id, {'currentLevel': upgradedUpgrade.currentLevel});
     _upgrades[upgradeIndex] = upgradedUpgrade;
 
@@ -499,8 +552,6 @@ class EsenciaService extends ChangeNotifier {
     debugPrint('🔄 EsenciaService: Progress reset to initial state.');
   }
 
-
-
   // Collection Service reference for passive generation bonuses
   CollectionService? _collectionService;
   
@@ -554,7 +605,8 @@ class EsenciaService extends ChangeNotifier {
       total += type.baseProduction * count;
     }
 
-    // Apply global multiplier if exists
+    // Apply global multiplier (Flow Essence)
+    // +1% per level. Max 20%.
     final globalUpgrade = _upgrades.firstWhere(
       (u) => u.type == UpgradeType.globalMultiplier,
       orElse: () => Upgrade(
@@ -567,18 +619,16 @@ class EsenciaService extends ChangeNotifier {
     );
 
     if (globalUpgrade.currentLevel > 0) {
-      final multiplier = 1.0 + (globalUpgrade.currentLevel * globalUpgrade.type.incrementPerLevel);
+      final multiplier = 1.0 + (globalUpgrade.currentLevel * 0.01);
       total *= multiplier;
     }
 
-
-
-    // Apply Idle Multiplier (Recolector de Esencia)
+    // Apply Idle Multiplier (Legacy/Recolector Efficiency)
     if (_playerState.idleMultiplier > 1.0) {
       total *= _playerState.idleMultiplier;
     }
 
-    // Collection bonuses - TODO: implement getTotalPassiveBonus in CollectionService
+    // Collection bonuses
     // if (_collectionService != null) {
     //   final collectionBonus = _collectionService!.getTotalPassiveBonus();
     //   total *= (1.0 + collectionBonus);
@@ -587,64 +637,8 @@ class EsenciaService extends ChangeNotifier {
     return total;
   }
 
-  /// Calculates offline essence (called when app resumes)
-  Future<void> calculateOfflineEssence() async {
-    try {
-      final now = DateTime.now();
-      final lastCheck = _playerState.lastOfflineCheck;
-      
-      final difference = now.difference(lastCheck);
-      final secondsOffline = difference.inSeconds;
-      
-      if (secondsOffline <= 60) {
-        // Less than a minute, ignore
-        _playerState = _playerState.copyWith(lastOfflineCheck: now);
-        await _db.updatePlayerState(_playerState.toJson());
-        return;
-      }
-
-      // Cap at 12 hours
-      final cappedSeconds = secondsOffline > (12 * 3600) ? (12 * 3600) : secondsOffline;
-
-      // Get offline efficiency
-      double offlineEfficiency = 0.05; // Base 5%
-      final offlineUpgrade = _upgrades.firstWhere(
-        (u) => u.type == UpgradeType.offlineEfficiency,
-        orElse: () => Upgrade(
-          id: 'temp',
-          type: UpgradeType.offlineEfficiency,
-          currentLevel: 0,
-          name: '',
-          description: '',
-        ),
-      );
-
-      if (offlineUpgrade.currentLevel > 0) {
-        offlineEfficiency += offlineUpgrade.currentLevel * 0.15; // +15% per level
-      }
-
-      final passiveRate = passiveEssencePerSecond;
-      final offlineEssence = passiveRate * cappedSeconds * offlineEfficiency;
-
-      if (offlineEssence > 0) {
-        // Store for display
-        _playerState = _playerState.copyWith(
-          lastOfflineEarnedEssence: offlineEssence,
-          lastOfflineCheck: now,
-        );
-        await _db.updatePlayerState(_playerState.toJson());
-
-        // Add the essence
-        await addEsencia(offlineEssence, fromNative: false);
-        debugPrint('💤 Offline essence calculated: $offlineEssence (${secondsOffline}s offline, ${offlineEfficiency * 100}% efficiency)');
-      } else {
-        _playerState = _playerState.copyWith(lastOfflineCheck: now);
-        await _db.updatePlayerState(_playerState.toJson());
-      }
-    } catch (e) {
-      debugPrint('❌ Error calculating offline essence: $e');
-    }
-  }
+  /// Calculates offline essence (Obsolete, see calculatePendingEsencia)
+  Future<void> calculateOfflineEssence() async {}
 
   /// Obtiene la esencia generada offline (para mostrar en UI)
   double get lastOfflineEarnedEssence => _playerState.lastOfflineEarnedEssence;
@@ -676,30 +670,12 @@ class EsenciaService extends ChangeNotifier {
     // Use ProgressionService for dynamic caps based on level
     final maxAllowed = _progressionService.getUpgradeCap(playerLevel, type: type.id);
     
-    // Fallback if maxAllowed is 0 (meaning not explicitly set, or locked)
-    // But if it's 0 and we are trying to buy, it implies it might be locked.
-    // However, if ProgressionService returns 0, we should probably assume strictly 0?
-    // Let's assume if > 0 use it, otherwise fallback to type.getMaxAllowedCount ONLY if we are sure?
-    // Actually, ProgressionService defines strict caps. If it returns 0, you can't buy.
-    // EXCEPT: "Unlock.upgradeCap(0)" exists for general.
-    
-    // If maxAllowed is 0, we can check if it's genuinely 0 or just not defined. 
-    // But given the config, it defines caps for building_recolector explicitly.
-    // If it returns 0, we block.
-    
     if (currentCount >= maxAllowed && maxAllowed > 0) {
       debugPrint('❌ Cannot buy building: already at max ($currentCount/$maxAllowed) for player level $playerLevel');
       return false;
     } else if (maxAllowed == 0 && currentCount > 0) {
-       // If cap is 0, but we have some? weird.
        return false;
     } else if (maxAllowed == 0 && currentCount == 0) {
-        // If cap is 0, maybe we can't buy any.
-        // But wait, isItemUnlocked might handle "unlocking".
-        // Use logic: if ProgressionService returns > 0, use it.
-        // If it returns 0, check if we should fallback to loose logic? 
-        // No, stay strict to ProgressionService.
-        // Note: For Recolector at Level 1, it returns 5. So it works.
         debugPrint('❌ Cannot buy building: cap is 0 for player level $playerLevel');
         return false;
     }
@@ -730,63 +706,78 @@ class EsenciaService extends ChangeNotifier {
 
   /// Calculates the base tap strength (without multipliers)
   double get baseTapStrength {
-    // 1. Base tap value always 1.0
-    double tapValue = 1.0;
-    
-    // 2. Add Tap Strength upgrade
     final strengthUpgrade = _upgrades.firstWhere(
       (u) => u.type == UpgradeType.tapStrength,
       orElse: () => Upgrade(
         id: 'temp_tap_strength',
         type: UpgradeType.tapStrength,
-        currentLevel: 0,
+        currentLevel: 1, 
         name: 'Fuerza de Tap',
         description: '',
       ),
     );
     
-    // Each level adds +1 to base tap
-    tapValue += strengthUpgrade.currentLevel * (strengthUpgrade.type.incrementPerLevel);
-    return tapValue;
+    // Nivel = Esencia (min 1)
+    int level = strengthUpgrade.currentLevel;
+    if (level < 1) level = 1; 
+
+    return level.toDouble();
   }
 
-  /// Calculates the current essence generated per tap (including multipliers)
+  /// Calculates the current essence generated per tap
   double get essencePerTap {
-    double tapValue = baseTapStrength;
-    
-    // 3. Apply Tap Multiplier
-    final multiplierUpgrade = _upgrades.firstWhere(
-      (u) => u.type == UpgradeType.tapMultiplier,
+    // Only depends on Tap Force. Inner Rhythm affects cooldown.
+    return baseTapStrength;
+  }
+
+  DateTime _lastTapTime = DateTime.fromMillisecondsSinceEpoch(0);
+  
+  Duration get tapCooldown {
+     final innerRhythm = _upgrades.firstWhere(
+      (u) => u.type == UpgradeType.tapMultiplier, 
       orElse: () => Upgrade(
-        id: 'temp_tap_multiplier',
+        id: 'temp_inner_rhythm',
         type: UpgradeType.tapMultiplier,
         currentLevel: 0,
         name: 'Ritmo Interior',
         description: '',
       ),
     );
+
+    int level = innerRhythm.currentLevel;
+    if (level <= 0) return const Duration(milliseconds: 3000); 
+
+    double cooldownSeconds = 3.0; 
     
-    // Base multiplier 1.0 + (level * 0.05)
-    double multiplier = 1.0 + (multiplierUpgrade.currentLevel * multiplierUpgrade.type.incrementPerLevel);
+    if (level >= 1 && level <= 13) {
+        cooldownSeconds = 3.0 - ((level - 1) * 0.2);
+    } else if (level == 14) {
+        cooldownSeconds = 0.45;
+    } else if (level >= 15) {
+        cooldownSeconds = 0.3;
+    }
     
-    return tapValue * multiplier;
+    return Duration(milliseconds: (cooldownSeconds * 1000).toInt());
   }
 
   /// Maneja un tap del usuario para generar esencia
-  /// Retorna la cantidad de esencia generada para mostrar en UI
   double handleTap() {
-    final finalEsencia = essencePerTap;
+    final now = DateTime.now();
+    final difference = now.difference(_lastTapTime);
+    final cooldown = tapCooldown;
     
-    // 5. Add to total essence (we don't await database here for performance, just update state)
-    // We update local state immediately
+    if (difference < cooldown) {
+       return 0.0; // Cooldown active
+    }
+
+    final finalEsencia = essencePerTap;
+    _lastTapTime = now;
+    
     _playerState = _playerState.copyWith(
       totalEsencia: _playerState.totalEsencia + finalEsencia,
     );
     
-    // Notify listeners so UI updates
     notifyListeners();
-    
-    // Trigger background save (fire and forget)
     _db.updatePlayerState(_playerState.toJson()).ignore();
     
     return finalEsencia;

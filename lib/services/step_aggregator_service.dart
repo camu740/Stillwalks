@@ -70,8 +70,21 @@ class StepAggregatorService {
           reliability: StepReliability.high,
         );
       } else {
-        // Valores muy diferentes, preferir Google Fit si está habilitado (más preciso)
+        // Valores muy diferentes
         debugPrint('⚠️ Step sources disagree (${percentDiff.toStringAsFixed(1)}% diff). Native: $nativeSteps, GoogleFit: $googleFitSteps');
+        
+        // Si Google Fit dice 0 pero el sensor nativo tiene datos, confiamos en el nativo
+        // (Google Fit a veces tarda en actualizarse o devuelve 0 si no ha sincronizado)
+        if (googleFitSteps == 0 && nativeSteps > 0) {
+           debugPrint('→ Google Fit returns 0. Preferring Native sensor.');
+           return StepData(
+            steps: nativeSteps,
+            source: StepSource.nativeSensor,
+            reliability: StepReliability.medium,
+          );
+        }
+
+        // En otros casos, preferir Google Fit si está habilitado (generalmente filtra mejor "sacudidas")
         debugPrint('→ Preferring Google Fit as primary source');
         return StepData(
           steps: googleFitSteps,

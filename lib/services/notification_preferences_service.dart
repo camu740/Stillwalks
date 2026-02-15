@@ -33,7 +33,8 @@ class NotificationPreferencesService extends ChangeNotifier {
         _settings = StillwalksSettings.fromJson(json);
         debugPrint('NotificationPreferences: Loaded settings from storage');
       } else {
-        debugPrint('NotificationPreferences: Using default settings');
+        debugPrint('NotificationPreferences: Using default settings (and saving them)');
+        await _saveSettings(); // Ensure defaults are persisted for Native side to read
       }
       
       notifyListeners();

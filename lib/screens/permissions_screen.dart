@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stillwalks/services/permission_service.dart';
+import 'package:stillwalks/services/native_bridge.dart'; 
 import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Pantalla inicial que solicita permisos necesarios
@@ -65,9 +66,18 @@ class PermissionsScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   final permissionService = Provider.of<PermissionService>(context, listen: false);
+                  final nativeBridge = Provider.of<NativeBridge>(context, listen: false); // Get NativeBridge
                   final granted = await permissionService.requestActivityRecognition();
                   
-                  if (!granted && context.mounted) {
+                  if (granted) {
+                     // Start tracking immediately upon grant
+                     debugPrint('PermissionsScreen: Permission granted, starting tracking service...');
+                     try {
+                        await nativeBridge.startTracking();
+                     } catch (e) {
+                        debugPrint('PermissionsScreen: Error starting tracking: $e');
+                     }
+                  } else if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                        SnackBar(
                         content: Text(l10n.permissionDeniedMessage),

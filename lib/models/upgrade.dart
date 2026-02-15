@@ -99,30 +99,37 @@ enum UpgradeType {
   tapStrength(
     baseCost: 25,
     incrementPerLevel: 1.0, 
-    maxLevel: 30, 
+    maxLevel: 30, // Expanded from 20 to 30 as per doc recommendation
     costScale: 1.5,
     costs: [], 
   ),
-  tapMultiplier(
-    baseCost: 100,
-    incrementPerLevel: 0.05, 
+  tapMultiplier( // Represents "Inner Rhythm"
+    baseCost: 150,
+    incrementPerLevel: 0.0, // Handled via specific logic (Cooldown)
     maxLevel: 15, 
+    costScale: 1.5,
+    costs: [],
+  ),
+  globalMultiplier( // Represents "Essence Flow"
+    baseCost: 2500,
+    incrementPerLevel: 0.01, // +1% per level
+    maxLevel: 20, 
     costScale: 1.6,
     costs: [],
   ),
-  globalMultiplier(
-    baseCost: 2000,
-    incrementPerLevel: 0.05, 
-    maxLevel: 15, 
-    costScale: 2.5,
-    costs: [],
+  offlineEfficiency( // Represents "Echo Persistent" (%)
+    baseCost: 3000,
+    incrementPerLevel: 0.01, // +1% per level
+    maxLevel: 15,
+    costScale: 1.7, 
+    costs: [], 
   ),
-  offlineEfficiency(
-    baseCost: 2000,
-    incrementPerLevel: 0.15, 
-    maxLevel: 5,
-    costScale: 0.0, // Uses fixed costs
-    costs: [2000, 6000, 15000, 30000, 50000], 
+  offlineTime( // Represents "Memory Persistent" (Time)
+    baseCost: 2500,
+    incrementPerLevel: 0.0, // Handled via specific logic (Time table)
+    maxLevel: 15,
+    costScale: 1.6,
+    costs: [],
   );
 
   const UpgradeType({

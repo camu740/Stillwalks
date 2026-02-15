@@ -32,26 +32,26 @@ class BootReceiver : BroadcastReceiver() {
             val settingsJson = prefs.getString("flutter.notification_settings", null)
             
             if (settingsJson != null) {
-                // Check if permanent notification is enabled in the JSON string
-                if (settingsJson.contains("\"permanentNotificationEnabled\":true")) {
-                    Log.d("BootReceiver", "🚀 Restarting tracking service...")
-                    val serviceIntent = Intent(context, TrackingForegroundService::class.java).apply {
-                        action = TrackingForegroundService.ACTION_START
-                    }
-                    
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(serviceIntent)
-                    } else {
-                        context.startService(serviceIntent)
-                    }
-                    
-                    Log.d("BootReceiver", "✅ Tracking service restarted successfully")
-                } else {
-                    Log.d("BootReceiver", "ℹ️ Permanent notification disabled. Not restarting service.")
+                // Check if permanent notification is EXPLICITLY disabled
+                if (settingsJson.contains("\"permanentNotificationEnabled\":false")) {
+                    Log.d("BootReceiver", "ℹ️ Permanent notification disabled by user. Not restarting service.")
+                    return
                 }
-            } else {
-                Log.d("BootReceiver", "ℹ️ No notification settings found. Not restarting service.")
             }
+            
+            // Default to TRUE (Start service) if settings are missing or not disabled
+            Log.d("BootReceiver", "🚀 Restarting tracking service (Default: Enabled)...")
+            val serviceIntent = Intent(context, TrackingForegroundService::class.java).apply {
+                action = TrackingForegroundService.ACTION_START
+            }
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
+            
+            Log.d("BootReceiver", "✅ Tracking service restarted successfully")
         }
     }
 }
