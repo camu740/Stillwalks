@@ -64,9 +64,8 @@ class _FloatingEssenceTextState extends State<FloatingEssenceText> with SingleTi
   @override
   Widget build(BuildContext context) {
     // Use SizedBox to ensure the text has layout constraints even in a Stack
-    return Positioned(
-      left: widget.startPosition.dx - 50, // Center better (wider touch target)
-      top: widget.startPosition.dy - 30, // Start slightly above finger
+    // Use SizedBox to ensure the text has layout constraints even in a Stack
+    return SizedBox(
       width: 100, // Fixed width to prevent layout issues
       height: 100, // Fixed height for animation space
       child: IgnorePointer( // Ensure it doesn't block other taps
@@ -74,7 +73,7 @@ class _FloatingEssenceTextState extends State<FloatingEssenceText> with SingleTi
           animation: _controller,
           builder: (context, child) {
             return Transform.translate(
-              offset: Offset(0, _translateY.value),
+              offset: Offset(-50, -30) + Offset(0, _translateY.value), // Apply centering offset here + animation
               child: Opacity(
                 opacity: _opacity.value,
                 child: Transform.scale(

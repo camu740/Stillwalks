@@ -46,6 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Offset? _randomOrbPosition;
   bool _isRandomOrbVisible = false;
   final Random _random = Random();
+  
+  // Cooldown State
+  Duration? _cooldownDuration;
+  DateTime? _lastTapTime;
 
   @override
   void initState() {
@@ -164,6 +168,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final earned = esenciaService.handleTap();
     
     if (earned <= 0) return; // Don't show floating text if no essence earned (cooldown)
+
+    // Trigger Cooldown Animation
+    setState(() {
+      _lastTapTime = DateTime.now();
+      _cooldownDuration = esenciaService.tapCooldown;
+    });
 
     // Add floating text animation
     final id = _tapIdCounter++;
@@ -611,11 +621,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                           '+${esenciaService.passiveEssencePerSecond.toStringAsFixed(1)}/s',
                                           style: const TextStyle(fontSize: 14, color: Colors.white70),
                                         ),
-
                                       ],
                                     ),
-                                  ],
-                                ),
+                                    
+                                    // Cooldown Indicator
+
+                                    ],
+                                  ),
                               ),
 
                               const SizedBox(width: 8),
@@ -713,6 +725,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
   
 
+
+                    if (_cooldownDuration != null)
+                       Padding(
+                         padding: const EdgeInsets.symmetric(horizontal: 32.0).copyWith(top: 4),
+                         child: SizedBox(
+                           height: 4,
+                           child: CooldownIndicator(
+                             key: ValueKey('cooldown_${_lastTapTime?.millisecondsSinceEpoch}'), 
+                             duration: _cooldownDuration!,
+                             onComplete: () {
+                               if (mounted) {
+                                 setState(() {
+                                   _cooldownDuration = null;
+                                 });
+                               }
+                             },
+                           ),
+                         ),
+                       ),
 
                     // Espacio flexible superior
                     const Spacer(),
@@ -1095,5 +1126,110 @@ class _NavButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cooldown Indicator Widget
+// ---------------------------------------------------------------------------
+
+class CooldownIndicator extends StatefulWidget {
+  final Duration duration;
+  final VoidCallback onComplete;
+
+  const CooldownIndicator({
+    super.key,
+    required this.duration,
+    required this.onComplete,
+  });
+
+  @override
+  State<CooldownIndicator> createState() => _CooldownIndicatorState();
+}
+
+class _CooldownIndicatorState extends State<CooldownIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+         vsync: this,
+         duration: widget.duration,
+    );
+    // Animate from 1.0 (full) to 0.0 (empty)
+    _controller.reverse(from: 1.0).whenComplete(() {
+        if (mounted) widget.onComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        // If progress is 0, don't paint
+        if (_controller.value <= 0) return const SizedBox.shrink();
+
+        return CustomPaint(
+          size: const Size(double.infinity, 4), // Height of the line
+          painter: _CooldownPainter(
+            progress: _controller.value,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CooldownPainter extends CustomPainter {
+  final double progress;
+
+  _CooldownPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+
+    final paint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.8)
+      ..style = PaintingStyle.fill
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = size.height;
+
+    final centerX = size.width / 2;
+    final currentTotalWidth = size.width * progress;
+    final halfWidth = currentTotalWidth / 2;
+
+    // Draw from center outwards? Or shrinking towards center.
+    // "vaciando desde ambos extremos hasta el centro" -> Means the bar gets shorter towards the center.
+    // So distinct start/end points moving closer to center.
+    // Left Point: CenterX - HalfWidth
+    // Right Point: CenterX + HalfWidth
+    
+    final p1 = Offset(centerX - halfWidth, size.height / 2);
+    final p2 = Offset(centerX + halfWidth, size.height / 2);
+
+    canvas.drawLine(p1, p2, paint);
+    
+    // Add glow
+    final glowPaint = Paint()
+      ..color = Colors.cyanAccent.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.height + 4
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+      
+    canvas.drawLine(p1, p2, glowPaint);
+  }
+
+  @override
+  bool shouldRepaint(_CooldownPainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }
