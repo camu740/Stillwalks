@@ -62,10 +62,26 @@ class InitialData {
         dexNumber: 3,
       ),
       CreatureSpecies(
+        id: 'lierpes',
+        name: 'Lierpes',
+        description: 'Lierpes es una criatura esquiva que se entreteje entre las sombras y la luz. Su presencia se siente a menudo antes de ser vista, dejando tras de sí un rastro de polvo brillante.',
+        rarity: 'epic',
+        assetPath: 'assets/creatures/lierpes.png',
+        dexNumber: 4,
+      ),
+      CreatureSpecies(
+        id: 'velanta',
+        name: 'Velanta',
+        description: 'Velanta aparece en caminos rurales durante la noche, liderando procesiones de espíritus invisibles. Porta una enorme vela encadenada que utiliza para marcar el destino de aquellos que se cruzan en su camino. Se dice que no puede ser detenido mientras la procesión sigue su curso.',
+        rarity: 'rare',
+        assetPath: 'assets/creatures/velanta.png',
+        dexNumber: 5,
+      ),
+      CreatureSpecies(
         id: 'gamusarra',
         name: 'Gamusarra',
         description: 'Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.',
-        rarity: 'special',
+        rarity: 'mythic',
         assetPath: 'assets/creatures/gamusarra.png',
         dexNumber: 0,
       ),
@@ -85,9 +101,11 @@ class InitialData {
       name: 'Orbe Básico',
       description: 'Un Orbe común que requiere 2000 pasos para canalizar.',
       lootTable: {
-        'yedrantia': 0.45,
-        'trasgueco': 0.45, 
-        'harijaun': 0.10,
+        'yedrantia': 0.43,
+        'trasgueco': 0.43, 
+        'harijaun': 0.11,
+        'lierpes': 0.01,
+        'velanta': 0.02,
       },
     );
 
@@ -97,9 +115,11 @@ class InitialData {
       name: 'Orbe Avanzado',
       description: 'Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.',
       lootTable: {
-        'yedrantia': 0.25,
-        'trasgueco': 0.25,
+        'yedrantia': 0.18,
+        'trasgueco': 0.18,
         'harijaun': 0.50,
+        'lierpes': 0.04,
+        'velanta': 0.10,
       },
     );
 
@@ -109,9 +129,11 @@ class InitialData {
       name: 'Orbe Experto',
       description: 'Mejora probabilidad de Raros. Requiere 10000 pasos.',
       lootTable: {
-        'yedrantia': 0.10,
-        'trasgueco': 0.10,
-        'harijaun': 0.80,
+        'yedrantia': 0.05,
+        'trasgueco': 0.05,
+        'harijaun': 0.40,
+        'lierpes': 0.20,
+        'velanta': 0.30,
       },
     );
 

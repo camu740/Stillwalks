@@ -204,6 +204,10 @@ extension DataLocalizations on AppLocalizations {
         return nameHarijaun;
       case 'gamusarra':
         return nameGamusarra;
+      case 'lierpes':
+        return nameLierpes;
+      case 'velanta':
+        return nameVelanta;
       default:
         return defaultName;
     }
@@ -219,6 +223,10 @@ extension DataLocalizations on AppLocalizations {
         return descHarijaun;
       case 'gamusarra':
         return descGamusarra;
+      case 'lierpes':
+        return descLierpes;
+      case 'velanta':
+        return descVelanta;
       default:
         return defaultDesc;
     }

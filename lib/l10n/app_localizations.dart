@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'Legendario'**
   String get rarityLegendary;
 
+  /// No description provided for @rarityMythic.
+  ///
+  /// In es, this message translates to:
+  /// **'Mítico'**
+  String get rarityMythic;
+
   /// No description provided for @selectSanctuary.
   ///
   /// In es, this message translates to:
@@ -1867,6 +1873,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Harijaun protege los bosques más antiguos, donde sus pasos hacen temblar la tierra. Su cuerpo, formado por madera y raíces, se endurece con los años como un roble centenario. Se dice que guía a quienes respetan el bosque y castiga sin piedad a quienes lo dañan.'**
   String get descHarijaun;
+
+  /// No description provided for @nameLierpes.
+  ///
+  /// In es, this message translates to:
+  /// **'Lierpes'**
+  String get nameLierpes;
+
+  /// No description provided for @descLierpes.
+  ///
+  /// In es, this message translates to:
+  /// **'Lierpes repta por los subsuelos de las ciudades, donde se oculta entre humedades y vegetación. Su cuerpo largo y escamoso emite un leve resplandor púrpura durante la noche. Se dice que protege antiguos secretos y tesoros, y que quien se le acerca con intención maliciosa recibe su mirada fulminante.'**
+  String get descLierpes;
+
+  /// No description provided for @nameVelanta.
+  ///
+  /// In es, this message translates to:
+  /// **'Velanta'**
+  String get nameVelanta;
+
+  /// No description provided for @descVelanta.
+  ///
+  /// In es, this message translates to:
+  /// **'Velanta aparece en caminos rurales durante la noche, liderando procesiones de espíritus invisibles. Porta una enorme vela encadenada que utiliza para marcar el destino de aquellos que se cruzan en su camino. Se dice que no puede ser detenido mientras la procesión sigue su curso.'**
+  String get descVelanta;
 
   /// No description provided for @physicalActivity.
   ///

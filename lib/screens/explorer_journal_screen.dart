@@ -268,7 +268,9 @@ class _RarityBadge extends StatelessWidget {
       case 'epic':
         return Colors.purple;
       case 'legendary':
-        return Colors.orange;
+        return Colors.amber; // Gold
+      case 'mythic':
+        return Colors.cyan;
       default:
         return Colors.grey;
     }
@@ -287,6 +289,8 @@ class _RarityBadge extends StatelessWidget {
         return l10n.rarityEpic;
       case 'legendary':
         return l10n.rarityLegendary;
+      case 'mythic':
+        return l10n.rarityMythic;
       default:
         return rarity;
     }

@@ -569,6 +569,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rarityLegendary => 'Legendario';
 
   @override
+  String get rarityMythic => 'Mítico';
+
+  @override
   String get selectSanctuary => 'Seleccionar Santuario';
 
   @override
@@ -983,6 +986,20 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get descHarijaun =>
       'Harijaun protege los bosques más antiguos, donde sus pasos hacen temblar la tierra. Su cuerpo, formado por madera y raíces, se endurece con los años como un roble centenario. Se dice que guía a quienes respetan el bosque y castiga sin piedad a quienes lo dañan.';
+
+  @override
+  String get nameLierpes => 'Lierpes';
+
+  @override
+  String get descLierpes =>
+      'Lierpes repta por los subsuelos de las ciudades, donde se oculta entre humedades y vegetación. Su cuerpo largo y escamoso emite un leve resplandor púrpura durante la noche. Se dice que protege antiguos secretos y tesoros, y que quien se le acerca con intención maliciosa recibe su mirada fulminante.';
+
+  @override
+  String get nameVelanta => 'Velanta';
+
+  @override
+  String get descVelanta =>
+      'Velanta aparece en caminos rurales durante la noche, liderando procesiones de espíritus invisibles. Porta una enorme vela encadenada que utiliza para marcar el destino de aquellos que se cruzan en su camino. Se dice que no puede ser detenido mientras la procesión sigue su curso.';
 
   @override
   String get physicalActivity => 'Actividad física';

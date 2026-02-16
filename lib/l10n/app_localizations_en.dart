@@ -568,6 +568,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rarityLegendary => 'Legendary';
 
   @override
+  String get rarityMythic => 'Mythic';
+
+  @override
   String get selectSanctuary => 'Select Sanctuary';
 
   @override
@@ -980,6 +983,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get descHarijaun =>
       'Harijaun protects the oldest forests, where its footsteps make the ground tremble. Its body, formed of wood and roots, hardens over time like a centuries-old oak. It is said to guide those who respect the forest and to show no mercy to those who harm it.';
+
+  @override
+  String get nameLierpes => 'Lierpes';
+
+  @override
+  String get descLierpes =>
+      'Lierpes slithers through the underground tunnels of cities, hiding among dampness and vegetation. Its long, scaly body emits a faint purple glow at night. It is said to guard ancient secrets and treasures, and that anyone who approaches it with malicious intent receives its withering glare.';
+
+  @override
+  String get nameVelanta => 'Velanta';
+
+  @override
+  String get descVelanta =>
+      'Velanta appears on rural paths at night, leading processions of invisible spirits. It carries a massive chained candle, which it uses to mark the fate of anyone who crosses its path. It is said that it cannot be stopped while the procession continues.';
 
   @override
   String get physicalActivity => 'Physical Activity';

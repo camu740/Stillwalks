@@ -12,6 +12,7 @@ import 'package:stillwalks/screens/channeling_screen.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/services/tutorial_service.dart';
+import 'package:stillwalks/services/hatching_service.dart';
 
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/l10n/data_localizations.dart';
@@ -114,17 +115,14 @@ class SanctuarySlot extends StatelessWidget {
                           // when the user clicks "Continue", ensuring the "Adventure Continues"
                           // dialog appears AFTER the creature reveal, not before.
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ChannelingScreen(
-                                species: species,
-                                instance: result.instance,
-                                isNew: isNew,
-                                channelingXp: result.channelingXp,
-                                discoveryXp: result.discoveryXp,
-                              ),
-                            ),
+                          final hatchingService = Provider.of<HatchingService>(context, listen: false);
+                          hatchingService.addHatchToQueue(
+                            context: context,
+                            species: species,
+                            instance: result.instance,
+                            isNew: isNew,
+                            channelingXp: result.channelingXp,
+                            discoveryXp: result.discoveryXp,
                           );
                         }
                       }

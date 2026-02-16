@@ -14,6 +14,7 @@ import 'services/notification_preferences_service.dart';
 import 'services/notification_guard_service.dart';
 import 'services/tutorial_service.dart';
 import 'services/progression_service.dart'; // Added
+import 'services/hatching_service.dart';
 import 'services/google_fit_service.dart';
 // import 'services/active_time_tracker.dart'; // Removed
 import 'providers/locale_provider.dart';
@@ -51,6 +52,7 @@ class StillwalksApp extends StatelessWidget {
         Provider(create: (_) => NativeBridge()),
         Provider(create: (_) => WidgetService()),
         Provider(create: (_) => ProgressionService()), // Added
+        ChangeNotifierProvider(create: (_) => HatchingService()),
       ],
       child: Builder(
         builder: (context) {
