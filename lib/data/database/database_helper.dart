@@ -25,7 +25,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 11,
+      version: 12,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -47,7 +47,9 @@ class DatabaseHelper {
         buildings TEXT NOT NULL DEFAULT '{}',
         tapMultiplier REAL NOT NULL DEFAULT 1.0,
         lastOfflineCheck TEXT,
-        lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0
+        lastOfflineCheck TEXT,
+        lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0,
+        freeOrbLevel2Claimed INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -158,6 +160,7 @@ class DatabaseHelper {
       'tapMultiplier': 1.0,
       'lastOfflineCheck': DateTime.now().toIso8601String(),
       'lastOfflineEarnedEssence': 0.0,
+      'freeOrbLevel2Claimed': 0,
     });
   }
 
@@ -264,6 +267,15 @@ class DatabaseHelper {
         await db.execute("ALTER TABLE player_state ADD COLUMN lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0");
       } catch (e) {
         debugPrint('Migration v11 warning: $e');
+      }
+    }
+
+    // V12: Añadir flag freeOrbLevel2Claimed
+    if (oldVersion < 12) {
+      try {
+         await db.execute("ALTER TABLE player_state ADD COLUMN freeOrbLevel2Claimed INTEGER NOT NULL DEFAULT 0");
+      } catch (e) {
+        debugPrint('Migration v12 warning: $e');
       }
     }
   }
@@ -522,6 +534,7 @@ class DatabaseHelper {
       'tapMultiplier': 1.0,
       'lastOfflineCheck': DateTime.now().toIso8601String(),
       'lastOfflineEarnedEssence': 0.0,
+      'freeOrbLevel2Claimed': 0,
     }, where: 'id = ?', whereArgs: [1]);
   }
 

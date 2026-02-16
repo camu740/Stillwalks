@@ -196,12 +196,12 @@ extension DataLocalizations on AppLocalizations {
   
   String getCreatureName(String speciesId, String defaultName) {
     switch (speciesId) {
-      case 'spiristone':
-        return nameSpiristone;
-      case 'radispirit':
-        return nameRadispirit;
-      case 'slugrry':
-        return nameSlugrry;
+      case 'yedrantia':
+        return nameYedrantia;
+      case 'trasgueco':
+        return nameTrasgueco;
+      case 'harijaun':
+        return nameHarijaun;
       case 'gamusarra':
         return nameGamusarra;
       default:
@@ -211,12 +211,12 @@ extension DataLocalizations on AppLocalizations {
 
   String getCreatureDescription(String speciesId, String defaultDesc) {
     switch (speciesId) {
-      case 'spiristone':
-        return descSpiristone;
-      case 'radispirit':
-        return descRadispirit;
-      case 'slugrry':
-        return descSlugrry;
+      case 'yedrantia':
+        return descYedrantia;
+      case 'trasgueco':
+        return descTrasgueco;
+      case 'harijaun':
+        return descHarijaun;
       case 'gamusarra':
         return descGamusarra;
       default:

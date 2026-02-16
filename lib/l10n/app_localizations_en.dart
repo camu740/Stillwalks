@@ -954,27 +954,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nameSpiristone => 'Spiristone';
-
-  @override
-  String get descSpiristone =>
-      'A small enchanted stone with little hands and legs. Curious and friendly.';
-
-  @override
-  String get nameRadispirit => 'Radispirit';
-
-  @override
-  String get descRadispirit =>
-      'A magical radish that walks on four legs. Its leaves glow at dusk.';
-
-  @override
-  String get nameSlugrry => 'Slugrry';
-
-  @override
-  String get descSlugrry =>
-      'A white furry slug with slow movements but quick thinking.';
-
-  @override
   String get nameGamusarra => 'Gamusarra';
 
   @override
@@ -987,6 +966,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get descTrasgueco =>
       'Trasgüeco lives in old houses and secluded granaries. At night, it moves objects around and leaves small wooden carvings as proof of its presence. Though it looks like a simple puppet, it moves when no one is watching and delights in testing the patience of those who try to catch it.';
+
+  @override
+  String get nameYedrantia => 'Yedrantía';
+
+  @override
+  String get descYedrantia =>
+      'Yedrantía dwells among ivy-covered ruins and ancient forests. It remains motionless for long periods, blending in with the vegetation while the gem it wears absorbs energy from its surroundings. It is said to protect the places where it was first summoned and to punish those who harm the nature around it.';
+
+  @override
+  String get nameHarijaun => 'Harijaun';
+
+  @override
+  String get descHarijaun =>
+      'Harijaun protects the oldest forests, where its footsteps make the ground tremble. Its body, formed of wood and roots, hardens over time like a centuries-old oak. It is said to guide those who respect the forest and to show no mercy to those who harm it.';
 
   @override
   String get physicalActivity => 'Physical Activity';

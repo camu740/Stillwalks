@@ -957,27 +957,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get nameSpiristone => 'Spiristone';
-
-  @override
-  String get descSpiristone =>
-      'Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.';
-
-  @override
-  String get nameRadispirit => 'Radispirit';
-
-  @override
-  String get descRadispirit =>
-      'Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.';
-
-  @override
-  String get nameSlugrry => 'Slugrry';
-
-  @override
-  String get descSlugrry =>
-      'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.';
-
-  @override
   String get nameGamusarra => 'Gamusarra';
 
   @override
@@ -990,6 +969,20 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get descTrasgueco =>
       'Trasgüeco habita en casas antiguas y hórreos apartados. Durante la noche cambia los objetos de lugar y deja pequeñas tallas de madera como señal de su presencia. Aunque parece una simple marioneta, se mueve cuando nadie lo observa y disfruta poniendo a prueba la paciencia de quienes intentan atraparlo.';
+
+  @override
+  String get nameYedrantia => 'Yedrantía';
+
+  @override
+  String get descYedrantia =>
+      'Yedrantía habita entre ruinas cubiertas de yedra y bosques antiguos. Permanece inmóvil durante largos periodos, confundiéndose con la vegetación, mientras la gema que porta absorbe la energía del entorno. Se dice que protege los lugares donde fue invocada y castiga a quienes dañan la naturaleza que la rodea.';
+
+  @override
+  String get nameHarijaun => 'Harijaun';
+
+  @override
+  String get descHarijaun =>
+      'Harijaun protege los bosques más antiguos, donde sus pasos hacen temblar la tierra. Su cuerpo, formado por madera y raíces, se endurece con los años como un roble centenario. Se dice que guía a quienes respetan el bosque y castiga sin piedad a quienes lo dañan.';
 
   @override
   String get physicalActivity => 'Actividad física';

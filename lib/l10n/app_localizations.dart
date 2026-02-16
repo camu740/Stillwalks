@@ -1820,42 +1820,6 @@ abstract class AppLocalizations {
   /// **'¡{steps} pasos obtenidos!'**
   String essenceInfused(Object steps);
 
-  /// No description provided for @nameSpiristone.
-  ///
-  /// In es, this message translates to:
-  /// **'Spiristone'**
-  String get nameSpiristone;
-
-  /// No description provided for @descSpiristone.
-  ///
-  /// In es, this message translates to:
-  /// **'Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.'**
-  String get descSpiristone;
-
-  /// No description provided for @nameRadispirit.
-  ///
-  /// In es, this message translates to:
-  /// **'Radispirit'**
-  String get nameRadispirit;
-
-  /// No description provided for @descRadispirit.
-  ///
-  /// In es, this message translates to:
-  /// **'Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.'**
-  String get descRadispirit;
-
-  /// No description provided for @nameSlugrry.
-  ///
-  /// In es, this message translates to:
-  /// **'Slugrry'**
-  String get nameSlugrry;
-
-  /// No description provided for @descSlugrry.
-  ///
-  /// In es, this message translates to:
-  /// **'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.'**
-  String get descSlugrry;
-
   /// No description provided for @nameGamusarra.
   ///
   /// In es, this message translates to:
@@ -1879,6 +1843,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Trasgüeco habita en casas antiguas y hórreos apartados. Durante la noche cambia los objetos de lugar y deja pequeñas tallas de madera como señal de su presencia. Aunque parece una simple marioneta, se mueve cuando nadie lo observa y disfruta poniendo a prueba la paciencia de quienes intentan atraparlo.'**
   String get descTrasgueco;
+
+  /// No description provided for @nameYedrantia.
+  ///
+  /// In es, this message translates to:
+  /// **'Yedrantía'**
+  String get nameYedrantia;
+
+  /// No description provided for @descYedrantia.
+  ///
+  /// In es, this message translates to:
+  /// **'Yedrantía habita entre ruinas cubiertas de yedra y bosques antiguos. Permanece inmóvil durante largos periodos, confundiéndose con la vegetación, mientras la gema que porta absorbe la energía del entorno. Se dice que protege los lugares donde fue invocada y castiga a quienes dañan la naturaleza que la rodea.'**
+  String get descYedrantia;
+
+  /// No description provided for @nameHarijaun.
+  ///
+  /// In es, this message translates to:
+  /// **'Harijaun'**
+  String get nameHarijaun;
+
+  /// No description provided for @descHarijaun.
+  ///
+  /// In es, this message translates to:
+  /// **'Harijaun protege los bosques más antiguos, donde sus pasos hacen temblar la tierra. Su cuerpo, formado por madera y raíces, se endurece con los años como un roble centenario. Se dice que guía a quienes respetan el bosque y castiga sin piedad a quienes lo dañan.'**
+  String get descHarijaun;
 
   /// No description provided for @physicalActivity.
   ///

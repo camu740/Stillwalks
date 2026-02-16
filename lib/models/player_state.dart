@@ -130,7 +130,7 @@ class PlayerState {
           ? DateTime.parse(json['lastOfflineCheck'] as String) 
           : DateTime.now(),
       lastOfflineEarnedEssence: (json['lastOfflineEarnedEssence'] as num?)?.toDouble() ?? 0.0,
-      freeOrbLevel2Claimed: json['freeOrbLevel2Claimed'] as bool? ?? false,
+      freeOrbLevel2Claimed: json['freeOrbLevel2Claimed'] == 1,
     );
   }
 

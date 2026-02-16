@@ -38,27 +38,27 @@ class InitialData {
   static Future<void> _seedCreatureSpecies() async {
     final species = [
       CreatureSpecies(
-        id: 'spiristone',
-        name: 'Spiristone',
-        description: 'Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.',
+        id: 'yedrantia',
+        name: 'Yedrantía',
+        description: 'Yedrantía habita entre ruinas cubiertas de yedra y bosques antiguos. Se dice que protege los lugares donde fue invocada.',
         rarity: 'common',
-        assetPath: 'assets/creatures/spiristone.png',
+        assetPath: 'assets/creatures/yedrantia.png',
         dexNumber: 1,
       ),
       CreatureSpecies(
-        id: 'radispirit',
-        name: 'Radispirit',
-        description: 'Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.',
-        rarity: 'uncommon',
-        assetPath: 'assets/creatures/radispirit.png',
+        id: 'trasgueco',
+        name: 'Trasgüeco',
+        description: 'Trasgüeco habita en casas antiguas y hórreos apartados. Aunque parece una simple marioneta, se mueve cuando nadie lo observa.',
+        rarity: 'common',
+        assetPath: 'assets/creatures/trasgueco.png',
         dexNumber: 2,
       ),
       CreatureSpecies(
-        id: 'slugrry',
-        name: 'Slugrry',
-        description: 'Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.',
-        rarity: 'rare',
-        assetPath: 'assets/creatures/slugrry.png',
+        id: 'harijaun',
+        name: 'Harijaun',
+        description: 'Harijaun protege los bosques más antiguos, donde sus pasos hacen temblar la tierra.',
+        rarity: 'uncommon',
+        assetPath: 'assets/creatures/harijaun.png',
         dexNumber: 3,
       ),
       CreatureSpecies(
@@ -85,9 +85,9 @@ class InitialData {
       name: 'Orbe Básico',
       description: 'Un Orbe común que requiere 2000 pasos para canalizar.',
       lootTable: {
-        'spiristone': 0.50,  // 50%
-        'radispirit': 0.35,  // 35%
-        'slugrry': 0.15,     // 15%
+        'yedrantia': 0.45,
+        'trasgueco': 0.45, 
+        'harijaun': 0.10,
       },
     );
 
@@ -97,9 +97,9 @@ class InitialData {
       name: 'Orbe Avanzado',
       description: 'Mejora probabilidad de Poco Comunes. Requiere 5000 pasos.',
       lootTable: {
-        'spiristone': 0.30,  // 30%
-        'radispirit': 0.50,  // 50%
-        'slugrry': 0.20,     // 20%
+        'yedrantia': 0.25,
+        'trasgueco': 0.25,
+        'harijaun': 0.50,
       },
     );
 
@@ -109,9 +109,9 @@ class InitialData {
       name: 'Orbe Experto',
       description: 'Mejora probabilidad de Raros. Requiere 10000 pasos.',
       lootTable: {
-        'spiristone': 0.10,  // 10%
-        'radispirit': 0.40,  // 40%
-        'slugrry': 0.50,     // 50%
+        'yedrantia': 0.10,
+        'trasgueco': 0.10,
+        'harijaun': 0.80,
       },
     );
 
