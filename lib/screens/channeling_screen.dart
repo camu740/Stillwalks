@@ -6,6 +6,7 @@ import 'package:stillwalks/models/creature_instance.dart';
 import 'package:stillwalks/models/creature_species.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/l10n/data_localizations.dart';
+import 'package:stillwalks/services/esencia_service.dart';
 
 import 'package:provider/provider.dart';
 import 'package:stillwalks/services/tutorial_service.dart';
@@ -14,6 +15,8 @@ import 'package:stillwalks/services/tutorial_service.dart';
 class ChannelingScreen extends StatefulWidget {
   final CreatureInstance instance;
   final CreatureSpecies species;
+  final int channelingXp;
+  final int discoveryXp;
   final bool isNew;
 
   const ChannelingScreen({
@@ -21,6 +24,8 @@ class ChannelingScreen extends StatefulWidget {
     required this.instance,
     required this.species,
     required this.isNew,
+    this.channelingXp = 0,
+    this.discoveryXp = 0,
   });
 
   @override
@@ -204,6 +209,14 @@ class _ChannelingScreenState extends State<ChannelingScreen>
                             // Tutorial completion check
                             final tutorialService = Provider.of<TutorialService>(context, listen: false);
                             
+                            // Award Deferred XP
+                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+                            int totalXp = widget.channelingXp + widget.discoveryXp;
+                            if (totalXp > 0) {
+                                await esenciaService.addXp(totalXp);
+                                debugPrint('⭐ XP Awarded Deferred: $totalXp');
+                            }
+
                             if (context.mounted) {
                               // Volver a home primero
                               Navigator.of(context).popUntil((route) => route.isFirst);

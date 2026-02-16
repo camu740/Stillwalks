@@ -9,6 +9,7 @@ import 'package:stillwalks/services/notification_preferences_service.dart';
 import 'package:stillwalks/services/progression_service.dart';
 import 'package:stillwalks/services/notification_guard_service.dart';
 import 'package:stillwalks/models/building.dart';
+import 'package:stillwalks/services/tutorial_service.dart';
 import 'dart:math';
 
 /// Servicio que gestiona la generación de Esencia y el estado del jugador
@@ -276,8 +277,16 @@ class EsenciaService extends ChangeNotifier {
     }
   }
 
+  // Tutorial Service reference
+  TutorialService? _tutorialService;
+
+  void setTutorialService(TutorialService tutorialService) {
+    _tutorialService = tutorialService;
+  }
+
   // Progression Service
   final ProgressionService _progressionService = ProgressionService();
+
 
   // Stream for notifying level up events
   final _levelUpController = StreamController<int>.broadcast();
@@ -286,6 +295,12 @@ class EsenciaService extends ChangeNotifier {
   /// Añade XP al jugador y verifica subida de nivel
   Future<void> addXp(int amount) async {
     if (amount <= 0) return;
+
+    // Bloquear ganancia de XP durante el tutorial para evitar popups superpuestos
+    if (_tutorialService != null && _tutorialService!.isActive) {
+      debugPrint('🎓 EsenciaService: XP gain blocked during tutorial.');
+      return;
+    }
 
     final oldLevel = _playerState.explorerLevel;
     final newXp = _playerState.currentXp + amount;
@@ -798,7 +813,8 @@ class EsenciaService extends ChangeNotifier {
     final difference = now.difference(_lastTapTime);
     final cooldown = tapCooldown;
     
-    if (difference < cooldown) {
+    // Permitir un pequeño margen de error (100ms) para evitar desincronización con UI
+    if (difference.inMilliseconds < (cooldown.inMilliseconds - 100)) {
        return 0.0; // Cooldown active
     }
 
@@ -813,5 +829,27 @@ class EsenciaService extends ChangeNotifier {
     _db.updatePlayerState(_playerState.toJson()).ignore();
     
     return finalEsencia;
+  }
+
+  /// Verifica si la oferta de orbe gratuito de nivel 2 está disponible
+  bool get isLevel2FreeOrbAvailable {
+    return _playerState.explorerLevel >= 2 && !_playerState.freeOrbLevel2Claimed;
+  }
+
+  /// Marca la oferta de orbe gratuito como reclamada
+  Future<void> claimLevel2FreeOrb() async {
+    if (!isLevel2FreeOrbAvailable) return;
+
+    _playerState = _playerState.copyWith(freeOrbLevel2Claimed: true);
+    await _db.updatePlayerState(_playerState.toJson());
+    notifyListeners();
+    debugPrint('🎁 EsenciaService: Level 2 Free Orb claimed.');
+  }
+
+  /// Sets the free orb claimed flag (Debug/Manual)
+  Future<void> setFreeOrbClaimed(bool claimed) async {
+      _playerState = _playerState.copyWith(freeOrbLevel2Claimed: claimed);
+      await _db.updatePlayerState(_playerState.toJson());
+      notifyListeners();
   }
 }

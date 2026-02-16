@@ -179,7 +179,7 @@ class SanctuaryWidget extends StatelessWidget {
                   if (isReadyToChannel)
                     ElevatedButton(
                       onPressed: () async {
-                        final instance = await orbeService.channelOrbe(orbe.id);
+                        final result = await orbeService.channelOrbe(orbe.id);
                         
                         // Verificar si hay recompensa de Simbiosis
                         final symbiosisReward = orbeService.lastSymbiosisReward;
@@ -196,16 +196,18 @@ class SanctuaryWidget extends StatelessWidget {
                           orbeService.clearSymbiosisReward();
                         }
                         
-                        if (instance != null && context.mounted) {
-                          final species = await orbeService.getSpeciesById(instance.speciesId);
+                        if (result != null && context.mounted) {
+                          final species = await orbeService.getSpeciesById(result.instance.speciesId);
                           if (species != null && context.mounted) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ChannelingScreen(
-                                  instance: instance,
+                                  instance: result.instance,
                                   species: species,
-                                  isNew: false, // O lógia isNewDiscovery
+                                  isNew: result.isNewDiscovery,
+                                  channelingXp: result.channelingXp,
+                                  discoveryXp: result.discoveryXp,
                                 ),
                               ),
                             ).then((_) {

@@ -382,6 +382,8 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       orbeService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
       esenciaService.setNotificationServices(nativeBridge, notificationPreferences, notificationGuard);
       esenciaService.setCollectionService(collectionService); // Added
+      esenciaService.setTutorialService(tutorialService); // Added
+
       
       // Wire game mechanics listeners
       orbeService.setEsenciaService(esenciaService);

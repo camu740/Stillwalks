@@ -213,6 +213,33 @@ class OrbeService extends ChangeNotifier {
     }
   }
 
+  /// Purchase an Orb without cost (for rewards/offers)
+  Future<bool> purchaseFreeOrb(String orbeTypeId) async {
+    // 1. Check Max Orbs
+    if (currentOrbsCount >= maxOrbs) {
+      debugPrint('❌ OrbeService: Cannot add free orb: Max orbs reached ($maxOrbs)');
+      return false;
+    }
+
+    final type = _orbeTypes.firstWhere((t) => t.id == orbeTypeId, orElse: () => _orbeTypes[0]);
+
+    // 2. Create Orb
+    final newOrbe = Orbe(
+      id: '${type.id}_${DateTime.now().millisecondsSinceEpoch}_${_random.nextInt(1000)}',
+      orbeTypeId: type.id,
+      currentProgress: 0,
+      createdAt: DateTime.now(),
+    );
+
+    // 4. Update Database and State
+    await _db.insertOrbe(newOrbe.toJson());
+    _orbes.add(newOrbe);
+
+    notifyListeners();
+    debugPrint('✅ OrbeService: Added free orb: ${type.name} (${newOrbe.id})');
+    return true;
+  }
+
   /// Compra un objeto de inventario
   Future<bool> purchaseInventoryItem(String typeId, double cost, double esenciaAvailable) async {
     if (esenciaAvailable < cost) return false;
@@ -380,8 +407,8 @@ class OrbeService extends ChangeNotifier {
     };
   }
 
-  /// Canaliza un Orbe completado
-  Future<CreatureInstance?> channelOrbe(String orbeId) async {
+  /// Resultado de la canalización para diferir recompensas visuales
+  Future<ChannelingResult?> channelOrbe(String orbeId) async {
     final orbeIdx = _orbes.indexWhere((o) => o.id == orbeId);
     if (orbeIdx == -1) return null;
 
@@ -447,15 +474,17 @@ class OrbeService extends ChangeNotifier {
     int channelingXp = 100; // Basic
     if (type.id == 'orbe_advanced') channelingXp = 250;
     if (type.id == 'orbe_expert') channelingXp = 400;
-    _esenciaService?.addXp(channelingXp);
+    // DEFER XP AWARD: We not calling _esenciaService.addXp here anymore.
+    // _esenciaService?.addXp(channelingXp);
 
-    // XP Award: Descubrimiento (50 XP)
-    // Check if this species was already discovered BEFORE this hatch
-    // (Wait, I just inserted it. So I should check if count == 1 now)
+    // XP Award: Descubrimiento (150 XP)
+    int discoveryXp = 0;
     final isNew = await isNewDiscovery(speciesId);
     if (isNew) {
-       _esenciaService?.addXp(150);
-       debugPrint('⭐ XP Bonus: New Discovery! (+50 XP)');
+       discoveryXp = 150;
+       // DEFER XP AWARD
+       // _esenciaService?.addXp(150);
+       debugPrint('⭐ XP Bonus: New Discovery! (+150 XP) - DEFERRED');
     }
 
     // Calcular recompensa de esencia si está en Santuario de Simbiosis
@@ -479,11 +508,14 @@ class OrbeService extends ChangeNotifier {
     notifyListeners();
     
     // Retornar instancia con metadatos de recompensa
-    // NOTA: Para comunicar la esencia al UI, necesitamos un mecanismo.
-    // Por ahora, guardaremos en una propiedad del servicio que el UI puede leer
     _lastSymbiosisReward = symbiosisEssence;
     
-    return instance;
+    return ChannelingResult(
+      instance: instance,
+      channelingXp: channelingXp,
+      discoveryXp: discoveryXp,
+      isNewDiscovery: isNew,
+    );
   }
 
   // Variable para comunicar la recompensa de simbiosis al UI
@@ -678,4 +710,20 @@ class OrbeService extends ChangeNotifier {
     debugPrint('🕊️ OrbeService: State reset complete.');
     notifyListeners();
   }
+}
+
+class ChannelingResult {
+  final CreatureInstance instance;
+  final int channelingXp;
+  final int discoveryXp;
+  final bool isNewDiscovery;
+
+  ChannelingResult({
+    required this.instance,
+    required this.channelingXp,
+    required this.discoveryXp,
+    required this.isNewDiscovery,
+  });
+
+  int get totalXp => channelingXp + discoveryXp;
 }

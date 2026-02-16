@@ -982,6 +982,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Gamusarra dwells in forests and rural roads where it is barely seen. It lures travelers with strange noises and playful jumps, but when anyone gets too close, it attacks with its sharp claws and vanishes into the undergrowth. It is said to appear only when no one can prove they have truly seen it.';
 
   @override
+  String get nameTrasgueco => 'Trasgüeco';
+
+  @override
+  String get descTrasgueco =>
+      'Trasgüeco lives in old houses and secluded granaries. At night, it moves objects around and leaves small wooden carvings as proof of its presence. Though it looks like a simple puppet, it moves when no one is watching and delights in testing the patience of those who try to catch it.';
+
+  @override
   String get physicalActivity => 'Physical Activity';
 
   @override

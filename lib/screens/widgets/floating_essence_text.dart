@@ -88,15 +88,15 @@ class _FloatingEssenceTextState extends State<FloatingEssenceText> with SingleTi
                           color: widget.color ?? Colors.amberAccent,
                           fontSize: widget.fontSize ?? 28, 
                           fontWeight: widget.fontWeight ?? FontWeight.w900,
-                          shadows: const [
-                            Shadow(
+                          shadows: [
+                            const Shadow(
                               color: Colors.black,
                               offset: Offset(2, 2),
                               blurRadius: 4,
                             ),
                             Shadow(
-                              color: Colors.amber,
-                              offset: Offset(0, 0),
+                              color: (widget.color ?? Colors.amber).withOpacity(0.6),
+                              offset: const Offset(0, 0),
                               blurRadius: 10, // Glow effect
                             ),
                           ],

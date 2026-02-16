@@ -77,15 +77,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showLevelUpDialog(int newLevel) {
     // Get unlocks for this level
+    // Use Provider if available, or new instance if that's how it's used elsewhere
+    // But since it's just static data, it's fine.
     final progressionService = ProgressionService();
     final levelDef = progressionService.getLevelDefinition(newLevel);
     
+    // Modificar lista para añadir ofertas especiales
+    List<Unlock> unlocks = List.from(levelDef.unlocks);
+    
+    if (newLevel == 2) {
+       unlocks.add(const Unlock.item(
+         'offer_free_orb', 
+         description: '¡OFERTA: 1 Orbe Básico GRATIS en la Tienda!',
+       ));
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false, // User must tap button
       builder: (context) => LevelUpDialog(
         newLevel: newLevel,
-        unlocks: levelDef.unlocks,
+        unlocks: unlocks,
         onDismiss: () => Navigator.of(context).pop(),
       ),
     );
@@ -693,10 +705,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         SizedBox(
                                           width: 48,
                                           height: 48,
-                                          child: CircularProgressIndicator(
-                                            value: nextLevelXp != null 
-                                              ? esenciaService.playerState.currentXp / nextLevelXp 
-                                              : 1.0,
+                                        child: CircularProgressIndicator(
+                                            value: progressionService.getLevelProgress(
+                                              esenciaService.playerState.currentXp,
+                                              esenciaService.playerState.explorerLevel,
+                                            ),
                                             backgroundColor: Colors.white10,
                                             valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
                                             strokeWidth: 4,
@@ -714,7 +727,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                    const SizedBox(height: 8),
                                     Text(
-                                      '${esenciaService.playerState.currentXp}/${nextLevelXp ?? "-"}',
+                                      '${progressionService.getLevelRelativeXp(esenciaService.playerState.currentXp, esenciaService.playerState.explorerLevel)}/${progressionService.getLevelXpRange(esenciaService.playerState.explorerLevel) > 0 ? progressionService.getLevelXpRange(esenciaService.playerState.explorerLevel) : "-"}',
                                       style: const TextStyle(
                                         color: Colors.white70,
                                         fontSize: 14,

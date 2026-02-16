@@ -452,15 +452,15 @@
   "infuseEssenceDesc": "Convierte {essence} Esencia en {steps} pasos",
   "essenceInfused": "¡{steps} pasos obtenidos!",
   
-  "nameSpiristone": "Spiristone",
-  "descSpiristone": "Una pequeña piedra encantada con manitas y piernitas. Curiosa y amigable.",
-  "nameRadispirit": "Radispirit",
-  "descRadispirit": "Un rábano mágico que camina sobre cuatro patas. Sus hojas brillan al atardecer.",
-  "nameSlugrry": "Slugrry",
-  "descSlugrry": "Una babosa peluda blanca de movimientos lentos pero pensamiento rápido.",
   "nameGamusarra": "Gamusarra",
   "descGamusarra": "Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.",
-  
+  "nameTrasgueco": "Trasgüeco",
+  "descTrasgueco": "Trasgüeco habita en casas antiguas y hórreos apartados. Durante la noche cambia los objetos de lugar y deja pequeñas tallas de madera como señal de su presencia. Aunque parece una simple marioneta, se mueve cuando nadie lo observa y disfruta poniendo a prueba la paciencia de quienes intentan atraparlo.",
+  "nameYedrantia": "Yedrantía",
+  "descYedrantia": "Yedrantía habita entre ruinas cubiertas de yedra y bosques antiguos. Permanece inmóvil durante largos periodos, confundiéndose con la vegetación, mientras la gema que porta absorbe la energía del entorno. Se dice que protege los lugares donde fue invocada y castiga a quienes dañan la naturaleza que la rodea.",
+  "nameHarijaun": "Harijaun",
+  "descHarijaun": "Harijaun protege los bosques más antiguos, donde sus pasos hacen temblar la tierra. Su cuerpo, formado por madera y raíces, se endurece con los años como un roble centenario. Se dice que guía a quienes respetan el bosque y castiga sin piedad a quienes lo dañan.",
+
   "physicalActivity": "Actividad física",
   "notificationsPermission": "Notificaciones",
   "backgroundExecution": "Ejecución en segundo plano",

@@ -223,8 +223,15 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 }
 
   Widget _buildOrbItem(OrbeType type, double currentEsencia, OrbeService orbeService, EsenciaService esenciaService, String? lockReason, TutorialService tutorialService) {
-      final cost = orbeService.getOrbeCost(type.id);
+      double cost = orbeService.getOrbeCost(type.id);
       
+      // Level 2 Free Orb Logic
+      bool isFreeOffer = false;
+      if (type.id == 'orbe_basic' && esenciaService.isLevel2FreeOrbAvailable) {
+          isFreeOffer = true;
+          cost = 0;
+      }
+
       // Determine color based on rarity/difficulty
       Color iconColor = Colors.grey; // Default for basic
       if (type.id == 'orbe_advanced') iconColor = Colors.green;
@@ -244,16 +251,55 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             cost: cost,
             currentEsencia: currentEsencia,
             isLocked: isLocked, // Pass lock state
+            isFree: isFreeOffer, // Add visual indicator for free item
             onPurchase: isLocked ? () {
                // Show reason if clicked while locked
                ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(lockReason ?? "Bloqueado")),
                );
             } : () async {
-              final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
-              if (result != null) {
-                await esenciaService.spendEsencia(cost);
-                
+              // For free offer, pass 0 cost or ensure service handles it?
+              // OrbeService needs to know if it can ignore cost check.
+              // IF cost is 0 here, we can pass a huge amount of essence to bypass check?
+              // Better: check if isFreeOffer and bypass cost check manually or pass 0 cost to service if supported.
+              // checking OrbeService... purchaseOrbe takes (typeId, currentEssence).
+              // If we pass currentEssence, it checks against calculated cost inside service. 
+              // We can't easily override cost inside OrbeService without changing it.
+              // Workaround: If isFreeOffer, we manually add the orb in OrbeService? 
+              // uniqueOrbId logic is inside purchaseOrbe.
+              // Let's assume for now we have enough essence or we need to modify OrbeService to accept 'isFree'.
+              // OR: We temporarily give player essence? Risky.
+              // BEST: Modify OrbeService to accept custom cost or 'free' flag.
+              // BUT: I can't modify OrbeService in this step effectively without viewing it.
+              // TRICK: The user has 0 essence maybe? 
+              // Let's look at `OrbeService.purchaseOrbe`. 
+              // Since I cannot change OrbeService right now (it's not open), I will assume I need to.
+              // Wait, I can open it. 
+              
+              // For now, let's try to call purchaseOrbe. If cost is calculated internally, it will fail if not enough essence.
+              // I need to update OrbeService to support free purchase or override cost.
+              
+              // Let's defer the actual purchase call change until I verify OrbeService.
+              // For now, let's implement the UI.
+              
+              bool success = false;
+              if (isFreeOffer) {
+                  // Special handling: We need to bypass cost check.
+                  // Since I can't change OrbeService in this specific tool call, I will do it in next step.
+                  // Placeholder for logic:
+                  success = await orbeService.purchaseFreeOrb(type.id); // Need to create this
+                  if (success) {
+                      await esenciaService.claimLevel2FreeOrb();
+                  }
+              } else {
+                  final result = await orbeService.purchaseOrbe(type.id, currentEsencia);
+                  success = result != null;
+                  if (success) {
+                     await esenciaService.spendEsencia(cost);
+                  }
+              }
+
+              if (success) {
                 // ADVANCE TUTORIAL if applicable
                 if (type.id == 'orbe_basic' && tutorialService.currentStep == TutorialStep.shop) {
                   await tutorialService.nextStep();
@@ -262,7 +308,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                   if (mounted) {
                     Navigator.of(context).pop(); // Return to Home
                   }
-                    return; // Exit function to avoid showing purchase snackbar which might be confusing during transition
+                    return; // Exit function
                 }
 
                 if (mounted) {
@@ -272,8 +318,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 }
               } else {
                 if (mounted) {
-                  // If not enough essence, show that. Otherwise, it must be the limit.
-                  if (currentEsencia < cost) {
+                  if (currentEsencia < cost && !isFreeOffer) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(AppLocalizations.of(context)!.notEnoughEssence))
                     );
@@ -995,7 +1040,8 @@ class _ShopItem extends StatelessWidget {
   final double currentEsencia;
   final Function() onPurchase;
   final bool isLocked;
-  final bool hasBackground; // Added parameter
+  final bool hasBackground; 
+  final bool isFree; // Added parameter
 
   const _ShopItem({
     required this.icon,
@@ -1006,16 +1052,17 @@ class _ShopItem extends StatelessWidget {
     required this.currentEsencia,
     required this.onPurchase,
     this.isLocked = false,
-    this.hasBackground = true, // Default to true (orb style)
+    this.hasBackground = true, 
+    this.isFree = false, // Default to false
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: isFree ? Colors.amber.withOpacity(0.1) : Colors.white.withOpacity(0.05), // Highlight free item
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white24),
+        border: Border.all(color: isFree ? Colors.amber : Colors.white24),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
@@ -1033,7 +1080,7 @@ class _ShopItem extends StatelessWidget {
             ),
           )
         : Padding(
-            padding: const EdgeInsets.all(12.0), // Keep spacing consistent
+            padding: const EdgeInsets.all(12.0), 
             child: Icon(
               isLocked ? Icons.lock : icon, 
               color: isLocked ? Colors.grey : iconColor, 
@@ -1057,33 +1104,50 @@ class _ShopItem extends StatelessWidget {
               style: TextStyle(color: isLocked ? Colors.redAccent : Colors.white70),
             ),
             const SizedBox(height: 8),
-            if (!isLocked) // Only show cost if unlocked (or show regardless? Design choice: user code had cost. Let's show cost but greyed out?)
-            // Actually, if locked, we might want to hide cost or show it in red?
-            // User requested "bloqueado", usually implies not purchasable.
-            // Let's keep cost visible but button handles logic.
+            if (!isLocked) 
             Row(
               children: [
-                const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  cost.toStringAsFixed(0),
-                  style: const TextStyle(
-                    color: Colors.amberAccent,
-                    fontWeight: FontWeight.bold,
+                if (isFree) ...[
+                   const Text(
+                    'GRATIS',
+                    style: TextStyle(
+                      color: Colors.greenAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Text(
+                    cost.toStringAsFixed(0),
+                    style: const TextStyle(
+                      color: Colors.white38,
+                      decoration: TextDecoration.lineThrough,
+                      fontSize: 12,
+                    ),
+                  ),
+                ] else ...[
+                  const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 16),
+                  const SizedBox(width: 4),
+                  Text(
+                    cost.toStringAsFixed(0),
+                    style: const TextStyle(
+                      color: Colors.amberAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ],
             ),
           ],
         ),
         trailing: ElevatedButton(
-          onPressed: isLocked ? onPurchase : (currentEsencia >= cost ? onPurchase : null),
+          onPressed: isLocked ? onPurchase : (isFree || currentEsencia >= cost ? onPurchase : null), // Allow purchase if free
           style: ElevatedButton.styleFrom(
             elevation: 0,
             shadowColor: Colors.transparent,
             backgroundColor: isLocked 
                 ? Colors.redAccent.withOpacity(0.5) 
-                : (currentEsencia >= cost ? Colors.green : Colors.white10),
+                : (isFree || currentEsencia >= cost ? Colors.green : Colors.white10), // Allow green if free
             foregroundColor: isLocked ? Colors.white38 : Colors.white,
             disabledForegroundColor: Colors.white38,
             minimumSize: const Size(120, 36),
@@ -1091,7 +1155,7 @@ class _ShopItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
             ),
           ),
-          child: Text(isLocked ? 'Bloqueado' : AppLocalizations.of(context)!.buy),
+          child: Text(isLocked ? 'Bloqueado' : (isFree ? 'RECLAMAR' : AppLocalizations.of(context)!.buy)),
         ),
       ),
     );

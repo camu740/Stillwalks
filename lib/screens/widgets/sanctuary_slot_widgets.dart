@@ -90,7 +90,7 @@ class SanctuarySlot extends StatelessWidget {
                     if (isReadyToChannel && orbe != null) {
                       // Canalizar el orbe
                       final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                      final instance = await orbeService.channelOrbe(orbe.id);
+                      final result = await orbeService.channelOrbe(orbe.id);
                       
                       // Verificar si hay recompensa de Simbiosis
                       final symbiosisReward = orbeService.lastSymbiosisReward;
@@ -106,9 +106,9 @@ class SanctuarySlot extends StatelessWidget {
                         orbeService.clearSymbiosisReward();
                       }
                       
-                      if (instance != null && context.mounted) {
-                        final species = await orbeService.getSpeciesById(instance.speciesId);
-                        final isNew = await orbeService.isNewDiscovery(instance.speciesId);
+                      if (result != null && context.mounted) {
+                        final species = await orbeService.getSpeciesById(result.instance.speciesId);
+                        final isNew = result.isNewDiscovery; // Use result from service
                         if (species != null && context.mounted) {
                           // Tutorial: The step advancement is now handled in ChannelingScreen
                           // when the user clicks "Continue", ensuring the "Adventure Continues"
@@ -119,8 +119,10 @@ class SanctuarySlot extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (_) => ChannelingScreen(
                                 species: species,
-                                instance: instance,
+                                instance: result.instance,
                                 isNew: isNew,
+                                channelingXp: result.channelingXp,
+                                discoveryXp: result.discoveryXp,
                               ),
                             ),
                           );
@@ -593,7 +595,7 @@ class TemporarySanctuarySlot extends StatelessWidget {
                       if (hasTemp && isReadyToChannel && orbe != null) {
                         // Canalizar el orbe
                         final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                        final instance = await orbeService.channelOrbe(orbe.id);
+                        final result = await orbeService.channelOrbe(orbe.id);
                         
                         // Verificar si hay recompensa de Simbiosis
                         final symbiosisReward = orbeService.lastSymbiosisReward;
@@ -609,17 +611,19 @@ class TemporarySanctuarySlot extends StatelessWidget {
                           orbeService.clearSymbiosisReward();
                         }
                         
-                        if (instance != null && context.mounted) {
-                          final species = await orbeService.getSpeciesById(instance.speciesId);
-                          final isNew = await orbeService.isNewDiscovery(instance.speciesId);
+                        if (result != null && context.mounted) {
+                          final species = await orbeService.getSpeciesById(result.instance.speciesId);
+                          final isNew = result.isNewDiscovery;
                           if (species != null && context.mounted) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => ChannelingScreen(
                                   species: species,
-                                  instance: instance,
+                                  instance: result.instance,
                                   isNew: isNew,
+                                  channelingXp: result.channelingXp,
+                                  discoveryXp: result.discoveryXp,
                                 ),
                               ),
                             );

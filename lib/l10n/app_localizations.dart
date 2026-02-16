@@ -1868,6 +1868,18 @@ abstract class AppLocalizations {
   /// **'Gamusarra habita en bosques y caminos rurales donde apenas se le puede ver. Atrae a los viajeros con ruidos extraños y saltos juguetones, pero cuando alguien se acerca demasiado, ataca con sus afiladas garras y desaparece entre la maleza. Se dice que solo aparece cuando nadie puede demostrar que realmente lo ha visto.'**
   String get descGamusarra;
 
+  /// No description provided for @nameTrasgueco.
+  ///
+  /// In es, this message translates to:
+  /// **'Trasgüeco'**
+  String get nameTrasgueco;
+
+  /// No description provided for @descTrasgueco.
+  ///
+  /// In es, this message translates to:
+  /// **'Trasgüeco habita en casas antiguas y hórreos apartados. Durante la noche cambia los objetos de lugar y deja pequeñas tallas de madera como señal de su presencia. Aunque parece una simple marioneta, se mueve cuando nadie lo observa y disfruta poniendo a prueba la paciencia de quienes intentan atraparlo.'**
+  String get descTrasgueco;
+
   /// No description provided for @physicalActivity.
   ///
   /// In es, this message translates to:

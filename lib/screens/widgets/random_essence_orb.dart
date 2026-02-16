@@ -74,6 +74,7 @@ class _RandomEssenceOrbState extends State<RandomEssenceOrb> with SingleTickerPr
             scale: _scaleAnimation.value,
             child: GestureDetector(
               onTap: _handleTap,
+              onTapDown: (_) {}, // Consumir evento para evitar que propague al fondo (tap normal)
               child: Container(
                 width: 60,
                 height: 60,

@@ -50,9 +50,10 @@ class ProgressionService {
     LevelDefinition(level: 1, requiredXp: 0, unlocks: [
       Unlock.item('building_recolector', description: "Recolector unlocked"),
       Unlock.item('upgrade_tap_strength', description: "Fuerza de Tap desbloqueada"),
+      Unlock.item('upgrade_tap_multiplier', description: "Ritmo Interior desbloqueado"),
     ]),
     LevelDefinition(level: 2, requiredXp: 250, unlocks: [
-      Unlock.item('upgrade_tap_multiplier', description: "Ritmo Interior desbloqueado"),
+       // Previous unlocks moved to level 1
     ]),
     LevelDefinition(level: 3, requiredXp: 550, unlocks: [ 
       Unlock.item('building_mina', description: "Mina desbloqueada"),
@@ -138,6 +139,38 @@ class ProgressionService {
     return getLevelDefinition(nextLevel).requiredXp;
   }
 
+  /// Returns the relative progress towards the next level as a value between 0.0 and 1.0.
+  double getLevelProgress(int currentXp, int currentLevel) {
+    final currentDef = getLevelDefinition(currentLevel);
+    int startXp = currentDef.requiredXp;
+    
+    final nextLevelXp = getNextLevelXpRequirement(currentLevel);
+    
+    if (nextLevelXp == null) return 1.0; 
+    
+    int levelTotalXp = nextLevelXp - startXp;
+    int currentLevelXp = currentXp - startXp;
+    
+    if (levelTotalXp <= 0) return 1.0; 
+    
+    return (currentLevelXp / levelTotalXp).clamp(0.0, 1.0);
+  }
+  
+  /// Returns current XP accumulated within the current level (Relative XP).
+  int getLevelRelativeXp(int currentXp, int currentLevel) {
+      final currentDef = getLevelDefinition(currentLevel);
+      // Ensure we don't return negative if for some reason xp < required (bug?)
+      return (currentXp - currentDef.requiredXp).clamp(0, 999999);
+  }
+
+  /// Returns total XP required for the current level (End - Start).
+  int getLevelXpRange(int currentLevel) {
+     final currentDef = getLevelDefinition(currentLevel);
+     final nextLevelXp = getNextLevelXpRequirement(currentLevel);
+     if (nextLevelXp == null) return 0; 
+     return nextLevelXp - currentDef.requiredXp;
+  }
+
   /// Checks if a feature is unlocked at the given level.
   bool isFeatureUnlocked(int currentLevel, ProgressionFeature feature) {
     for (var def in _levels) {
@@ -164,22 +197,9 @@ class ProgressionService {
       return cap.clamp(0, 15);
     }
 
-    // Hardcode limits based on Level 1-11+ tables
-    
-    // Limits map key: type, value: maxLevel
-    // We can use a switch on currentLevel
-    
-    // Helper to get building limits
-    // Force specific limits as per doc
-    
+    // Checking Level 12+ first
     if (currentLevel >= 12) {
         // Regla general 12+: +1 al nivel máximo de todas por cada nivel
-        // Topes globales: Tap: 20, Rhythm: 15, Flow: 20, Echo: 15, Memory: 15.
-        // Buildings: ??? Doc says "Aumenta en +1 el nivel máximo de todas las mejoras y edificios".
-        // Base values at L11:
-        // Tap: 11. Recolector: 11. Mina: 9. Cantera: 8. Yacimiento: 4. Fabrica: 1.
-        // Rhythm: 10. Flow: 7. Echo: 6. Memory: 5.
-        
         final levelDiff = currentLevel - 11; // L12 -> 1.
         
         if (type == 'tap_strength') return (11 + levelDiff).clamp(0, 20);
@@ -200,20 +220,22 @@ class ProgressionService {
     // Explicit Levels 1-11
     switch (currentLevel) {
         case 1:
-            if (type == 'tap_strength') return 1;
-            if (type == 'building_recolector') return 1;
-            break;
-        case 2:
-            if (type == 'tap_strength') return 2;
-            if (type == 'tap_multiplier') return 1;
-            if (type == 'building_recolector') return 2;
-            break;
-        case 3:
-            if (type == 'tap_strength') return 3;
+            if (type == 'tap_strength') return 5;
             if (type == 'tap_multiplier') return 2;
             if (type == 'building_recolector') return 3;
+            break;
+        case 2:
+            if (type == 'tap_strength') return 8; // Smooth transition
+            if (type == 'tap_multiplier') return 4;
+            if (type == 'building_recolector') return 5;
+            break;
+        case 3:
+            if (type == 'tap_strength') return 10; // Was 3, now must be >= prev levels
+            if (type == 'tap_multiplier') return 6;
+            if (type == 'building_recolector') return 7;
             if (type == 'building_mina') return 1;
             break;
+
         case 4:
             if (type == 'tap_strength') return 4;
             if (type == 'tap_multiplier') return 3;
@@ -293,8 +315,7 @@ class ProgressionService {
             if (type == 'building_yacimiento') return 4;
             if (type == 'building_fabrica') return 1;
             break;
-            if (type == 'building_fabrica') return 1;
-            break;
+
     }
     
     // Sanctuary Logic

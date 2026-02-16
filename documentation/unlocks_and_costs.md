@@ -6,8 +6,8 @@ Este documento detalla el contenido desbloqueable por nivel de explorador y los 
 
 | Nivel | XP Req. | Desbloqueos Principales | Límite Edificios | Límite Mejoras |
 |:-----:|:-------:|:------------------------|:----------------:|:--------------:|
-| **1** | 0 | **Edificio: Recolector**<br>_Inicio del juego_ | 1 | Nv. 1 |
-| **2** | 250 | Aumento de límites | 1 | Nv. 1 |
+| **1** | 0 | **Edificio: Recolector**<br>**Mejora: Ritmo Interior** (Tap Multiplier)<br>_Inicio del juego_ | 3 | Nv. 5 (Tap Strength)<br>Nv. 2 (Multiplier) |
+| **2** | 250 | Aumento de límites | 5 | Nv. 8 |
 | **3** | 550 | **Edificio: Mina** | 2 | Nv. 1 |
 | **4** | 1,000 | **Mejora: Almacén de Energía** | 2 | Nv. 2 |
 | **5** | 1,650 | **Santuario Temporal: Fast Flow**<br>**Edificio: Cantera**<br>Slot Santuario Temporal | 3 | Nv. 2 |
