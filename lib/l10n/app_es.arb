@@ -565,6 +565,9 @@
       "max": {"type": "int"}
     }
   },
+  "orbBag": "Bolsa de Orbes",
+  "currentBonus": "Bono actual",
+  "stepsToPerform": "pasos a realizar",
   "buildingLimitReached": "Límite: {max}",
   "requiresLevel": "Requiere Nivel {level}"
 }

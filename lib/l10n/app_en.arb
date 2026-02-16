@@ -565,6 +565,9 @@
       "max": {"type": "int"}
     }
   },
+  "orbBag": "Orb Bag",
+  "currentBonus": "Current Bonus",
+  "stepsToPerform": "steps to perform",
   "buildingLimitReached": "Limit: {max}",
   "requiresLevel": "Required Level {level}"
 }

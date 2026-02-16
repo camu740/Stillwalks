@@ -181,7 +181,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Bolsa de Orbes',
+                AppLocalizations.of(context)!.orbBag,
                 style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
               ),
               Container(
@@ -431,7 +431,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                        Text(
                          !isUnlocked 
                           ? AppLocalizations.of(context)!.requiresLevel(progressionService.getRequiredLevelForItem(type.id) ?? 0)
-                          : type.description,
+                          : AppLocalizations.of(context)!.getBuildingDescription(type),
                          style: TextStyle(
                            color: !isUnlocked ? Colors.redAccent.withOpacity(0.7) : Colors.white70, 
                            fontSize: 13,
@@ -1425,13 +1425,13 @@ class _SanctuaryUpgradeItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Bono actual: -$reductionPercent%',
+                      '${AppLocalizations.of(context)!.currentBonus}: -$reductionPercent%',
                       style: const TextStyle(fontSize: 13, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      '-2% pasos a realizar / nivel',
-                      style: TextStyle(fontSize: 11, color: Colors.white54),
+                    Text(
+                      '-2% ${AppLocalizations.of(context)!.stepsToPerform} ${AppLocalizations.of(context)!.perLevel}',
+                      style: const TextStyle(fontSize: 11, color: Colors.white54),
                     ),
                   ],
                 ),

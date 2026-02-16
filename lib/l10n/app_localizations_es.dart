@@ -1207,6 +1207,15 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get orbBag => 'Bolsa de Orbes';
+
+  @override
+  String get currentBonus => 'Bono actual';
+
+  @override
+  String get stepsToPerform => 'pasos a realizar';
+
+  @override
   String buildingLimitReached(Object max) {
     return 'Límite: $max';
   }

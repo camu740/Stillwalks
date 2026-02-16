@@ -2270,6 +2270,24 @@ abstract class AppLocalizations {
   /// **'Límite alcanzado ({count}/{max})'**
   String limitCountReached(int count, int max);
 
+  /// No description provided for @orbBag.
+  ///
+  /// In es, this message translates to:
+  /// **'Bolsa de Orbes'**
+  String get orbBag;
+
+  /// No description provided for @currentBonus.
+  ///
+  /// In es, this message translates to:
+  /// **'Bono actual'**
+  String get currentBonus;
+
+  /// No description provided for @stepsToPerform.
+  ///
+  /// In es, this message translates to:
+  /// **'pasos a realizar'**
+  String get stepsToPerform;
+
   /// No description provided for @buildingLimitReached.
   ///
   /// In es, this message translates to:
