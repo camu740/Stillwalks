@@ -47,7 +47,6 @@ class DatabaseHelper {
         buildings TEXT NOT NULL DEFAULT '{}',
         tapMultiplier REAL NOT NULL DEFAULT 1.0,
         lastOfflineCheck TEXT,
-        lastOfflineCheck TEXT,
         lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0,
         freeOrbLevel2Claimed INTEGER NOT NULL DEFAULT 0
       )
@@ -314,9 +313,20 @@ class DatabaseHelper {
     return results.isNotEmpty ? results.first : null;
   }
 
+  // Helper helper to convert bools to ints for SQLite
+  Map<String, dynamic> _sanitizeMap(Map<String, dynamic> map) {
+    final sanitized = Map<String, dynamic>.from(map);
+    sanitized.forEach((key, value) {
+      if (value is bool) {
+        sanitized[key] = value ? 1 : 0;
+      }
+    });
+    return sanitized;
+  }
+
   Future<void> updatePlayerState(Map<String, dynamic> state) async {
     final db = await database;
-    await db.update('player_state', state, where: 'id = ?', whereArgs: [1]);
+    await db.update('player_state', _sanitizeMap(state), where: 'id = ?', whereArgs: [1]);
   }
 
   // ========== SANCTUARIES ==========
@@ -334,7 +344,7 @@ class DatabaseHelper {
 
   Future<void> updateSanctuary(String id, Map<String, dynamic> data) async {
     final db = await database;
-    await db.update('sanctuaries', data, where: 'id = ?', whereArgs: [id]);
+    await db.update('sanctuaries', _sanitizeMap(data), where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> deleteSanctuary(String id) async {
@@ -344,7 +354,7 @@ class DatabaseHelper {
 
   Future<void> insertSanctuary(Map<String, dynamic> sanctuary) async {
     final db = await database;
-    await db.insert('sanctuaries', sanctuary, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('sanctuaries', _sanitizeMap(sanctuary), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // ========== ORBE TYPES ==========
@@ -362,14 +372,14 @@ class DatabaseHelper {
 
   Future<void> insertOrbeType(Map<String, dynamic> orbeType) async {
     final db = await database;
-    await db.insert('orbe_types', orbeType, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('orbe_types', _sanitizeMap(orbeType), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // ========== ORBES ==========
 
   Future<String> insertOrbe(Map<String, dynamic> orbe) async {
     final db = await database;
-    await db.insert('orbes', orbe);
+    await db.insert('orbes', _sanitizeMap(orbe));
     return orbe['id'];
   }
 
@@ -386,7 +396,7 @@ class DatabaseHelper {
 
   Future<void> updateOrbe(String id, Map<String, dynamic> data) async {
     final db = await database;
-    await db.update('orbes', data, where: 'id = ?', whereArgs: [id]);
+    await db.update('orbes', _sanitizeMap(data), where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> deleteOrbe(String id) async {
@@ -403,7 +413,7 @@ class DatabaseHelper {
 
   Future<void> insertCreatureSpecies(Map<String, dynamic> species) async {
     final db = await database;
-    await db.insert('creature_species', species, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('creature_species', _sanitizeMap(species), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Map<String, dynamic>>> getAllCreatureSpecies() async {
@@ -421,7 +431,7 @@ class DatabaseHelper {
 
   Future<String> insertCreatureInstance(Map<String, dynamic> instance) async {
     final db = await database;
-    await db.insert('creature_instances', instance);
+    await db.insert('creature_instances', _sanitizeMap(instance));
     return instance['id'];
   }
 
@@ -438,7 +448,7 @@ class DatabaseHelper {
 
   Future<void> updateCreatureInstance(String id, Map<String, dynamic> data) async {
     final db = await database;
-    await db.update('creature_instances', data, where: 'id = ?', whereArgs: [id]);
+    await db.update('creature_instances', _sanitizeMap(data), where: 'id = ?', whereArgs: [id]);
   }
 
   // ========== INVENTORY ITEMS ==========
@@ -476,7 +486,7 @@ class DatabaseHelper {
 
   Future<void> insertUpgrade(Map<String, dynamic> upgrade) async {
     final db = await database;
-    await db.insert('upgrades', upgrade, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('upgrades', _sanitizeMap(upgrade), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Map<String, dynamic>>> getAllUpgrades() async {
@@ -492,7 +502,7 @@ class DatabaseHelper {
 
   Future<void> updateUpgrade(String id, Map<String, dynamic> data) async {
     final db = await database;
-    await db.update('upgrades', data, where: 'id = ?', whereArgs: [id]);
+    await db.update('upgrades', _sanitizeMap(data), where: 'id = ?', whereArgs: [id]);
   }
 
   // ========== UTILIDADES ==========

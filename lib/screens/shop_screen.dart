@@ -878,7 +878,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                upgrade = Upgrade(
                  id: 'temp_${type.name}',
                  type: type,
-                 currentLevel: 0,
+                 currentLevel: type.startLevel, // Use defined startLevel (e.g. 1 for Tap Strength)
                  name: getTypeDisplayName(type, context), // Helper
                  description: getTypeDescription(type, context), // Helper
                );
@@ -937,7 +937,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 icon: _getUpgradeIcon(type),
                 title: AppLocalizations.of(context)!.getUpgradeName(type),
                 description: AppLocalizations.of(context)!.getUpgradeDescription(type),
-                currentLevel: isOwned ? upgrade.currentLevel : 0,
+                currentLevel: isOwned ? upgrade.currentLevel : type.startLevel,
                 maxLevel: type.maxLevel,
                 cost: isMaxLevel ? 0 : cost.toDouble(),
                 currentEsencia: currentEsencia,

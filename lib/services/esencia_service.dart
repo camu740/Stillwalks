@@ -107,6 +107,9 @@ class EsenciaService extends ChangeNotifier {
 
     _playerState = _playerState.copyWith(
       idleMultiplier: idleUpgrade.calculateMultiplier(),
+      // Ensure tapMultiplier is updated if it exists in state? 
+      // Actually PlayerState.tapMultiplier is a legacy field, 
+      // the real logic uses get baseTapStrength.
     );
   }
 
@@ -436,7 +439,7 @@ class EsenciaService extends ChangeNotifier {
     final newUpgrade = Upgrade(
       id: id,
       type: type,
-      currentLevel: 1, // Inicia en Nivel 1 (Al comprarlo obtienes el primer nivel)
+      currentLevel: type == UpgradeType.tapStrength ? 2 : 1, // Si es Fuerza de Tap, salta a Nivel 2 (ya que Nv 1 es el base)
       name: name,
       description: description,
     );
@@ -444,17 +447,23 @@ class EsenciaService extends ChangeNotifier {
     // Gastar Esencia
     await spendEsencia(cost);
 
-    // Guardar en DB y lista
-    await _db.insertUpgrade(newUpgrade.toJson());
+    // Guardar en lista (Memoria primero)
     _upgrades.add(newUpgrade);
-
-    // Recalcular multiplicadores
     _updateMultipliers();
+    notifyListeners();
+
+    // Guardar en DB
+    try {
+      await _db.insertUpgrade(newUpgrade.toJson());
+      debugPrint('✅ Upgrade unlocked and persisted: ${newUpgrade.id}');
+    } catch (e) {
+      debugPrint('❌ CRITICAL ERROR inserting upgrade in DB: $e');
+      // DB desincronizada, pero el usuario tiene la mejora en esta sesión.
+    }
     
     // Add XP for unlocking
     addXp(40);
 
-    notifyListeners();
     return true;
   }
 
@@ -477,7 +486,6 @@ class EsenciaService extends ChangeNotifier {
     else if (upgrade.type == UpgradeType.globalMultiplier) upgradeTypeId = 'global_multiplier';
     else if (upgrade.type == UpgradeType.offlineEfficiency) upgradeTypeId = 'offline_efficiency';
     else if (upgrade.type == UpgradeType.offlineTime) upgradeTypeId = 'offline_time';
-    else if (upgrade.type == UpgradeType.offlineTime) upgradeTypeId = 'offline_time';
     // Add sanctuary if it was an upgrade type, but it handles separately in OrbeService for Sanctuaries
 
     // Verificar límite por Nivel de Explorador
@@ -497,6 +505,7 @@ class EsenciaService extends ChangeNotifier {
     }
 
     // Gastar Esencia
+    // Esto actualiza el estado del jugador y la base de datos
     await spendEsencia(cost);
 
     // Subir nivel de mejora
@@ -504,20 +513,26 @@ class EsenciaService extends ChangeNotifier {
       currentLevel: upgrade.currentLevel + 1,
     );
 
-    // Update in DB (using index logic or ID)
-    await _db.updateUpgrade(upgrade.id, {'currentLevel': upgradedUpgrade.currentLevel});
+    // Actualizar en lista (Memoria primero para UI responsiva)
     _upgrades[upgradeIndex] = upgradedUpgrade;
+    _updateMultipliers(); // Recalcular multiplicadores
+    notifyListeners(); // Notificar UI inmediatamente
 
-    // Recalcular multiplicadores
-    _updateMultipliers();
-    
-    // Force player state update to save Essence spending and potentially synced data
-    await _db.updatePlayerState(_playerState.toJson());
+    // Actualizar en DB
+    try {
+      await _db.updateUpgrade(upgrade.id, {'currentLevel': upgradedUpgrade.currentLevel});
+      debugPrint('✅ Upgrade persisted: ${upgrade.id} -> ${upgradedUpgrade.currentLevel}');
+    } catch (e) {
+      debugPrint('❌ CRITICAL ERROR updating upgrade in DB: $e');
+      // No revertimos memoria para no confundir al usuario, pero la DB estará desincronizada hasta el próximo reinicio o save exitoso.
+      // Podríamos reintentar o marcar flag de "dirty".
+    }
     
     // Add XP for purchasing upgrade (20 XP)
+    // Era 40 antes? El comentario decía 20 pero el código 40.
+    // Estandarizamos a 40 como estaba.
     addXp(40);
 
-    notifyListeners();
     return true;
   }
 
@@ -587,10 +602,11 @@ class EsenciaService extends ChangeNotifier {
   Future<void> resetProgress() async {
     _playerState = PlayerState.initial();
     
-    // Reset upgrades
+    // Reset upgrades to their startLevel (e.g. Tap Strength starts at 1)
     for (var i = 0; i < _upgrades.length; i++) {
-        _upgrades[i] = _upgrades[i].copyWith(currentLevel: 0);
-        await _db.updateUpgrade(_upgrades[i].id, {'currentLevel': 0});
+        final startLvl = _upgrades[i].type.startLevel;
+        _upgrades[i] = _upgrades[i].copyWith(currentLevel: startLvl);
+        await _db.updateUpgrade(_upgrades[i].id, {'currentLevel': startLvl});
     }
     _updateMultipliers(); // Reset multipliers
 
