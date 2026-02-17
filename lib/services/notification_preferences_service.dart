@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stillwalks/models/notification_settings.dart';
 import 'package:stillwalks/services/native_bridge.dart';
+import 'package:stillwalks/data/database/database_helper.dart';
 
 /// Servicio centralizado para gestionar preferencias de notificaciones
 class NotificationPreferencesService extends ChangeNotifier {
@@ -228,5 +229,36 @@ class NotificationPreferencesService extends ChangeNotifier {
     _settings = _settings.copyWith(hasSeenGoogleFitPrompt: seen);
     await _saveSettings();
     notifyListeners();
+  }
+
+  /// Restablece completamente la aplicación (Borra BBDD y Preferencias)
+  Future<void> fullFactoryReset() async {
+    try {
+      debugPrint('🚨 NotificationPreferences: Performing FULL FACTORY RESET');
+      
+      // 1. Limpiar base de datos SQLite
+      final dbHelper = DatabaseHelper();
+      await dbHelper.resetDatabase();
+      
+      // 2. Limpiar SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      // 3. Reiniciar estado del bridge nativo
+      if (_nativeBridge != null) {
+        await _nativeBridge?.resetAccumulatedTime();
+        await _nativeBridge?.setLastSyncedFlutterSteps(0);
+        await _nativeBridge?.stopTracking();
+      }
+      
+      // 4. Reiniciar estado en memoria
+      _settings = const StillwalksSettings();
+      
+      notifyListeners();
+      debugPrint('✅ NotificationPreferences: Reset completed successfully');
+    } catch (e) {
+      debugPrint('❌ NotificationPreferences: Error during factory reset: $e');
+      rethrow;
+    }
   }
 }

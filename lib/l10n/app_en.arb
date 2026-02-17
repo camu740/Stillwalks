@@ -569,5 +569,11 @@
   "currentBonus": "Current Bonus",
   "stepsToPerform": "steps to perform",
   "buildingLimitReached": "Limit: {max}",
-  "requiresLevel": "Required Level {level}"
+  "requiresLevel": "Required Level {level}",
+  "resetData": "Reset Data",
+  "resetDataDesc": "Deletes all your progress and settings",
+  "resetConfirmationTitle": "Delete everything?",
+  "resetConfirmationDesc": "This action cannot be undone. You will lose all your creatures, levels, and essence.",
+  "resetConfirm": "Delete Everything",
+  "resetCancel": "Cancel"
 }

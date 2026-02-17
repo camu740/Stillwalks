@@ -569,5 +569,11 @@
   "currentBonus": "Bono actual",
   "stepsToPerform": "pasos a realizar",
   "buildingLimitReached": "Límite: {max}",
-  "requiresLevel": "Requiere Nivel {level}"
+  "requiresLevel": "Requiere Nivel {level}",
+  "resetData": "Restablecer Datos",
+  "resetDataDesc": "Elimina todo tu progreso y ajustes",
+  "resetConfirmationTitle": "¿Borrar todo?",
+  "resetConfirmationDesc": "Esta acción no se puede deshacer. Perderás todas tus criaturas, niveles y esencia.",
+  "resetConfirm": "Borrar Todo",
+  "resetCancel": "Cancelar"
 }

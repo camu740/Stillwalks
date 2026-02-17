@@ -1218,4 +1218,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String requiresLevel(Object level) {
     return 'Required Level $level';
   }
+
+  @override
+  String get resetData => 'Reset Data';
+
+  @override
+  String get resetDataDesc => 'Deletes all your progress and settings';
+
+  @override
+  String get resetConfirmationTitle => 'Delete everything?';
+
+  @override
+  String get resetConfirmationDesc =>
+      'This action cannot be undone. You will lose all your creatures, levels, and essence.';
+
+  @override
+  String get resetConfirm => 'Delete Everything';
+
+  @override
+  String get resetCancel => 'Cancel';
 }

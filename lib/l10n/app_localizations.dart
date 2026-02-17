@@ -2299,6 +2299,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Requiere Nivel {level}'**
   String requiresLevel(Object level);
+
+  /// No description provided for @resetData.
+  ///
+  /// In es, this message translates to:
+  /// **'Restablecer Datos'**
+  String get resetData;
+
+  /// No description provided for @resetDataDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Elimina todo tu progreso y ajustes'**
+  String get resetDataDesc;
+
+  /// No description provided for @resetConfirmationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Borrar todo?'**
+  String get resetConfirmationTitle;
+
+  /// No description provided for @resetConfirmationDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta acción no se puede deshacer. Perderás todas tus criaturas, niveles y esencia.'**
+  String get resetConfirmationDesc;
+
+  /// No description provided for @resetConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar Todo'**
+  String get resetConfirm;
+
+  /// No description provided for @resetCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get resetCancel;
 }
 
 class _AppLocalizationsDelegate

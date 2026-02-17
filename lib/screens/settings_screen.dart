@@ -200,6 +200,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Google Fit Toggle
           _buildGoogleFitTile(context, googleFitService),
 
+          _buildSettingTile(
+            icon: Icons.delete_forever,
+            iconColor: Colors.red,
+            title: AppLocalizations.of(context)!.resetData,
+            subtitle: AppLocalizations.of(context)!.resetDataDesc,
+            onTap: () => _showResetConfirmationDialog(context, preferencesService),
+          ),
+
           // INFORMACIÓN Section
           _buildSectionHeader(AppLocalizations.of(context)!.information),
           _buildSettingTile(
@@ -525,6 +533,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value: value,
         onChanged: onChanged,
         activeColor: iconColor,
+      ),
+    );
+  }
+
+  void _showResetConfirmationDialog(BuildContext context, NotificationPreferencesService service) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(AppLocalizations.of(context)!.resetConfirmationTitle, style: const TextStyle(color: Colors.red)),
+        content: Text(AppLocalizations.of(context)!.resetConfirmationDesc),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.resetCancel, style: const TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              // Show loading overlay
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator()),
+              );
+
+              try {
+                await service.fullFactoryReset();
+                
+                if (mounted) {
+                  // Restart the app by going back to root and clearing stack
+                  Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context); // Remove loader
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(AppLocalizations.of(context)!.resetConfirm),
+          ),
+        ],
       ),
     );
   }

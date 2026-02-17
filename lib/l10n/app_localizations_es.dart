@@ -1224,4 +1224,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String requiresLevel(Object level) {
     return 'Requiere Nivel $level';
   }
+
+  @override
+  String get resetData => 'Restablecer Datos';
+
+  @override
+  String get resetDataDesc => 'Elimina todo tu progreso y ajustes';
+
+  @override
+  String get resetConfirmationTitle => '¿Borrar todo?';
+
+  @override
+  String get resetConfirmationDesc =>
+      'Esta acción no se puede deshacer. Perderás todas tus criaturas, niveles y esencia.';
+
+  @override
+  String get resetConfirm => 'Borrar Todo';
+
+  @override
+  String get resetCancel => 'Cancelar';
 }
