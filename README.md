@@ -327,7 +327,6 @@ stillwalks/
 
 ### 1. 💎 Sistema de Esencia (Moneda del juego)
 
-- **Generación pasiva**: Se acumula automáticamente mientras el teléfono está bloqueado, gracias al tracking nativo en Kotlin (`ScreenLockTracker`).
 - **Generación activa (Tap)**: El jugador puede hacer tap en la pantalla principal para generar esencia manualmente, con un cooldown configurable.
 - **Edificios generadores**: Se pueden comprar edificios (Recolector, Mina, Cantera, Yacimiento, Fábrica) que generan esencia de forma continua.
 - **Límite offline**: Máximo 12 horas de esencia acumulable estando offline (configurable según nivel del explorador).
@@ -441,7 +440,7 @@ El juego utiliza una terminología propia inspirada en la temática mística. Es
 | 3 | **Harijaun** | Poco Común | 11% |
 | 4 | **Lierpes** | Épico | 1% |
 | 5 | **Velanta** | Raro | 2% |
-| 0 | **Gamusarra** | Mítico | — (solo en Orbes Avanzados/Expertos) |
+| 0 | **Gamusarra** | Mítico | — (Tutorial) |
 
 > Todas las criaturas están inspiradas en mitología y folclore ibérico.
 
@@ -523,8 +522,6 @@ El proyecto se encuentra en su **primer MVP funcional**. La APK es completamente
 - [ ] Sistema de logros.
 - [ ] Modo oscuro / temas visuales.
 - [ ] Publicación en **Google Play Store**.
-- [ ] Tests unitarios y de integración más extensos.
-
 ---
 
 ## 📄 Licencia
