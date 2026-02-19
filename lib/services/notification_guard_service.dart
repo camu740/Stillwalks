@@ -6,7 +6,6 @@ import 'package:stillwalks/services/native_bridge.dart';
 /// Servicio encargado de evitar spam de notificaciones y aplicar reglas de bienestar.
 class NotificationGuardService extends ChangeNotifier {
   static const String _lastAppActiveKey = 'flutter.last_app_active_timestamp';
-  static const String _lastNotificationPrefix = 'last_notified_';
   // Daily Steps persistence
   static const String _dailyStepsKey = 'stillwalks_daily_steps';
   static const String _lastStepsDateKey = 'stillwalks_last_steps_date';

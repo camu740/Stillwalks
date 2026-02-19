@@ -161,23 +161,4 @@ enum UpgradeType {
   /// Obtiene la lista de costes por nivel
   List<double> getCosts() => costs;
   
-  /// Returns the maximum upgrade level allowed for a given player level
-  /// This enforces progressive unlocking tied to player progression
-  int getMaxAllowedLevel(int playerLevel) {
-    // Tiered approach: every 3-5 levels unlocks more upgrade levels
-    if (playerLevel <= 3) return 1;
-    if (playerLevel <= 6) return 2;
-    if (playerLevel <= 10) return 3;
-    if (playerLevel <= 15) return 4;
-    if (playerLevel <= 20) return 5;
-    if (playerLevel <= 25) return 6;
-    if (playerLevel <= 30) return 7;
-    if (playerLevel <= 35) return 8;
-    if (playerLevel <= 40) return 9;
-    if (playerLevel <= 45) return 10;
-    if (playerLevel <= 50) return 11;
-    
-    // Cap at the absolute max for this upgrade type
-    return maxLevel < 12 ? maxLevel : 12;
-  }
 }

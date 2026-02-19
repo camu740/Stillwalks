@@ -60,14 +60,12 @@ class EsenciaService extends ChangeNotifier {
     // REMOVED: We want Energy Storage to be initially UNOWNED (not in list)
     
     // Repair: Force Tap Strength to be at least Level 1
-    bool needsUpdate = false;
     for (var u in _upgrades) {
       if (u.type == UpgradeType.tapStrength && u.currentLevel < 1) {
         // Upgrade to Level 1
         final index = _upgrades.indexOf(u);
         _upgrades[index] = u.copyWith(currentLevel: 1);
         _db.updateUpgrade(u.id, {'currentLevel': 1}).ignore();
-        needsUpdate = true;
       }
     }
     
@@ -83,7 +81,6 @@ class EsenciaService extends ChangeNotifier {
         );
         _upgrades.add(newUpgrade);
         _db.insertUpgrade(newUpgrade.toJson()).ignore();
-        needsUpdate = true;
     }
 
     // Recalcular multiplicador basado en mejoras
@@ -265,8 +262,7 @@ class EsenciaService extends ChangeNotifier {
     _checkMilestoneNotification();
     _checkEssenceRainTrigger();
 
-    final source = fromNative ? 'native Android' : 'app calculation';
-    // debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
+
     
     // Sync with native for persistent notification
     _syncToNative();
@@ -714,17 +710,8 @@ class EsenciaService extends ChangeNotifier {
       total *= _playerState.idleMultiplier;
     }
 
-    // Collection bonuses
-    // if (_collectionService != null) {
-    //   final collectionBonus = _collectionService!.getTotalPassiveBonus();
-    //   total *= (1.0 + collectionBonus);
-    // }
-
     return total;
   }
-
-  /// Calculates offline essence (Obsolete, see calculatePendingEsencia)
-  Future<void> calculateOfflineEssence() async {}
 
   /// Obtiene la esencia generada offline (para mostrar en UI)
   double get lastOfflineEarnedEssence => _playerState.lastOfflineEarnedEssence;

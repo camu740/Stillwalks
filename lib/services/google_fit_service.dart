@@ -38,9 +38,6 @@ class GoogleFitService extends ChangeNotifier {
   /// Verifica si Google Fit / Health Connect está disponible
   Future<void> _checkAvailability() async {
     try {
-      // Intentar obtener tipos de datos soportados
-      final types = [HealthDataType.STEPS];
-      
       // Check status separately
       try {
         final status = await _health.getHealthConnectSdkStatus();

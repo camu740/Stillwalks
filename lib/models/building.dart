@@ -55,13 +55,6 @@ enum BuildingType {
     required this.costScale,
     required this.description,
   });
-  
-  /// Returns the maximum count of this building type allowed for a given player level
-  /// Formula: Every 2 player levels unlocks 1 more building
-  /// L1-2: 1, L3-4: 2, L5-6: 3, etc.
-  int getMaxAllowedCount(int playerLevel) {
-    return (playerLevel ~/ 2) + 1; // Integer division
-  }
 }
 
 class Building {

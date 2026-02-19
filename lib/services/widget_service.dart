@@ -9,7 +9,6 @@ import 'package:stillwalks/models/upgrade.dart';
 import 'package:stillwalks/l10n/app_localizations.dart';
 
 class WidgetService {
-  static const String _groupId = 'group.stillwalks.widget'; // Para iOS si se implementa
   static const String _androidWidgetName = 'StillwalksWidget';
 
   /// Actualiza los datos del widget basándose en el estado actual

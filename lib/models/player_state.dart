@@ -7,7 +7,6 @@ class PlayerState {
   final DateTime lastActiveTimestamp; // Última vez que el dispositivo fue desbloqueado
   final int totalSteps; // Pasos totales acumulados
   final int storedSteps; // Pasos almacenados (batería)
-  final double esenciaPerHour; // Esencia generada por hora (calculado)
   final int explorerLevel; // Nivel de explorador (nuevo sistema de progresión)
   final int currentXp; // XP actual acumulada
   
@@ -35,25 +34,7 @@ class PlayerState {
     this.freeOrbLevel2Claimed = false,
     this.essenceRainTriggered = false,
     this.earnedEsenciaByTap = 0.0,
-  }) : esenciaPerHour = _calculateEsenciaPerHour(idleMultiplier);
-
-  // Esencia base por hora NO LONGER USED in new system, keeping for compatibility until full refactor
-  static double _calculateEsenciaPerHour(double multiplier) {
-    return 300.0 * multiplier;
-  }
-
-  /// Calcula la Esencia generada desde lastActiveTimestamp hasta ahora
-  /// Aplica el límite de 12 horas máximo
-  double calculatePendingEsencia() {
-    final now = DateTime.now();
-    final elapsedTime = now.difference(lastActiveTimestamp);
-    
-    // Límite de 12 horas acumulables
-    final cappedHours = elapsedTime.inMinutes / 60.0;
-    final hoursToApply = cappedHours > 12.0 ? 12.0 : cappedHours;
-    
-    return esenciaPerHour * hoursToApply;
-  }
+  }) ;
 
   PlayerState copyWith({
     double? totalEsencia,

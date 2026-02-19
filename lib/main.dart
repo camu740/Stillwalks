@@ -291,7 +291,6 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
     
     if (state == AppLifecycleState.resumed) {
       // App volvió a foreground
-      esenciaService.calculateOfflineEssence();
       _syncNativeSteps();
       esenciaService.startGenerationTimer();
       
@@ -417,7 +416,6 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       orbeService.setEsenciaService(esenciaService);
       orbeService.listenToEssenceService(esenciaService.onEssenceEarned);
       
-      await esenciaService.calculateOfflineEssence();
       esenciaService.startGenerationTimer();
       
       await permissionService.checkPermission();

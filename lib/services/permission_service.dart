@@ -25,7 +25,7 @@ class PermissionService extends ChangeNotifier {
   Future<bool> requestActivityRecognition() async {
     // Solicitar ambos permisos
     final activityStatus = await ph.Permission.activityRecognition.request();
-    final notificationStatus = await ph.Permission.notification.request();
+    await ph.Permission.notification.request();
     
     _activityRecognitionGranted = activityStatus.isGranted;
     // No bloqueamos si no hay notificaciones, pero es bueno tenerlo

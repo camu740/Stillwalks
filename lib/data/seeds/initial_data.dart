@@ -28,10 +28,7 @@ class InitialData {
     return sanctuaries.isNotEmpty;
   }
 
-  /// Verifica si la base de datos ya fue inicializada (deprecated but kept for compatibility if used elsewhere)
-  static Future<bool> isSeeded() async {
-    return isSeededRest();
-  }
+
 
   // ==================== CREATURE SPECIES ====================
 
@@ -184,8 +181,4 @@ class InitialData {
 
   // ==================== UTILIDADES ====================
 
-  /// Obtiene el costo base de un Orbe básico
-  static double getBasicOrbeCost() {
-    return 500.0; // 500 Esencia
-  }
 }
