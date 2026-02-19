@@ -1,4 +1,4 @@
-# 🌿 Stillwalks — Juego Idle de Bienestar Digital
+# 🌿 Stillwalks — Juego Idle contra el Sedentarismo
 
 <p align="center">
   <img src="assets/ui/stillwalks-logo.png" alt="Stillwalks Logo" width="180"/>
