@@ -44,23 +44,23 @@
 
 ## 🌟 Descripción General
 
-**Stillwalks** es una aplicación móvil para Android que combina las mecánicas de un **juego idle/incremental** con el fomento del **bienestar digital** y la **actividad física**.
+**Stillwalks** es una aplicación móvil para Android que combina las mecánicas de un **juego idle/incremental** con el fomento de la **actividad física**.
 
 ### ¿Cómo funciona?
 
-El concepto es sencillo y tiene un doble propósito:
+El concepto es sencillo:
 
-1. **Bienestar Digital**: El jugador gana **Esencia** (la moneda del juego) manteniendo su teléfono **bloqueado**. Cuanto más tiempo pases sin usar el móvil, más Esencia acumulas.
-2. **Actividad Física**: Con esa Esencia, el jugador compra **Orbes** que se colocan en **Santuarios**. Para que un Orbe eclosione y revele una criatura (**Stillwalk**), es necesario **caminar** un cierto número de pasos reales.
+1. **Incremental**: El jugador gana **Esencia** (la moneda del juego) al puro estilo "clicker", al principio haciendo tap en la pantalla y después automatizando cada vez más la recolección de Esencia.
+2. **Actividad Física**: Con esa Esencia, el jugador compra **Orbes** que se colocan en **Santuarios**. Para que un Orbe canalice y revele una criatura (**Stillwalk**), es necesario **caminar** un cierto número de pasos reales.
 
 ### El ciclo de juego
 
 ```
-🔒 Bloquea el móvil → 💎 Gana Esencia → 🔮 Compra Orbes → 🏛️ Colócalos en Santuarios
+🔒 Haz tap (o espera) → 💎 Gana Esencia → 🔮 Compra Orbes → 🏛️ Colócalos en Santuarios
      → 🚶 Camina → ✨ Canaliza el Orbe → 🐾 Descubre un Stillwalk → 📖 Completa tu Diario
 ```
 
-El objetivo final es completar el **Diario de Explorador** descubriendo todas las criaturas disponibles, mientras se incentiva un uso más saludable del teléfono y un estilo de vida activo.
+El objetivo final es completar el **Diario de Explorador** descubriendo todas las criaturas disponibles, mientras se incentiva un estilo de vida activo.
 
 ---
 
