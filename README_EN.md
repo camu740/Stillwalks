@@ -1,4 +1,4 @@
-# 🌿 Stillwalks — Digital Wellbeing Idle Game
+# 🌿 Stillwalks — Idle Game Against Sedentary Lifestyle
 
 <p align="center">
   <img src="assets/ui/stillwalks-logo.png" alt="Stillwalks Logo" width="180"/>
@@ -44,23 +44,23 @@
 
 ## 🌟 Overview
 
-**Stillwalks** is an Android mobile application that combines **idle/incremental game** mechanics with the promotion of **digital wellbeing** and **physical activity**.
+**Stillwalks** is an Android mobile application that combines **idle/incremental game** mechanics with the promotion of **physical activity**.
 
 ### How does it work?
 
 The concept is simple and serves a dual purpose:
 
-1. **Digital Wellbeing**: Players earn **Essence** (the in-game currency) by keeping their phone **locked**. The longer you stay away from your phone, the more Essence you accumulate.
+1. **Incremental**: Players earn **Essence** (the in-game currency) in true "clicker" style, initially by tapping on the screen and then increasingly automating the collection of Essence.
 2. **Physical Activity**: With that Essence, players buy **Orbs** that are placed inside **Sanctuaries**. For an Orb to hatch and reveal a creature (**Stillwalk**), the player must **walk** a certain number of real-world steps.
 
 ### The Game Loop
 
 ```
-🔒 Lock your phone → 💎 Earn Essence → 🔮 Buy Orbs → 🏛️ Place them in Sanctuaries
+🔒 Tap (or wait) → 💎 Earn Essence → 🔮 Buy Orbs → 🏛️ Place them in Sanctuaries
      → 🚶 Walk → ✨ Channel the Orb → 🐾 Discover a Stillwalk → 📖 Complete your Journal
 ```
 
-The ultimate goal is to complete the **Explorer's Journal** by discovering all available creatures, while encouraging a healthier relationship with your phone and an active lifestyle.
+The ultimate goal is to complete the **Explorer's Journal** by discovering all available creatures, while encouraging an active lifestyle.
 
 ---
 
