@@ -1133,7 +1133,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get upgradeGlobalMultiplierDesc =>
-      'Multiplica la producción pasiva de Esencia.';
+      'Multiplica la producción de Esencia de todos los edificios.';
 
   @override
   String get upgradeOfflineEfficiencyName => 'Eco Persistente';

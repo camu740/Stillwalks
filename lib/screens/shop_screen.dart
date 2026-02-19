@@ -561,7 +561,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
               icon: Icons.battery_charging_full,
               iconColor: Colors.blueAccent,
               title: AppLocalizations.of(context)!.upgradeStorageName, 
-              description: "Requiere Nivel $requiredLevel",
+              description: AppLocalizations.of(context)!.requiresLevel(requiredLevel ?? 0),
               cost: 0,
               currentEsencia: currentEsencia,
               isLocked: true,
@@ -575,7 +575,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
               // So false is closer to _UpgradeItem style (just padding).
               onPurchase: () {
                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Requiere Nivel $requiredLevel")),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.requiresLevel(requiredLevel ?? 0))),
                  );
               }
            ),
@@ -822,6 +822,7 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
 
   Widget _buildUpgradesTab(int currentLevel) {
     final esenciaService = Provider.of<EsenciaService>(context);
+    final progressionService = Provider.of<ProgressionService>(context);
     final currentEsencia = esenciaService.playerState.totalEsencia;
     
     // Obtener mejoras globales
@@ -851,22 +852,40 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
         ),
         const SizedBox(height: 8),
         
-          ...[
+        ...([
             UpgradeType.tapStrength,
             UpgradeType.tapMultiplier,
-            UpgradeType.globalMultiplier,
             UpgradeType.offlineEfficiency,
             UpgradeType.offlineTime,
-          ].map((type) {
+            UpgradeType.globalMultiplier,
+          ]..sort((a, b) {
+              final aOwned = esenciaService.hasUpgrade(a);
+              final bOwned = esenciaService.hasUpgrade(b);
+              final aUpgrade = aOwned ? esenciaService.getUpgrade(a)! : null;
+              final bUpgrade = bOwned ? esenciaService.getUpgrade(b)! : null;
+              
+              final aLvl = aUpgrade?.currentLevel ?? a.startLevel;
+              final bLvl = bUpgrade?.currentLevel ?? b.startLevel;
+              
+              final aMax = aOwned && aLvl >= a.maxLevel;
+              final bMax = bOwned && bLvl >= b.maxLevel;
+              
+              // 1. Maxed items go to the end
+              if (aMax && !bMax) return 1;
+              if (!aMax && bMax) return -1;
+              
+              // 2. Otherwise, maintain the order defined in the list above (stable sort property)
+              // (Since we are using ..sort on a fixed list, the default behavior for equals is 0)
+              return 0; 
+          })).map((type) {
              final isOwned = esenciaService.hasUpgrade(type);
              
              Upgrade upgrade;
-             double cost; // Changed to double
+             double cost; 
              String bonusText = '';
              
              if (isOwned) {
                upgrade = esenciaService.getUpgrade(type)!;
-               
                cost = upgrade.calculateNextLevelCost();
                
                if (type == UpgradeType.tapStrength) {
@@ -878,47 +897,42 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                upgrade = Upgrade(
                  id: 'temp_${type.name}',
                  type: type,
-                 currentLevel: type.startLevel, // Use defined startLevel (e.g. 1 for Tap Strength)
-                 name: getTypeDisplayName(type, context), // Helper
-                 description: getTypeDescription(type, context), // Helper
+                 currentLevel: type.startLevel,
+                 name: getTypeDisplayName(type, context),
+                 description: getTypeDescription(type, context),
                );
-               // Level 0 -> 1 cost is Base Cost (or costs[0])
-               if (type.costs.isNotEmpty) {
-                 cost = type.costs[0]; 
-               } else {
-                 cost = type.baseCost;
-               }
-               
+               cost = type.costs.isNotEmpty ? type.costs[0] : type.baseCost;
                bonusText = AppLocalizations.of(context)!.unlockLevel1;
              }
 
             // Check Upgrade Cap with Type
             final progressionService = Provider.of<ProgressionService>(context);
             String upgradeTypeId = '';
-            if (type == UpgradeType.idleMultiplier) upgradeTypeId = 'idle_multiplier';
-            else if (type == UpgradeType.energyStorage) upgradeTypeId = 'energy_storage';
-            else if (type == UpgradeType.tapStrength) upgradeTypeId = 'tap_strength';
+            if (type == UpgradeType.tapStrength) upgradeTypeId = 'tap_strength';
             else if (type == UpgradeType.tapMultiplier) upgradeTypeId = 'tap_multiplier';
             else if (type == UpgradeType.globalMultiplier) upgradeTypeId = 'global_multiplier';
             else if (type == UpgradeType.offlineEfficiency) upgradeTypeId = 'offline_efficiency';
-
+            else if (type == UpgradeType.offlineTime) upgradeTypeId = 'offline_time';
             
-            int upgradeCap = 999;
-            if (upgradeTypeId.isNotEmpty) {
-               upgradeCap = progressionService.getUpgradeCap(currentLevel, type: upgradeTypeId);
-            }
-            // If unowned (level 0), and cap is 0, then 0 >= 0 is true -> Capped.
-            // If cap is 2 (level 4 reached), then 0 >= 2 is false -> Not capped.
+            int upgradeCap = progressionService.getUpgradeCap(currentLevel, type: upgradeTypeId);
             final isCappedByLevel = upgrade.currentLevel >= upgradeCap;
             final isMaxLevel = isOwned && upgrade.currentLevel >= type.maxLevel;
             
+            // Re-check Unlock for UI consistency
+            final bool isUnlocked = progressionService.isItemUnlocked(currentLevel, upgradeTypeId.isEmpty ? 'upgrade_${type.name}' : 'upgrade_$upgradeTypeId');
+
+            if (!isUnlocked) {
+               final reqLevel = progressionService.getRequiredLevelForItem(upgradeTypeId.isEmpty ? 'upgrade_${type.name}' : 'upgrade_$upgradeTypeId');
+               bonusText = AppLocalizations.of(context)!.requiresLevel(reqLevel ?? 0); 
+            }
+
             // Next required level logic
             int? nextReqLevel; 
-            if (isCappedByLevel) {
+            if (isCappedByLevel && isUnlocked) {
                  nextReqLevel = progressionService.getLevelRequiredForHigherCap(upgradeCap, type: upgradeTypeId);
             }
 
-            // Dependency Check (Eco Duradero requires Eco Persistente)
+            // Dependency Check
             bool isLockedByDependency = false;
             String? dependencyMessage;
             
@@ -926,7 +940,6 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 final echo = esenciaService.getUpgrade(UpgradeType.offlineEfficiency);
                 if (echo == null || echo.currentLevel < 1) {
                     isLockedByDependency = true;
-                    // TODO: Use localized string if possible, but hardcoding based on known strings for now
                     dependencyMessage = "Requiere Eco Persistente";
                 }
             }
@@ -939,17 +952,17 @@ class _ShopScreenState extends State<ShopScreen> with SingleTickerProviderStateM
                 description: AppLocalizations.of(context)!.getUpgradeDescription(type),
                 currentLevel: isOwned ? upgrade.currentLevel : type.startLevel,
                 maxLevel: type.maxLevel,
-                cost: isMaxLevel ? 0 : cost.toDouble(),
+                cost: (isMaxLevel || !isUnlocked) ? 0 : cost.toDouble(),
                 currentEsencia: currentEsencia,
-                multiplier: '', // Not used anymore as separate text
+                multiplier: '', 
                 bonusText: bonusText,
-                isCappedByLevel: isCappedByLevel,
-                nextRequiredLevel: nextReqLevel,
+                isCappedByLevel: isCappedByLevel && isUnlocked,
+                nextRequiredLevel: isUnlocked ? nextReqLevel : null,
                 isMaxLevel: isMaxLevel,
-                isLocked: isLockedByDependency,
-                lockedMessage: dependencyMessage,
+                isLocked: isLockedByDependency || !isUnlocked,
+                lockedMessage: isLockedByDependency ? dependencyMessage : (!isUnlocked ? "Bloqueado" : null),
                 onPurchase: () async {
-                  if (isCappedByLevel || isMaxLevel || isLockedByDependency) return;
+                  if (isCappedByLevel || isMaxLevel || isLockedByDependency || !isUnlocked) return;
 
                   final success = await esenciaService.purchaseUpgradeByType(type);
                   if (success) {

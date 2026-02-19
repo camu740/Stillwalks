@@ -2147,7 +2147,7 @@ abstract class AppLocalizations {
   /// No description provided for @upgradeGlobalMultiplierDesc.
   ///
   /// In es, this message translates to:
-  /// **'Multiplica la producción pasiva de Esencia.'**
+  /// **'Multiplica la producción de Esencia de todos los edificios.'**
   String get upgradeGlobalMultiplierDesc;
 
   /// No description provided for @upgradeOfflineEfficiencyName.

@@ -25,7 +25,7 @@ class DatabaseHelper {
     
     return await openDatabase(
       path,
-      version: 12,
+      version: 14,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -48,7 +48,9 @@ class DatabaseHelper {
         tapMultiplier REAL NOT NULL DEFAULT 1.0,
         lastOfflineCheck TEXT,
         lastOfflineEarnedEssence REAL NOT NULL DEFAULT 0.0,
-        freeOrbLevel2Claimed INTEGER NOT NULL DEFAULT 0
+        freeOrbLevel2Claimed INTEGER NOT NULL DEFAULT 0,
+        essenceRainTriggered INTEGER NOT NULL DEFAULT 0,
+        earnedEsenciaByTap REAL NOT NULL DEFAULT 0.0
       )
     ''');
 
@@ -160,6 +162,8 @@ class DatabaseHelper {
       'lastOfflineCheck': DateTime.now().toIso8601String(),
       'lastOfflineEarnedEssence': 0.0,
       'freeOrbLevel2Claimed': 0,
+      'essenceRainTriggered': 0,
+      'earnedEsenciaByTap': 0.0,
     });
   }
 
@@ -275,6 +279,24 @@ class DatabaseHelper {
          await db.execute("ALTER TABLE player_state ADD COLUMN freeOrbLevel2Claimed INTEGER NOT NULL DEFAULT 0");
       } catch (e) {
         debugPrint('Migration v12 warning: $e');
+      }
+    }
+
+    // V13: Añadir flag essenceRainTriggered
+    if (oldVersion < 13) {
+      try {
+         await db.execute("ALTER TABLE player_state ADD COLUMN essenceRainTriggered INTEGER NOT NULL DEFAULT 0");
+      } catch (e) {
+        debugPrint('Migration v13 warning: $e');
+      }
+    }
+
+    // V14: Añadir earnedEsenciaByTap
+    if (oldVersion < 14) {
+      try {
+         await db.execute("ALTER TABLE player_state ADD COLUMN earnedEsenciaByTap REAL NOT NULL DEFAULT 0.0");
+      } catch (e) {
+        debugPrint('Migration v14 warning: $e');
       }
     }
   }
@@ -545,6 +567,8 @@ class DatabaseHelper {
       'lastOfflineCheck': DateTime.now().toIso8601String(),
       'lastOfflineEarnedEssence': 0.0,
       'freeOrbLevel2Claimed': 0,
+      'essenceRainTriggered': 0,
+      'earnedEsenciaByTap': 0.0,
     }, where: 'id = ?', whereArgs: [1]);
   }
 

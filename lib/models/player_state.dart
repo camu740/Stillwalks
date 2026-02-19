@@ -17,6 +17,8 @@ class PlayerState {
   final DateTime lastOfflineCheck;
   final double lastOfflineEarnedEssence; // Track offline earnings for display
   final bool freeOrbLevel2Claimed;
+  final bool essenceRainTriggered;
+  final double earnedEsenciaByTap;
 
   PlayerState({
     required this.totalEsencia,
@@ -31,6 +33,8 @@ class PlayerState {
     required this.lastOfflineCheck,
     this.lastOfflineEarnedEssence = 0.0,
     this.freeOrbLevel2Claimed = false,
+    this.essenceRainTriggered = false,
+    this.earnedEsenciaByTap = 0.0,
   }) : esenciaPerHour = _calculateEsenciaPerHour(idleMultiplier);
 
   // Esencia base por hora NO LONGER USED in new system, keeping for compatibility until full refactor
@@ -64,6 +68,8 @@ class PlayerState {
     DateTime? lastOfflineCheck,
     double? lastOfflineEarnedEssence,
     bool? freeOrbLevel2Claimed,
+    bool? essenceRainTriggered,
+    double? earnedEsenciaByTap,
   }) {
     return PlayerState(
       totalEsencia: totalEsencia ?? this.totalEsencia,
@@ -78,6 +84,8 @@ class PlayerState {
       lastOfflineCheck: lastOfflineCheck ?? this.lastOfflineCheck,
       lastOfflineEarnedEssence: lastOfflineEarnedEssence ?? this.lastOfflineEarnedEssence,
       freeOrbLevel2Claimed: freeOrbLevel2Claimed ?? this.freeOrbLevel2Claimed,
+      essenceRainTriggered: essenceRainTriggered ?? this.essenceRainTriggered,
+      earnedEsenciaByTap: earnedEsenciaByTap ?? this.earnedEsenciaByTap,
     );
   }
 
@@ -95,6 +103,8 @@ class PlayerState {
       'lastOfflineCheck': lastOfflineCheck.toIso8601String(),
       'lastOfflineEarnedEssence': lastOfflineEarnedEssence,
       'freeOrbLevel2Claimed': freeOrbLevel2Claimed,
+      'essenceRainTriggered': essenceRainTriggered,
+      'earnedEsenciaByTap': earnedEsenciaByTap,
     };
   }
 
@@ -131,6 +141,8 @@ class PlayerState {
           : DateTime.now(),
       lastOfflineEarnedEssence: (json['lastOfflineEarnedEssence'] as num?)?.toDouble() ?? 0.0,
       freeOrbLevel2Claimed: json['freeOrbLevel2Claimed'] == 1,
+      essenceRainTriggered: json['essenceRainTriggered'] == 1,
+      earnedEsenciaByTap: (json['earnedEsenciaByTap'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -149,6 +161,8 @@ class PlayerState {
       lastOfflineCheck: DateTime.now(),
       lastOfflineEarnedEssence: 0.0,
       freeOrbLevel2Claimed: false,
+      essenceRainTriggered: false,
+      earnedEsenciaByTap: 0.0,
     );
   }
 }

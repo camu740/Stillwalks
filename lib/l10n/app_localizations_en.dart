@@ -1128,7 +1128,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get upgradeGlobalMultiplierDesc =>
-      'Multiply the passive production of Essence.';
+      'Multiplies the Essence production of all buildings.';
 
   @override
   String get upgradeOfflineEfficiencyName => 'Lingering Echo';

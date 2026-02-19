@@ -229,10 +229,16 @@ class EsenciaService extends ChangeNotifier {
   // Stream for notifying when essence is earned
   final _essenceEarnedController = StreamController<double>.broadcast();
   Stream<double> get onEssenceEarned => _essenceEarnedController.stream;
+  
+  // Stream for notifying when "Lluvia de Esencia" is requested
+  final _essenceRainController = StreamController<void>.broadcast();
+  Stream<void> get onEssenceRainRequested => _essenceRainController.stream;
 
   @override
   void dispose() {
     _essenceEarnedController.close();
+    _essenceRainController.close();
+    _levelUpController.close();
     super.dispose();
   }
 
@@ -257,6 +263,7 @@ class EsenciaService extends ChangeNotifier {
     _essenceEarnedController.add(amount);
 
     _checkMilestoneNotification();
+    _checkEssenceRainTrigger();
 
     final source = fromNative ? 'native Android' : 'app calculation';
     // debugPrint('💰 EsenciaService: Added $amount Esencia from $source. Total: ${_playerState.totalEsencia}');
@@ -346,6 +353,22 @@ class EsenciaService extends ChangeNotifier {
         debugPrint('💰 EsenciaService: Milestone notification sent for $currentMilestone essence');
       }
     }
+  }
+
+  /// Verifica si se debe activar la Lluvia de Esencia por primera vez (5 esencia)
+  void _checkEssenceRainTrigger() {
+    // Solo si no se ha activado nunca antes y hemos ganado al menos 3 de esencia mediante taps
+    if (!_playerState.essenceRainTriggered && _playerState.earnedEsenciaByTap >= 3.0) {
+      debugPrint('✨ EsenciaService: First-time essence rain trigger! (3 tap essence reached)');
+      _playerState = _playerState.copyWith(essenceRainTriggered: true);
+      _db.updatePlayerState(_playerState.toJson()).ignore();
+      requestEssenceRain();
+    }
+  }
+
+  /// Solicita manualmente una lluvia de esencia (ej. tras subir de nivel)
+  void requestEssenceRain() {
+    _essenceRainController.add(null);
   }
 
   /// Gasta Esencia (para compras)
@@ -808,19 +831,15 @@ class EsenciaService extends ChangeNotifier {
     );
 
     int level = innerRhythm.currentLevel;
-    if (level <= 0) return const Duration(milliseconds: 3000); 
-
-    double cooldownSeconds = 3.0; 
     
-    if (level >= 1 && level <= 13) {
-        cooldownSeconds = 3.0 - ((level - 1) * 0.2);
-    } else if (level == 14) {
-        cooldownSeconds = 0.45;
-    } else if (level >= 15) {
-        cooldownSeconds = 0.3;
+    switch (level) {
+      case 1: return const Duration(milliseconds: 3000);
+      case 2: return const Duration(milliseconds: 2200);
+      case 3: return const Duration(milliseconds: 1800);
+      case 4: return const Duration(milliseconds: 1000);
+      case 5: return const Duration(milliseconds: 300);
+      default: return const Duration(milliseconds: 3000);
     }
-    
-    return Duration(milliseconds: (cooldownSeconds * 1000).toInt());
   }
 
   /// Maneja un tap del usuario para generar esencia
@@ -839,10 +858,14 @@ class EsenciaService extends ChangeNotifier {
     
     _playerState = _playerState.copyWith(
       totalEsencia: _playerState.totalEsencia + finalEsencia,
+      earnedEsenciaByTap: _playerState.earnedEsenciaByTap + finalEsencia,
     );
     
     notifyListeners();
     _db.updatePlayerState(_playerState.toJson()).ignore();
+    
+    // Verificar si se activa la lluvia tras este tap
+    _checkEssenceRainTrigger();
     
     return finalEsencia;
   }

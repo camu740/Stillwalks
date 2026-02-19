@@ -522,7 +522,7 @@
   "upgradeTapMultiplierName": "Ritmo Interior",
   "upgradeTapMultiplierDesc": "Reduce el enfriamiento del tap.",
   "upgradeGlobalMultiplierName": "Flujo Esencial",
-  "upgradeGlobalMultiplierDesc": "Multiplica la producción pasiva de Esencia.",
+  "upgradeGlobalMultiplierDesc": "Multiplica la producción de Esencia de todos los edificios.",
   "upgradeOfflineEfficiencyName": "Eco Persistente",
   "upgradeOfflineEfficiencyDesc": "Aumenta la eficiencia de producción desconectado.",
   "upgradeOfflineTimeName": "Eco Duradero",

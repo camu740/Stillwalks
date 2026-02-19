@@ -522,7 +522,7 @@
   "upgradeTapMultiplierName": "Inner Rhythm",
   "upgradeTapMultiplierDesc": "Reduce tap cooling.",
   "upgradeGlobalMultiplierName": "Essential Flow",
-  "upgradeGlobalMultiplierDesc": "Multiply the passive production of Essence.",
+  "upgradeGlobalMultiplierDesc": "Multiplies the Essence production of all buildings.",
   "upgradeOfflineEfficiencyName": "Lingering Echo",
   "upgradeOfflineEfficiencyDesc": "Increases offline production efficiency.",
   "upgradeOfflineTimeName": "Durable Echo",

@@ -31,8 +31,12 @@ class Upgrade {
       return type.baseCost * math.pow(type.costScale, calcLevel);
     }
     
-    if (currentLevel >= costs.length) return double.infinity; // Máximo nivel alcanzado
-    return costs[currentLevel];
+    // Adjusted index for fixed-cost lists (e.g. currentLevel 4 - startLevel 1 = index 3)
+    final effectiveIndex = currentLevel - type.startLevel;
+    if (effectiveIndex >= costs.length || currentLevel >= type.maxLevel) {
+      return double.infinity; // Máximo nivel alcanzado
+    }
+    return costs[effectiveIndex];
   }
 
   /// Calcula el valor del multiplicador en el nivel actual
@@ -109,11 +113,12 @@ enum UpgradeType {
     startLevel: 1,
   ),
   tapMultiplier( // Represents "Inner Rhythm"
-    baseCost: 150,
+    baseCost: 5,
     incrementPerLevel: 0.0, // Handled via specific logic (Cooldown)
-    maxLevel: 15, 
+    maxLevel: 5, 
+    startLevel: 1,
     costScale: 1.5,
-    costs: [],
+    costs: [5, 15, 30, 50],
   ),
   globalMultiplier( // Represents "Essence Flow"
     baseCost: 2500,

@@ -5,7 +5,6 @@ import 'package:stillwalks/services/esencia_service.dart';
 import 'package:stillwalks/services/orbe_service.dart';
 import 'package:stillwalks/screens/shop_screen.dart';
 import 'package:stillwalks/screens/explorer_journal_screen.dart';
-
 import 'package:stillwalks/screens/settings_screen.dart';
 import 'package:stillwalks/screens/inventory_screen.dart';
 import 'package:stillwalks/data/database/database_helper.dart';
@@ -21,8 +20,7 @@ import 'package:stillwalks/l10n/app_localizations.dart';
 import 'package:stillwalks/screens/widgets/floating_essence_text.dart';
 import 'package:stillwalks/screens/widgets/random_essence_orb.dart';
 import 'package:stillwalks/screens/widgets/shop_shortcut_button.dart';
-import 'package:stillwalks/screens/shop_screen.dart'; // Ensure ShopScreen is imported
-import 'dart:math'; // Added for random position
+import 'dart:math';
 
 /// Pantalla principal con el estado del jugador
 class HomeScreen extends StatefulWidget {
@@ -36,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _shopButtonKey = GlobalKey();
   final GlobalKey _sanctuarySlotKey = GlobalKey();
   StreamSubscription<int>? _levelUpSubscription;
+  StreamSubscription<void>? _essenceRainSubscription;
   
   // Tap animation state
   final List<Widget> _tapAnimations = [];
@@ -61,6 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
         _showLevelUpDialog(newLevel);
       });
       
+      _essenceRainSubscription = esenciaService.onEssenceRainRequested.listen((_) {
+        _startEssenceRain();
+      });
+      
       // Check for offline essence collected
       _checkOfflineEssence();
     });
@@ -71,18 +74,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _levelUpSubscription?.cancel();
+    _essenceRainSubscription?.cancel();
     _randomOrbTimer?.cancel();
+    _essenceRainTimer?.cancel();
     super.dispose();
   }
 
   void _showLevelUpDialog(int newLevel) {
-    // Get unlocks for this level
-    // Use Provider if available, or new instance if that's how it's used elsewhere
-    // But since it's just static data, it's fine.
     final progressionService = ProgressionService();
     final levelDef = progressionService.getLevelDefinition(newLevel);
     
-    // Modificar lista para añadir ofertas especiales
     List<Unlock> unlocks = List.from(levelDef.unlocks);
     
     if (newLevel == 2) {
@@ -94,21 +95,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showDialog(
       context: context,
-      barrierDismissible: false, // User must tap button
+      barrierDismissible: false,
       builder: (context) => LevelUpDialog(
         newLevel: newLevel,
         unlocks: unlocks,
-        onDismiss: () => Navigator.of(context).pop(),
+        onDismiss: () {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          Provider.of<EsenciaService>(context, listen: false).requestEssenceRain();
+        },
       ),
     );
   }
 
-
-
   void _startRandomOrbTimer() {
     _randomOrbTimer?.cancel();
-    // Random interval between 5 and 45 seconds
-    final nextInterval = _random.nextInt(41) + 5;
+    
+    // Frecuencia dinámica basada en el nivel
+    final level = Provider.of<EsenciaService>(context, listen: false).playerState.explorerLevel;
+    final int nextInterval;
+    
+    if (level <= 2) {
+      // Mucho más frecuente en niveles iniciales (3 a 12 segundos)
+      nextInterval = _random.nextInt(10) + 3;
+    } else {
+      // Intervalo normal (5 a 45 segundos)
+      nextInterval = _random.nextInt(41) + 5;
+    }
+    
     _randomOrbTimer = Timer(Duration(seconds: nextInterval), () {
       if (mounted) {
         _showRandomOrb();
@@ -116,17 +129,122 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void _showRandomOrb() {
-    // Calculate random position (safe area roughly)
-    // Avoid top bar and bottom nav
+  // --- Essence Rain Logic ---
+  Timer? _essenceRainTimer;
+  bool _isEssenceRainActive = false;
+
+  void _startEssenceRain() {
+    if (_isEssenceRainActive) return;
+    
+    debugPrint('✨ HomeScreen: Starting Essence Rain event!');
+    setState(() {
+      _isEssenceRainActive = true;
+    });
+
+    int orbsSpawned = 0;
+    const int totalOrbs = 25;
+    
+    _essenceRainTimer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+      if (orbsSpawned >= totalOrbs) {
+        timer.cancel();
+        Future.delayed(const Duration(seconds: 4), () {
+          if (mounted) {
+            setState(() {
+              _isEssenceRainActive = false;
+            });
+          }
+        });
+        return;
+      }
+
+      if (mounted) {
+        _showRainOrb();
+        orbsSpawned++;
+      }
+    });
+  }
+
+  void _showRainOrb() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     
-    // Margins
     final minX = 40.0;
     final maxX = screenWidth - 100.0;
-    final minY = 100.0; // Below top stats
-    final maxY = screenHeight - 200.0; // Above nav
+    final minY = 100.0;
+    final maxY = screenHeight - 200.0;
+
+    final pos = Offset(
+      minX + _random.nextDouble() * (maxX - minX),
+      minY + _random.nextDouble() * (maxY - minY),
+    );
+
+    final id = 'rain_${DateTime.now().millisecondsSinceEpoch}_${_random.nextInt(1000)}';
+    
+    setState(() {
+      _tapAnimations.add(
+        Positioned(
+          key: ValueKey(id),
+          left: pos.dx,
+          top: pos.dy,
+          child: RandomEssenceOrb(
+            onTap: () {
+              final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+              final bonus = esenciaService.baseTapStrength * 3;
+              esenciaService.addEsencia(bonus);
+              
+              if (mounted) {
+                setState(() {
+                  _tapAnimations.removeWhere((w) => w.key == ValueKey(id));
+                  _showFloatingXpText(bonus, pos, Colors.amberAccent);
+                });
+              }
+            },
+            onDismiss: () {
+              if (mounted) {
+                setState(() {
+                  _tapAnimations.removeWhere((w) => w.key == ValueKey(id));
+                });
+              }
+            },
+          ),
+        ),
+      );
+    });
+  }
+
+  void _showFloatingXpText(double bonus, Offset pos, Color color) {
+    final id = 'floating_${DateTime.now().millisecondsSinceEpoch}_${_random.nextInt(1000)}';
+    _tapAnimations.add(
+      Positioned(
+        key: ValueKey(id),
+        left: pos.dx,
+        top: pos.dy,
+        child: FloatingEssenceText(
+          text: '+${bonus.toStringAsFixed(0)}',
+          startPosition: pos,
+          color: color,
+          fontWeight: FontWeight.w900,
+          fontSize: 22,
+          onComplete: () {
+            if (mounted) {
+              setState(() {
+                _tapAnimations.removeWhere((w) => w.key == ValueKey(id));
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showRandomOrb() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
+    final minX = 40.0;
+    final maxX = screenWidth - 100.0;
+    final minY = 100.0;
+    final maxY = screenHeight - 200.0;
 
     setState(() {
       _randomOrbPosition = Offset(
@@ -141,21 +259,17 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!_isRandomOrbVisible) return;
 
     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-    
-    // Reward calculation: 5x Base Tap Strength (without multipliers)
     final bonus = esenciaService.baseTapStrength * 5;
-    
     esenciaService.addEsencia(bonus); 
 
-    // Show floating text
     final pos = _randomOrbPosition ?? Offset.zero;
+    final id = 'bonus_${DateTime.now().millisecondsSinceEpoch}';
     
     setState(() {
       _isRandomOrbVisible = false;
-      _isRandomOrbVisible = false;
       _tapAnimations.add(
         Positioned(
-          key: ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}'),
+          key: ValueKey(id),
           left: pos.dx,
           top: pos.dy,
           child: FloatingEssenceText(
@@ -167,9 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onComplete: () {
                  if (mounted) {
                    setState(() {
-                     _tapAnimations.removeWhere((w) => w.key == ValueKey('bonus_${DateTime.now().millisecondsSinceEpoch}')); // This key lookup might fail if recreated. Using a unique ID is safer but let's stick to this for now or just remove by instance if possible? 
-                     // Actually logic above removes by ValueKey same string. But typically we should use a variable.
-                     // However, existing logic uses this pattern.
+                     _tapAnimations.removeWhere((w) => w.key == ValueKey(id));
                    });
                  }
              },
@@ -178,22 +290,23 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     });
 
-    _startRandomOrbTimer(); // Restart cycle
+    _startRandomOrbTimer();
   }
 
   void _handleTap(TapDownDetails details) {
     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
     final earned = esenciaService.handleTap();
     
-    if (earned <= 0) return; // Don't show floating text if no essence earned (cooldown)
+    if (earned <= 0) return;
 
-    // Trigger Cooldown Animation
+    final tapTime = DateTime.now();
+    final duration = esenciaService.tapCooldown;
+    
     setState(() {
-      _lastTapTime = DateTime.now();
-      _cooldownDuration = esenciaService.tapCooldown;
+      _lastTapTime = tapTime;
+      _cooldownDuration = duration.inMilliseconds > 300 ? duration : null;
     });
 
-    // Add floating text animation
     final id = _tapIdCounter++;
     
     setState(() {
@@ -222,7 +335,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final esenciaService = Provider.of<EsenciaService>(context, listen: false);
     
     if (esenciaService.lastOfflineEarnedEssence > 0) {
-      // Small delay to ensure dialog appears after screen is ready
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           _showOfflineEssenceDialog(esenciaService.lastOfflineEarnedEssence);
@@ -406,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildXpSource(
                 icon: Icons.auto_awesome,
                 text: l10n.xpSourceBuySanctuaries,
-                xp: '20', // Aligning with balance doc for now, pending verification
+                xp: '20',
                 color: Colors.cyan,
               ),
               const SizedBox(height: 10),
@@ -478,9 +590,9 @@ class _HomeScreenState extends State<HomeScreen> {
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ),
-        const SizedBox(width: 16), // Increased from 8 to 16 for more breathing room
+        const SizedBox(width: 16),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), // Slightly larger badge
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: Colors.green.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(6),
@@ -498,613 +610,495 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // Escuchar cambios en los servicios
     final esenciaService = Provider.of<EsenciaService>(context);
     final orbeService = Provider.of<OrbeService>(context);
-    final tutorialService = Provider.of<TutorialService>(context); // Listen to tutorial steps
+    final tutorialService = Provider.of<TutorialService>(context);
     final progressionService = ProgressionService();
-    
-    // final currentEsencia = esenciaService.playerState.totalEsencia;
-    final nextLevelXp = progressionService.getNextLevelXpRequirement(esenciaService.playerState.explorerLevel);
-    // Asumimos que esenciaPerHour está en el estado del jugador, si no, calculamos o usamos base
-    // Revisando EsenciaService: _playerState.esenciaPerHour se usa en calculatePendingEsencia.
-    // Si la propiedad no existe en el modelo público, usaremos un valor derivado o fijo por ahora.
-    // Para asegurar compilación, accediendo a playerState.
-    // Si playerState no tiene esenciaPerHour, esto fallará. 
-    // Mirando EsenciaService.dart linea 75: _playerState.esenciaPerHour * hoursElapsed. SI EXISTE.
-    final esenciaPerHour = esenciaService.playerState.esenciaPerHour; 
-    
- 
-    
-
     
     // Tutorial Target Updates
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final tutorialService = Provider.of<TutorialService>(context, listen: false);
-      
       if (tutorialService.currentStep == TutorialStep.shop) {
         _updateTutorialTarget(_shopButtonKey, tutorialService);
-      } else if (tutorialService.currentStep == TutorialStep.sanctuary) {
+      } else if (tutorialService.currentStep == TutorialStep.sanctuary || tutorialService.currentStep == TutorialStep.hatch) {
         _updateTutorialTarget(_sanctuarySlotKey, tutorialService);
-      } else if (tutorialService.currentStep == TutorialStep.hatch) {
-         _updateTutorialTarget(_sanctuarySlotKey, tutorialService);
       }
     });
 
     return TutorialManager(
       child: TutorialOverlay(
-        child: GestureDetector(
-          onTapDown: _handleTap,
-          behavior: HitTestBehavior.opaque, // Capture taps even on empty space
-          child: Stack(
-            children: [
-              // Background (if any)
-              Container(color: Colors.black), // Ensure background is hit-testable if it was transparent
-              
-              // Floating animations (moved to top of stack)
-              // ..._tapAnimations,  <-- REMOVED from here
-              
-              // Main UI Content
-              Stack(
-                children: [
-          PopScope(
-            canPop: tutorialService.isCompleted,
-            onPopInvokedWithResult: (didPop, result) {
-               if (didPop) return;
-               // Optional: Show message or just do nothing as requested "que no ocurra nada"
-               ScaffoldMessenger.of(context).showSnackBar(
-                 SnackBar(content: Text(AppLocalizations.of(context)!.tutorialBlockHome)),
-               );
-            },
-            child: Scaffold(
-              // Removed AppBar
-              body: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.deepPurple.withValues(alpha: 0.8),
-                    Colors.black,
-                  ],
+        child: PopScope(
+          canPop: tutorialService.isCompleted,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context)!.tutorialBlockHome)),
+            );
+          },
+          child: Scaffold(
+            body: GestureDetector(
+              onTapDown: _handleTap,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.deepPurple.withValues(alpha: 0.8),
+                      Colors.black,
+                    ],
+                  ),
                 ),
-              ),
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    // Sección superior: Panel Unificado (Esencia + Nivel)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Essence Info (Takes available space)
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
+                child: SafeArea(
+                  child: Stack(
+                    children: [
+                      // 1. Base UI Layer
+                      Column(
+                        children: [
+                          // Upper Panel: Essence + Level
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.essenceCollectorLabel.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white.withValues(alpha: 0.6),
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 24),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          esenciaService.playerState.totalEsencia.toStringAsFixed(0),
-                                          style: const TextStyle(
-                                            fontSize: 28,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            shadows: [
-                                              Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
+                                    // Essence Info
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(context)!.essenceCollectorLabel.toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white.withValues(alpha: 0.6),
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.auto_awesome, color: Colors.amberAccent, size: 24),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                esenciaService.playerState.totalEsencia.toStringAsFixed(0),
+                                                style: const TextStyle(
+                                                  fontSize: 28,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  shadows: [
+                                                    Shadow(color: Colors.black45, offset: Offset(0, 2), blurRadius: 4),
+                                                  ],
+                                                ),
+                                              ),
                                             ],
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.access_time, size: 14, color: Colors.white70),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '+${esenciaService.passiveEssencePerSecond.toStringAsFixed(1)}/s',
+                                                style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Row(
+
+                                    const SizedBox(width: 8),
+                                   
+                                    // Shortcuts
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(Icons.access_time, size: 14, color: Colors.white70),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '+${esenciaService.passiveEssencePerSecond.toStringAsFixed(1)}/s',
-                                          style: const TextStyle(fontSize: 14, color: Colors.white70),
+                                        ShopShortcutButton(
+                                          icon: Icons.trending_up,
+                                          iconColor: Colors.greenAccent,
+                                          isCompact: true,
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) => const ShopScreen(initialTab: 0),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(height: 6),
+                                        ShopShortcutButton(
+                                          icon: Icons.location_city,
+                                          iconColor: Colors.cyanAccent,
+                                          isCompact: true,
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) => const ShopScreen(initialTab: 1),
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ],
                                     ),
                                     
-                                    // Cooldown Indicator
-
-                                    ],
-                                  ),
-                              ),
-
-                              const SizedBox(width: 8),
-                             
-                              // Shortcuts (Next to Divider)
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ShopShortcutButton(
-                                    icon: Icons.trending_up,
-                                    iconColor: Colors.greenAccent,
-                                    isCompact: true,
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const ShopScreen(initialTab: 0),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(height: 6),
-                                  ShopShortcutButton(
-                                    icon: Icons.location_city,
-                                    iconColor: Colors.cyanAccent,
-                                    isCompact: true,
-                                    onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const ShopScreen(initialTab: 1),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                              
-                              const SizedBox(width: 20),
-                              
-                              // Divider (Restored)
-                              Container(
-                                width: 1,
-                                color: Colors.white.withOpacity(0.2),
-                                margin: const EdgeInsets.only(right: 20),
-                              ),
-
-                              
-                              // Right Side: Player Level Info
-                              GestureDetector(
-                                onTap: () => _showLevelInfoDialog(context),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        SizedBox(
-                                          width: 48,
-                                          height: 48,
-                                        child: CircularProgressIndicator(
-                                            value: progressionService.getLevelProgress(
-                                              esenciaService.playerState.currentXp,
-                                              esenciaService.playerState.explorerLevel,
-                                            ),
-                                            backgroundColor: Colors.white10,
-                                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
-                                            strokeWidth: 4,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${esenciaService.playerState.explorerLevel}',
-                                          style: const TextStyle(
-                                            color: Colors.amber,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ],
+                                    const SizedBox(width: 20),
+                                    
+                                    // Divider
+                                    Container(
+                                      width: 1,
+                                      color: Colors.white.withOpacity(0.2),
+                                      margin: const EdgeInsets.only(right: 20),
                                     ),
-                                   const SizedBox(height: 8),
-                                    Text(
-                                      '${progressionService.getLevelRelativeXp(esenciaService.playerState.currentXp, esenciaService.playerState.explorerLevel)}/${progressionService.getLevelXpRange(esenciaService.playerState.explorerLevel) > 0 ? progressionService.getLevelXpRange(esenciaService.playerState.explorerLevel) : "-"}',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+
+                                    // Right Side: Player Level Info
+                                    GestureDetector(
+                                      onTap: () => _showLevelInfoDialog(context),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: 48,
+                                                height: 48,
+                                                child: CircularProgressIndicator(
+                                                  value: progressionService.getLevelProgress(
+                                                    esenciaService.playerState.currentXp,
+                                                    esenciaService.playerState.explorerLevel,
+                                                  ),
+                                                  backgroundColor: Colors.white10,
+                                                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                                                  strokeWidth: 4,
+                                                ),
+                                              ),
+                                              Text(
+                                                '${esenciaService.playerState.explorerLevel}',
+                                                style: const TextStyle(
+                                                  color: Colors.amber,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '${progressionService.getLevelRelativeXp(esenciaService.playerState.currentXp, esenciaService.playerState.explorerLevel)}/${progressionService.getLevelXpRange(esenciaService.playerState.explorerLevel) > 0 ? progressionService.getLevelXpRange(esenciaService.playerState.explorerLevel) : "-"}',
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-  
 
-
-                    // Cooldown Indicator (Persistent height to avoid layout shift)
-                     Padding(
-                       padding: const EdgeInsets.symmetric(horizontal: 32.0).copyWith(top: 4),
-                       child: SizedBox(
-                         height: 4,
-                         child: _cooldownDuration != null 
-                           ? CooldownIndicator(
-                               key: ValueKey('cooldown_${_lastTapTime?.millisecondsSinceEpoch}'), 
-                               duration: _cooldownDuration!,
-                               onComplete: () {
-                                 if (mounted) {
-                                   setState(() {
-                                     _cooldownDuration = null;
-                                   });
-                                 }
-                               },
-                             )
-                           : const SizedBox(), // Placeholder
-                       ),
-                     ),
-
-                    // Espacio flexible superior
-                    const Spacer(),
-  
-                    // Sección central: Santuarios y Almacén
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                       child: Column(
-                         mainAxisSize: MainAxisSize.min,
-                         children: [
-                           LayoutBuilder(
-                            builder: (context, constraints) {
-                               // Use ProgressionService to check unlock status instead of hardcoding
-                               final isTempUnlocked = progressionService.isFeatureUnlocked(
-                                 esenciaService.playerState.explorerLevel, 
-                                 ProgressionFeature.temporarySanctuarySlot
-                               );
-                               
-                               if (!isTempUnlocked) {
-                                 // Locked: Centered Primordial Sanctuary
-                                 return Center(
-                                   child: SizedBox(
-                                     width: constraints.maxWidth * 0.6, // Slightly wider when single
-                                     child: SanctuarySlot(
-                                      containerKey: _sanctuarySlotKey,
-                                      sanctuary: orbeService.sanctuaries.firstWhere(
-                                        (s) => !s.isTemporary,
-                                        orElse: () => orbeService.sanctuaries.first,
-                                      ),
-                                      orbeService: orbeService,
-                                     ),
-                                   ),
-                                 );
-                               }
-                               
-                               // Unlocked: Side by Side
-                               return Row(
-                                 children: [
-                                   // Santuario Primordial (izquierda)
-                                   Expanded(
-                                     child: SanctuarySlot(
-                                       containerKey: _sanctuarySlotKey,
-                                       sanctuary: orbeService.sanctuaries.firstWhere(
-                                         (s) => !s.isTemporary,
-                                         orElse: () => orbeService.sanctuaries.first,
-                                       ),
-                                       orbeService: orbeService,
-                                     ),
-                                   ),
-                                   const SizedBox(width: 12),
-                                   // Santuario Temporal (derecha)
-                                   Expanded(
-                                     child: TemporarySanctuarySlot(
-                                       orbeService: orbeService,
-                                     ),
-                                   ),
-                                 ],
-                               );
-                            }
-                          ),
-  
-                          // Almacén de Energía (Debajo de santuarios)
+                          // Cooldown Indicator
                           Builder(
                             builder: (context) {
-                              final storageUpgrade = esenciaService.upgrades.firstWhere(
-                                (u) => u.type == UpgradeType.energyStorage,
-                                orElse: () => Upgrade(
-                                  id: 'temp_storage', 
-                                  type: UpgradeType.energyStorage, 
-                                  currentLevel: 0, 
-                                  name: '', 
-                                  description: ''
+                              final tapTime = _lastTapTime;
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 32.0).copyWith(top: 4),
+                                child: SizedBox(
+                                  height: 4,
+                                  child: _cooldownDuration != null 
+                                    ? CooldownIndicator(
+                                        key: ValueKey('cooldown_${tapTime?.millisecondsSinceEpoch}'), 
+                                        duration: _cooldownDuration!,
+                                        onComplete: () {
+                                          if (mounted && _lastTapTime == tapTime) {
+                                            setState(() {
+                                              _cooldownDuration = null;
+                                            });
+                                          }
+                                        },
+                                      )
+                                    : const SizedBox(),
                                 ),
                               );
-                              
-                              const totalLevels = 12; // UpgradeType.energyStorage.maxLevel
-                              
-                              final isVisible = esenciaService.playerState.explorerLevel >= 4 && 
-                                                esenciaService.hasUpgrade(UpgradeType.energyStorage);
-  
-                              if (isVisible) {
-                                final currentLevel = storageUpgrade.currentLevel;
-                                final double visualProgress = (currentLevel - 1) / (totalLevels - 1);
-                                final double clampedProgress = visualProgress.clamp(0.0, 1.0);
-  
-                                return LayoutBuilder(
+                            }
+                          ),
+
+                          const Spacer(),
+
+                          // Central Section: Sanctuaries
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                LayoutBuilder(
                                   builder: (context, constraints) {
-                                    final maxAvailableWidth = constraints.maxWidth; // Full width of parent
+                                    final isTempUnlocked = progressionService.isFeatureUnlocked(
+                                      esenciaService.playerState.explorerLevel, 
+                                      ProgressionFeature.temporarySanctuarySlot
+                                    );
                                     
-                                    final widthFactor = 0.5 + (0.5 * clampedProgress);
-                                    final targetWidth = maxAvailableWidth * widthFactor;
-  
-                                    return Padding(
-                                      padding: const EdgeInsets.only(top: 24.0), // Space between sanctuaries and storage
-                                      child: Container(
-                                        width: targetWidth,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blueAccent.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(20),
-                                          border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.blueAccent,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              overflow: TextOverflow.visible,
-                                              softWrap: false,
+                                    if (!isTempUnlocked) {
+                                      return Center(
+                                        child: SizedBox(
+                                          width: constraints.maxWidth * 0.6,
+                                          child: SanctuarySlot(
+                                            containerKey: _sanctuarySlotKey,
+                                            sanctuary: orbeService.sanctuaries.firstWhere(
+                                              (s) => !s.isTemporary,
+                                              orElse: () => orbeService.sanctuaries.first,
                                             ),
-                                          ],
+                                            orbeService: orbeService,
+                                          ),
                                         ),
-                                      ),
+                                      );
+                                    }
+                                    
+                                    return Row(
+                                      children: [
+                                        Expanded(
+                                          child: SanctuarySlot(
+                                            containerKey: _sanctuarySlotKey,
+                                            sanctuary: orbeService.sanctuaries.firstWhere(
+                                              (s) => !s.isTemporary,
+                                              orElse: () => orbeService.sanctuaries.first,
+                                            ),
+                                            orbeService: orbeService,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: TemporarySanctuarySlot(
+                                            orbeService: orbeService,
+                                          ),
+                                        ),
+                                      ],
                                     );
                                   }
-                                );
-                              } else {
-                                return const SizedBox.shrink();
+                                ),
+
+                                // Energy Storage
+                                Builder(
+                                  builder: (context) {
+                                    final isVisible = esenciaService.playerState.explorerLevel >= 4 && 
+                                                      esenciaService.hasUpgrade(UpgradeType.energyStorage);
+                                    if (!isVisible) return const SizedBox.shrink();
+
+                                    final storageUpgrade = esenciaService.upgrades.firstWhere(
+                                      (u) => u.type == UpgradeType.energyStorage,
+                                      orElse: () => Upgrade(id: 'temp', type: UpgradeType.energyStorage, currentLevel: 0, name: '', description: ''),
+                                    );
+                                    
+                                    final currentLevel = storageUpgrade.currentLevel;
+                                    double visualProgress = (currentLevel - 1) / 11.0;
+                                    visualProgress = visualProgress.clamp(0.0, 1.0);
+
+                                    return LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final targetWidth = constraints.maxWidth * (0.5 + (0.5 * visualProgress));
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 24.0),
+                                          child: Container(
+                                            width: targetWidth,
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blueAccent.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(20),
+                                              border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Icon(Icons.battery_charging_full, size: 18, color: Colors.blueAccent),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  '${AppLocalizations.of(context)!.storage}: ${esenciaService.playerState.storedSteps} / ${esenciaService.storageCapacity}',
+                                                  style: const TextStyle(fontSize: 14, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    );
+                                  }
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const Spacer(),
+
+                          // Navigation Buttons
+                          Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _NavButton(
+                                        icon: Icons.inventory_2,
+                                        label: AppLocalizations.of(context)!.yourBag,
+                                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InventoryScreen())),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: _NavButton(
+                                        key: _shopButtonKey,
+                                        icon: Icons.shopping_bag,
+                                        label: AppLocalizations.of(context)!.shop,
+                                        onPressed: () {
+                                          final tutorialService = Provider.of<TutorialService>(context, listen: false);
+                                          if (tutorialService.isActive && !tutorialService.allowShopAccess) return;
+                                          if (tutorialService.currentStep == TutorialStep.shop) tutorialService.setTarget(null);
+                                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                _NavButton(
+                                  icon: Icons.book,
+                                  label: AppLocalizations.of(context)!.explorerJournal,
+                                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen())),
+                                ),
+                                const SizedBox(height: 12),
+                                _NavButton(
+                                  icon: Icons.settings,
+                                  label: AppLocalizations.of(context)!.settings,
+                                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // 2. Animations Layer
+                      Stack(children: _tapAnimations),
+
+                      // 3. Random Orb
+                      if (_isRandomOrbVisible && _randomOrbPosition != null)
+                        Positioned(
+                          left: _randomOrbPosition!.dx,
+                          top: _randomOrbPosition!.dy,
+                          child: RandomEssenceOrb(
+                            onTap: _handleRandomOrbTap,
+                            onDismiss: () {
+                              if (mounted) {
+                                setState(() { _isRandomOrbVisible = false; });
+                                _startRandomOrbTimer();
                               }
-                            }
-                          ),
-                        ],
-                      ),
-                    ),
-      
-                    // Espacio flexible inferior
-                    const Spacer(),
-      
-                    // Sección inferior: Botones de navegación
-                    Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _NavButton(
-                                  icon: Icons.inventory_2,
-                                  label: AppLocalizations.of(context)!.yourBag,
-                                  onPressed: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const InventoryScreen()));
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _NavButton(
-                                  key: _shopButtonKey,
-                                  icon: Icons.shopping_bag,
-                                  label: AppLocalizations.of(context)!.shop,
-                                  onPressed: () {
-                                    // Allow navigation only if permitted
-                                    final tutorialService = Provider.of<TutorialService>(context, listen: false);
-                                    if (tutorialService.isActive && !tutorialService.allowShopAccess) {
-                                      return;
-                                    }
-                                    
-                                    if (tutorialService.currentStep == TutorialStep.shop) {
-                                      tutorialService.setTarget(null); // Clear highlight
-                                    }
-                                    
-                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          _NavButton(
-                            icon: Icons.book,
-                            label: AppLocalizations.of(context)!.explorerJournal,
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerJournalScreen()));
                             },
                           ),
-                          const SizedBox(height: 12),
-                          _NavButton(
-                            icon: Icons.settings,
-                            label: AppLocalizations.of(context)!.settings,
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-              floatingActionButton: kDebugMode
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        FloatingActionButton.extended(
-                          heroTag: 'essence_btn',
-                          onPressed: () async {
-                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                            await esenciaService.addEsencia(1000.0);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('DEBUG: +1000 Esencia añadida')),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.flash_on),
-                          label: const Text('+1000 Esencia'),
-                          backgroundColor: Colors.amber,
                         ),
-                        const SizedBox(height: 16),
-                        FloatingActionButton.extended(
-                          heroTag: 'steps_btn',
-                          onPressed: () async {
-                            final orbeService = Provider.of<OrbeService>(context, listen: false);
-                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                            
-                            const steps = 500;
-                            final activeOrbs = await orbeService.addStepsToActiveOrbes(steps);
-                            if (activeOrbs['count'] == 0) {
-                              await esenciaService.addStoredSteps(steps);
-                            }
-                            esenciaService.updateSteps(steps);
-                            
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('DEBUG: +500 pasos simulados')),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.directions_run),
-                          label: const Text('+500 Pasos'),
-                          backgroundColor: Colors.redAccent,
-                        ),
-                        const SizedBox(height: 16),
-                        FloatingActionButton.extended(
-                          heroTag: 'storage_btn',
-                          onPressed: () {
-                            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                            esenciaService.addStoredSteps(100);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('DEBUG: +100 pasos al Almacén')),
-                            );
-                          },
-                          icon: const Icon(Icons.battery_charging_full),
-                          label: const Text('+100 Almacén'),
-                          backgroundColor: Colors.blueAccent,
-                        ),
-                        const SizedBox(height: 16),
-                        FloatingActionButton.extended(
-                          heroTag: 'reset_btn',
-                          onPressed: () async {
-                             final orbeService = Provider.of<OrbeService>(context, listen: false);
-                             final esenciaService = Provider.of<EsenciaService>(context, listen: false);
-                             final tutorialService = Provider.of<TutorialService>(context, listen: false);
-
-                             final db = DatabaseHelper();
-                             await db.resetDatabase();
-                             
-                             // Services must reset their internal state too
-                             await orbeService.initialize();
-                             await esenciaService.resetProgress(); // Explicitly reset player state in memory
-                             // Re-initialize to load fresh state from DB (though resetProgress sets memory)
-                             await esenciaService.initialize(); 
-                             
-                             await tutorialService.resetTutorial();
-                             
-                             if (context.mounted) {
-                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('DEBUG: Base de datos REINICIADA y Servicios Recargados 💥')),
-                              );
-                             }
-                          },
-                          icon: const Icon(Icons.delete_forever),
-                          label: const Text('Reset DB'),
-                          backgroundColor: Colors.black,
-                        ),
-                      ],
-                    )
-                  : null,
-            ),
-          ),
-                ],
-              ),
-              
-              // Floating animations (ON TOP of UI controls)
-              IgnorePointer(
-                ignoring: true, // Let taps pass through to UI
-                child: Stack(
-                  children: _tapAnimations,
-                ),
-              ),
-
-
-              // Random Essence Orb (Moved to top)
-              if (_isRandomOrbVisible && _randomOrbPosition != null)
-                Positioned(
-                  left: _randomOrbPosition!.dx,
-                  top: _randomOrbPosition!.dy,
-                  child: RandomEssenceOrb(
-                    onTap: _handleRandomOrbTap,
-                    onDismiss: () {
-                      if (mounted) {
-                        setState(() {
-                          _isRandomOrbVisible = false;
-                        });
-                        _startRandomOrbTimer();
-                      }
-                    },
+                    ],
                   ),
                 ),
-
-                
-              // Floating animations (restore)
-              ..._tapAnimations,
-            ],
+              ),
+            ),
+            floatingActionButton: kDebugMode ? _buildDebugButtons() : null,
           ),
         ),
       ),
     );
   }
 
+  Widget _buildDebugButtons() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FloatingActionButton.extended(
+          heroTag: 'essence_btn',
+          onPressed: () async {
+            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+            await esenciaService.addEsencia(1000.0);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('DEBUG: +1000 Esencia added')));
+            }
+          },
+          icon: const Icon(Icons.flash_on),
+          label: const Text('+1000 Esencia'),
+          backgroundColor: Colors.amber,
+        ),
+        const SizedBox(height: 16),
+        FloatingActionButton.extended(
+          heroTag: 'steps_btn',
+          onPressed: () async {
+            final orbeService = Provider.of<OrbeService>(context, listen: false);
+            final esenciaService = Provider.of<EsenciaService>(context, listen: false);
+            final res = await orbeService.addStepsToActiveOrbes(500);
+            if (res['count'] == 0) await esenciaService.addStoredSteps(500);
+            esenciaService.updateSteps(500);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('DEBUG: +500 steps added')));
+            }
+          },
+          icon: const Icon(Icons.directions_run),
+          label: const Text('+500 Pasos'),
+          backgroundColor: Colors.redAccent,
+        ),
+        const SizedBox(height: 16),
+        FloatingActionButton.extended(
+          heroTag: 'reset_btn',
+          onPressed: () async {
+             await DatabaseHelper().resetDatabase();
+             await Provider.of<OrbeService>(context, listen: false).initialize();
+             final es = Provider.of<EsenciaService>(context, listen: false);
+             await es.resetProgress();
+             await es.initialize();
+             await Provider.of<TutorialService>(context, listen: false).resetTutorial();
+             if (mounted) {
+               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('DEBUG: Database Reset')));
+             }
+          },
+          icon: const Icon(Icons.delete_forever),
+          label: const Text('Reset DB'),
+          backgroundColor: Colors.black,
+        ),
+      ],
+    );
+  }
 
   void _updateTutorialTarget(GlobalKey key, TutorialService service) {
     if (key.currentContext == null || !key.currentContext!.mounted) return;
-    
     final RenderBox? renderBox = key.currentContext!.findRenderObject() as RenderBox?;
-    if (renderBox != null && renderBox.attached) {
-      final position = renderBox.localToGlobal(Offset.zero);
+    final RenderBox? screenBox = context.findRenderObject() as RenderBox?;
+
+    if (renderBox != null && renderBox.attached && screenBox != null && screenBox.attached) {
+      final position = renderBox.localToGlobal(Offset.zero, ancestor: screenBox);
       final size = renderBox.size;
       final rect = Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
-      
-      // Update service only if changed significantly
       if (service.targetRect != rect) {
         service.setTarget(rect);
       }
@@ -1154,10 +1148,6 @@ class _NavButton extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Cooldown Indicator Widget
-// ---------------------------------------------------------------------------
-
 class CooldownIndicator extends StatefulWidget {
   final Duration duration;
   final VoidCallback onComplete;
@@ -1182,7 +1172,6 @@ class _CooldownIndicatorState extends State<CooldownIndicator> with SingleTicker
          vsync: this,
          duration: widget.duration,
     );
-    // Animate from 1.0 (full) to 0.0 (empty)
     _controller.reverse(from: 1.0).whenComplete(() {
         if (mounted) widget.onComplete();
     });
@@ -1199,11 +1188,9 @@ class _CooldownIndicatorState extends State<CooldownIndicator> with SingleTicker
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        // If progress is 0, don't paint
         if (_controller.value <= 0) return const SizedBox.shrink();
-
         return CustomPaint(
-          size: const Size(double.infinity, 4), // Height of the line
+          size: const Size(double.infinity, 4),
           painter: _CooldownPainter(
             progress: _controller.value,
           ),
@@ -1231,19 +1218,12 @@ class _CooldownPainter extends CustomPainter {
     final centerX = size.width / 2;
     final currentTotalWidth = size.width * progress;
     final halfWidth = currentTotalWidth / 2;
-
-    // Draw from center outwards? Or shrinking towards center.
-    // "vaciando desde ambos extremos hasta el centro" -> Means the bar gets shorter towards the center.
-    // So distinct start/end points moving closer to center.
-    // Left Point: CenterX - HalfWidth
-    // Right Point: CenterX + HalfWidth
     
     final p1 = Offset(centerX - halfWidth, size.height / 2);
     final p2 = Offset(centerX + halfWidth, size.height / 2);
 
     canvas.drawLine(p1, p2, paint);
     
-    // Add glow
     final glowPaint = Paint()
       ..color = Colors.cyanAccent.withOpacity(0.4)
       ..style = PaintingStyle.stroke

@@ -53,26 +53,26 @@ class ProgressionService {
       Unlock.item('upgrade_tap_multiplier', description: "Ritmo Interior desbloqueado"),
     ]),
     LevelDefinition(level: 2, requiredXp: 250, unlocks: [
-       // Previous unlocks moved to level 1
     ]),
     LevelDefinition(level: 3, requiredXp: 550, unlocks: [ 
+      Unlock.item('energy_storage', description: "Almacén de Energía desbloqueado"),
       Unlock.item('building_mina', description: "Mina desbloqueada"),
     ]),
     LevelDefinition(level: 4, requiredXp: 1000, unlocks: [ 
-        Unlock.item('building_cantera', description: "Cantera desbloqueada"),
-        Unlock.item('energy_storage', description: "Almacén de Energía desbloqueado"),
+      Unlock.item('upgrade_offline_efficiency', description: "Eco Persistente desbloqueado"),
+      Unlock.item('building_cantera', description: "Cantera desbloqueada"),
+
     ]),
     LevelDefinition(level: 5, requiredXp: 1650, unlocks: [ 
-      Unlock.item('upgrade_global_multiplier', description: "Flujo Esencial desbloqueado"),
+      Unlock.item('upgrade_offline_time', description: "Eco Duradero desbloqueado"),
       Unlock.feature(ProgressionFeature.temporarySanctuarySlot, description: "Slot de Santuario Temporal"),
-       Unlock.item(InventoryItemTypes.tempSanctuaryFastFlow, description: "Santuario Temporal: Fast Flow"),
+      Unlock.item(InventoryItemTypes.tempSanctuaryFastFlow, description: "Santuario Temporal: Fast Flow"),
     ]),
     LevelDefinition(level: 6, requiredXp: 2600, unlocks: [ 
-      Unlock.item('upgrade_offline_efficiency', description: "Eco Persistente desbloqueado"),
       Unlock.item('orbe_advanced', description: "Orbe Avanzado"),
     ]),
     LevelDefinition(level: 7, requiredXp: 3550, unlocks: [ 
-      Unlock.item('upgrade_offline_time', description: "Memoria Persistente desbloqueada"),
+      Unlock.item('upgrade_global_multiplier', description: "Flujo Esencial desbloqueado"),
       Unlock.item(InventoryItemTypes.tempSanctuarySymbiosis, description: "Santuario Temporal: Simbiosis"),
     ]),
     LevelDefinition(level: 8, requiredXp: 5000, unlocks: [ 
@@ -80,16 +80,14 @@ class ProgressionService {
     ]),
     LevelDefinition(level: 9, requiredXp: 6500, unlocks: [ 
       Unlock.item('orbe_expert', description: "Orbe Experto"),
-      Unlock.item(InventoryItemTypes.tempSanctuaryQuietude, description: "Santuario Temporal: Quietud"),
     ]),
     LevelDefinition(level: 10, requiredXp: 9000, unlocks: [
-       // No news
+      Unlock.item(InventoryItemTypes.tempSanctuaryQuietude, description: "Santuario Temporal: Quietud"),
     ]),
     LevelDefinition(level: 11, requiredXp: 11500, unlocks: [ 
       Unlock.item('building_fabrica', description: "Fábrica desbloqueada"),
     ]),
     LevelDefinition(level: 12, requiredXp: 15000, unlocks: [ 
-        // 12+ General rule
     ]),
   ];
 
@@ -191,25 +189,35 @@ class ProgressionService {
 
     // Energy Storage specific logic
     if (type == 'energy_storage') {
-      if (currentLevel < 4) return 0;
-      // Formula: Cap 2 at L4, +2 every 2 levels. Max 15.
-      int cap = 2 + ((currentLevel - 4) ~/ 2) * 2;
+      if (currentLevel < 3) return 0;
+      // Formula: Cap 2 at L3, +2 every 2 levels. Max 15.
+      int cap = 2 + ((currentLevel - 3) ~/ 2) * 2;
       return cap.clamp(0, 15);
     }
 
-    // Checking Level 12+ first
+    // Unified Formula for Tap Strength (Smoother progression)
+    if (type == 'tap_strength') {
+        // Starts at cap 5 at L1, then +4 per level.
+        int cap = 5 + (currentLevel - 1) * 4;
+        return cap.clamp(1, 30);
+    }
+
+    // Ritmo Interior (Inner Rhythm) always cap 5
+    if (type == 'tap_multiplier') {
+        return 5;
+    }
+
+    // Checking Level 12+ for other types
     if (currentLevel >= 12) {
         // Regla general 12+: +1 al nivel máximo de todas por cada nivel
         final levelDiff = currentLevel - 11; // L12 -> 1.
         
-        if (type == 'tap_strength') return (11 + levelDiff).clamp(0, 20);
-        if (type == 'building_recolector') return (11 + levelDiff); // Unlimited? Or soft cap?
+        if (type == 'building_recolector') return (11 + levelDiff); 
         if (type == 'building_mina') return (9 + levelDiff);
         if (type == 'building_cantera') return (8 + levelDiff);
         if (type == 'building_yacimiento') return (4 + levelDiff);
         if (type == 'building_fabrica') return (1 + levelDiff);
         
-        if (type == 'tap_multiplier') return (10 + levelDiff).clamp(0, 15); // Rhythm
         if (type == 'global_multiplier') return (7 + levelDiff).clamp(0, 20); // Flow
         if (type == 'offline_efficiency') return (6 + levelDiff).clamp(0, 15); // Echo
         if (type == 'offline_time') return (5 + levelDiff).clamp(0, 15); // Memory
@@ -220,95 +228,75 @@ class ProgressionService {
     // Explicit Levels 1-11
     switch (currentLevel) {
         case 1:
-            if (type == 'tap_strength') return 5;
-            if (type == 'tap_multiplier') return 2;
             if (type == 'building_recolector') return 3;
             break;
         case 2:
-            if (type == 'tap_strength') return 8; // Smooth transition
-            if (type == 'tap_multiplier') return 4;
             if (type == 'building_recolector') return 5;
             break;
         case 3:
-            if (type == 'tap_strength') return 10; // Was 3, now must be >= prev levels
-            if (type == 'tap_multiplier') return 6;
             if (type == 'building_recolector') return 7;
             if (type == 'building_mina') return 1;
             break;
 
         case 4:
-            if (type == 'tap_strength') return 4;
-            if (type == 'tap_multiplier') return 3;
-            if (type == 'building_recolector') return 4;
+            if (type == 'offline_efficiency') return 1;
+            if (type == 'building_recolector') return 7; 
             if (type == 'building_mina') return 2;
             if (type == 'building_cantera') return 1;
             break;
         case 5:
-            if (type == 'tap_strength') return 5;
-            if (type == 'tap_multiplier') return 4;
-            if (type == 'global_multiplier') return 1;
-            if (type == 'building_recolector') return 5;
+            if (type == 'offline_efficiency') return 2;
+            if (type == 'offline_time') return 1;
+            if (type == 'building_recolector') return 7; 
             if (type == 'building_mina') return 3;
             if (type == 'building_cantera') return 2;
             break;
         case 6:
-            if (type == 'tap_strength') return 6;
-            if (type == 'tap_multiplier') return 5;
-            if (type == 'global_multiplier') return 2;
-            if (type == 'offline_efficiency') return 1;
-            if (type == 'building_recolector') return 6;
+            if (type == 'offline_efficiency') return 3;
+            if (type == 'offline_time') return 2;
+            if (type == 'building_recolector') return 7; 
             if (type == 'building_mina') return 4;
             if (type == 'building_cantera') return 3;
             break;
         case 7:
-            if (type == 'tap_strength') return 7;
-            if (type == 'tap_multiplier') return 6;
-            if (type == 'global_multiplier') return 3;
-            if (type == 'offline_efficiency') return 2;
-            if (type == 'offline_time') return 1;
+            if (type == 'global_multiplier') return 1;
+            if (type == 'offline_efficiency') return 4;
+            if (type == 'offline_time') return 3;
             if (type == 'building_recolector') return 7;
             if (type == 'building_mina') return 5;
             if (type == 'building_cantera') return 4;
             break;
         case 8:
-            if (type == 'tap_strength') return 8;
-            if (type == 'tap_multiplier') return 7;
-            if (type == 'global_multiplier') return 4;
-            if (type == 'offline_efficiency') return 3;
-            if (type == 'offline_time') return 2;
+            if (type == 'global_multiplier') return 2;
+            if (type == 'offline_efficiency') return 5;
+            if (type == 'offline_time') return 4;
             if (type == 'building_recolector') return 8;
             if (type == 'building_mina') return 6;
             if (type == 'building_cantera') return 5;
             if (type == 'building_yacimiento') return 1;
             break;
         case 9:
-            if (type == 'tap_strength') return 9;
-            if (type == 'tap_multiplier') return 8;
-            if (type == 'global_multiplier') return 5;
-            if (type == 'offline_efficiency') return 4;
-            if (type == 'offline_time') return 3;
+            if (type == 'global_multiplier') return 3;
+            if (type == 'offline_efficiency') return 6;
+            if (type == 'offline_time') return 5;
             if (type == 'building_recolector') return 9;
             if (type == 'building_mina') return 7;
             if (type == 'building_cantera') return 6;
             if (type == 'building_yacimiento') return 2;
             break;
         case 10:
-            if (type == 'tap_strength') return 10;
-            if (type == 'tap_multiplier') return 9;
-            if (type == 'global_multiplier') return 6;
-            if (type == 'offline_efficiency') return 5;
-            if (type == 'offline_time') return 4;
+            if (type == 'global_multiplier') return 4;
+            if (type == 'offline_efficiency') return 7;
+            if (type == 'offline_time') return 6;
             if (type == 'building_recolector') return 10;
             if (type == 'building_mina') return 8;
             if (type == 'building_cantera') return 7;
             if (type == 'building_yacimiento') return 3;
             break;
         case 11:
-            if (type == 'tap_strength') return 11;
-            if (type == 'tap_multiplier') return 10;
-            if (type == 'global_multiplier') return 7;
-            if (type == 'offline_efficiency') return 6;
-            if (type == 'offline_time') return 5;
+            if (type == 'global_multiplier') return 5;
+            if (type == 'offline_efficiency') return 8;
+            if (type == 'offline_time') return 7;
             if (type == 'building_recolector') return 11;
             if (type == 'building_mina') return 9;
             if (type == 'building_cantera') return 8;
