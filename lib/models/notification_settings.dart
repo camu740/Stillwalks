@@ -28,6 +28,9 @@ class StillwalksSettings {
   // Google Fit
   final bool hasSeenGoogleFitPrompt;
 
+  // Audio
+  final double musicVolume; // 0.0 - 1.0
+
   const StillwalksSettings({
     this.language = 'es',
     this.hasLanguageBeenSelected = false,
@@ -44,6 +47,7 @@ class StillwalksSettings {
     this.dailyStepGoal = 5000,
     this.dailyGoalNotificationEnabled = false,
     this.hasSeenGoogleFitPrompt = false,
+    this.musicVolume = 0.5,
   });
 
   Map<String, dynamic> toJson() {
@@ -63,6 +67,7 @@ class StillwalksSettings {
       'dailyStepGoal': dailyStepGoal,
       'dailyGoalNotificationEnabled': dailyGoalNotificationEnabled,
       'hasSeenGoogleFitPrompt': hasSeenGoogleFitPrompt,
+      'musicVolume': musicVolume,
     };
   }
 
@@ -88,6 +93,7 @@ class StillwalksSettings {
       dailyStepGoal: json['dailyStepGoal'] ?? 5000,
       dailyGoalNotificationEnabled: json['dailyGoalNotificationEnabled'] ?? false,
       hasSeenGoogleFitPrompt: json['hasSeenGoogleFitPrompt'] ?? false,
+      musicVolume: (json['musicVolume'] as num?)?.toDouble() ?? 0.5,
     );
   }
 
@@ -107,6 +113,7 @@ class StillwalksSettings {
     int? dailyStepGoal,
     bool? dailyGoalNotificationEnabled,
     bool? hasSeenGoogleFitPrompt,
+    double? musicVolume,
   }) {
     return StillwalksSettings(
       language: language ?? this.language,
@@ -124,6 +131,7 @@ class StillwalksSettings {
       dailyStepGoal: dailyStepGoal ?? this.dailyStepGoal,
       dailyGoalNotificationEnabled: dailyGoalNotificationEnabled ?? this.dailyGoalNotificationEnabled,
       hasSeenGoogleFitPrompt: hasSeenGoogleFitPrompt ?? this.hasSeenGoogleFitPrompt,
+      musicVolume: musicVolume ?? this.musicVolume,
     );
   }
 }

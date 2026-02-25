@@ -338,6 +338,18 @@ abstract class AppLocalizations {
   /// **'Feedback sonoro y háptico'**
   String get soundVibrationDesc;
 
+  /// No description provided for @musicVolume.
+  ///
+  /// In es, this message translates to:
+  /// **'Volumen de música'**
+  String get musicVolume;
+
+  /// No description provided for @musicVolumeDesc.
+  ///
+  /// In es, this message translates to:
+  /// **'Ajusta el volumen de la música del juego'**
+  String get musicVolumeDesc;
+
   /// No description provided for @batterySaver.
   ///
   /// In es, this message translates to:
@@ -2335,6 +2347,192 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cancelar'**
   String get resetCancel;
+
+  /// No description provided for @creditsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Créditos'**
+  String get creditsTitle;
+
+  /// No description provided for @creditsVersion.
+  ///
+  /// In es, this message translates to:
+  /// **'Versión {version}'**
+  String creditsVersion(String version);
+
+  /// No description provided for @creditsCreationTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'CREACIÓN Y DESARROLLO'**
+  String get creditsCreationTitle;
+
+  /// No description provided for @creditsCreationContent.
+  ///
+  /// In es, this message translates to:
+  /// **'Idea, diseño y desarrollo\nCamu'**
+  String get creditsCreationContent;
+
+  /// No description provided for @creditsTechTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'TECNOLOGÍA'**
+  String get creditsTechTitle;
+
+  /// No description provided for @creditsTechContent.
+  ///
+  /// In es, this message translates to:
+  /// **'Desarrollado con tecnologías multiplataforma para dispositivos móviles.\n\nSeguimiento de actividad física mediante APIs nativas del sistema.\n\nSistema de notificaciones y ejecución en segundo plano implementados de forma local.'**
+  String get creditsTechContent;
+
+  /// No description provided for @creditsMusicTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'MÚSICA'**
+  String get creditsMusicTitle;
+
+  /// No description provided for @creditsMusicContent.
+  ///
+  /// In es, this message translates to:
+  /// **'Banda sonora del juego\n@FronterasDeFantasia\n\nGenerada con SUNO AI'**
+  String get creditsMusicContent;
+
+  /// No description provided for @creditsThanksTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'AGRADECIMIENTOS'**
+  String get creditsThanksTitle;
+
+  /// No description provided for @creditsThanksContent.
+  ///
+  /// In es, this message translates to:
+  /// **'Gracias a todas las personas que han probado el juego, han dado feedback y han apoyado la idea de un uso más consciente del móvil.\n\nGracias también a quienes buscan equilibrar tecnología y bienestar en su día a día.'**
+  String get creditsThanksContent;
+
+  /// No description provided for @creditsPhilosophyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'FILOSOFÍA DEL PROYECTO'**
+  String get creditsPhilosophyTitle;
+
+  /// No description provided for @creditsPhilosophyContent.
+  ///
+  /// In es, this message translates to:
+  /// **'Stillwalks no pretende que uses más el móvil, sino que lo uses mejor.\n\nDiseñado para acompañarte, no para exigirte.'**
+  String get creditsPhilosophyContent;
+
+  /// No description provided for @creditsLegalTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'INFORMACIÓN LEGAL'**
+  String get creditsLegalTitle;
+
+  /// No description provided for @creditsLegalContent.
+  ///
+  /// In es, this message translates to:
+  /// **'© 2026 Camu. Todos los derechos reservados.\n\nEste proyecto utiliza librerías y tecnologías de terceros cuyas licencias pueden consultarse en la sección correspondiente.'**
+  String get creditsLegalContent;
+
+  /// No description provided for @helpTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ayuda'**
+  String get helpTitle;
+
+  /// No description provided for @helpEssenceQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué es la Esencia y cómo se genera?'**
+  String get helpEssenceQ;
+
+  /// No description provided for @helpEssenceA.
+  ///
+  /// In es, this message translates to:
+  /// **'La Esencia es el recurso principal de Stillwalks.\nPuedes generarla de dos formas:\n\n• Haciendo tap en la pantalla principal\n• Comprando edificios que la producen automáticamente\n\nLa Esencia se utiliza para comprar Orbes, Santuarios, edificios y mejoras que aceleran tu progreso.'**
+  String get helpEssenceA;
+
+  /// No description provided for @helpOrbsQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo funcionan los Orbes?'**
+  String get helpOrbsQ;
+
+  /// No description provided for @helpOrbsA.
+  ///
+  /// In es, this message translates to:
+  /// **'Los Orbes son semillas de vida que contienen a los Stillwalks.\nCada Orbe necesita una cantidad determinada de pasos para poder canalizarse.\n\nUna vez compras un Orbe:\n• Lo colocas en un Santuario\n• Caminas para generar Energía (pasos)\n• Cuando el progreso se completa, puedes canalizarlo\n• Al canalizarlo, descubres una nueva criatura\n\nExisten diferentes tipos de Orbes, algunos más raros y exigentes que otros.'**
+  String get helpOrbsA;
+
+  /// No description provided for @helpSanctuariesQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo funcionan los Santuarios?'**
+  String get helpSanctuariesQ;
+
+  /// No description provided for @helpSanctuariesA.
+  ///
+  /// In es, this message translates to:
+  /// **'Los Santuarios son el lugar donde los Orbes se canalizan.\nEn ellos se transforma la Energía (pasos) en progreso del Orbe.\n\nHay dos tipos de Santuarios:\n• Permanentes: se pueden mejorar y usar de forma indefinida\n• Temporales: ofrecen ventajas especiales, pero duran un número limitado de canalizaciones\n\nLos Santuarios pueden tener diferentes beneficios dependiendo de su nivel o el tipo que sea.'**
+  String get helpSanctuariesA;
+
+  /// No description provided for @helpStepsQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo cuenta la app mis pasos?'**
+  String get helpStepsQ;
+
+  /// No description provided for @helpStepsA.
+  ///
+  /// In es, this message translates to:
+  /// **'Stillwalks utiliza el contador de pasos del sistema de tu dispositivo.\nNo mide tu ubicación ni registra recorridos, solo el número de pasos.\n\nEl conteo funciona en segundo plano y se actualiza de forma periódica para reducir el consumo de batería.'**
+  String get helpStepsA;
+
+  /// No description provided for @helpStepsDelayQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Por qué los pasos no se actualizan al instante?'**
+  String get helpStepsDelayQ;
+
+  /// No description provided for @helpStepsDelayA.
+  ///
+  /// In es, this message translates to:
+  /// **'Para ahorrar batería y respetar el funcionamiento del sistema, los pasos no se actualizan en tiempo real.\n\nLa app recibe los datos en intervalos, por lo que es normal que haya pequeños retrasos.\nTodos los pasos realizados acaban contándose correctamente.'**
+  String get helpStepsDelayA;
+
+  /// No description provided for @helpNotificationsQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué notificaciones puedo recibir?'**
+  String get helpNotificationsQ;
+
+  /// No description provided for @helpNotificationsA.
+  ///
+  /// In es, this message translates to:
+  /// **'Dependiendo de tu configuración, puedes recibir:\n• Avisos cuando un Orbe está listo para canalizar\n• Notificaciones sobre eventos del juego\n• Recordatorios no intrusivos para recordarte salir a caminar\n• Notificación permanente para ver en todo momento el estado de tu cuenta\n\nTodas las notificaciones se pueden activar o desactivar desde Ajustes.'**
+  String get helpNotificationsA;
+
+  /// No description provided for @helpPermissionsQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Qué permisos necesita la app?'**
+  String get helpPermissionsQ;
+
+  /// No description provided for @helpPermissionsA.
+  ///
+  /// In es, this message translates to:
+  /// **'Stillwalks puede solicitar:\n• Acceso a actividad física (para contar pasos)\n• Permiso de notificaciones (para avisos opcionales)\n\nSin estos permisos el juego sigue funcionando, pero algunas funciones pueden ser menos precisas.'**
+  String get helpPermissionsA;
+
+  /// No description provided for @helpBatteryQ.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Consume mucha batería?'**
+  String get helpBatteryQ;
+
+  /// No description provided for @helpBatteryA.
+  ///
+  /// In es, this message translates to:
+  /// **'No.\nStillwalks está diseñado para tener un impacto mínimo en la batería.\n\nUtiliza:\n• El contador de pasos del sistema\n• Actualizaciones periódicas, no constantes\n• Opciones como el modo ahorro batería\n\nPuedes controlar este comportamiento desde Ajustes en cualquier momento.'**
+  String get helpBatteryA;
 }
 
 class _AppLocalizationsDelegate

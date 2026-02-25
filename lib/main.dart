@@ -21,6 +21,7 @@ import 'services/tutorial_service.dart';
 import 'services/progression_service.dart';
 import 'services/hatching_service.dart';
 import 'services/google_fit_service.dart';
+import 'services/audio_service.dart';
 
 import 'providers/locale_provider.dart';
 import 'data/seeds/initial_data.dart';
@@ -127,6 +128,7 @@ class StillwalksApp extends StatelessWidget {
         Provider(create: (_) => WidgetService()),
         Provider(create: (_) => ProgressionService()),
         ChangeNotifierProvider(create: (_) => HatchingService()),
+        ChangeNotifierProvider(create: (_) => AudioService()),
       ],
       child: Builder(
         builder: (context) {
@@ -294,10 +296,18 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       _syncNativeSteps();
       esenciaService.startGenerationTimer();
       
+      // Resume music
+      final audioService = Provider.of<AudioService>(context, listen: false);
+      audioService.resume();
+      
     } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       // App sale de foreground
       esenciaService.stopGenerationTimer();
       _updateWidget();
+      
+      // Pause music
+      final audioService = Provider.of<AudioService>(context, listen: false);
+      audioService.pause();
     }
   }
 
@@ -437,6 +447,13 @@ class _AppInitializerState extends State<AppInitializer> with WidgetsBindingObse
       
       debugPrint('✅ Stillwalks initialized successfully');
       FlutterNativeSplash.remove();
+      
+      // Start background music with saved volume
+      if (context.mounted) {
+        final audioService = Provider.of<AudioService>(context, listen: false);
+        final savedVolume = notificationPreferences.settings.musicVolume;
+        audioService.initialize(volume: savedVolume);
+      }
     } catch (e, stackTrace) {
       debugPrint('❌ Error initializing app: $e');
       debugPrint('Stack trace: $stackTrace');

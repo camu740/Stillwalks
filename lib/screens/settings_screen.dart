@@ -10,6 +10,7 @@ import 'package:stillwalks/screens/tracking_status_screen.dart';
 import 'package:stillwalks/screens/help_screen.dart';
 import 'package:stillwalks/screens/credits_screen.dart';
 import 'package:stillwalks/services/google_fit_service.dart';
+import 'package:stillwalks/services/audio_service.dart';
 import 'package:health/health.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -40,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final preferencesService = Provider.of<NotificationPreferencesService>(context);
     final settings = preferencesService.settings;
     final googleFitService = Provider.of<GoogleFitService>(context);
+    final audioService = Provider.of<AudioService>(context);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -67,6 +69,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: settings.soundVibrationEnabled,
             onChanged: (value) => preferencesService.setSoundVibrationEnabled(value),
           ),
+          // Music volume slider
+          _buildMusicVolumeTile(context, audioService, preferencesService),
           _buildSwitchTile(
             icon: Icons.battery_saver,
             iconColor: Colors.greenAccent,
@@ -414,6 +418,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
             : null,
         trailing: trailing,
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildMusicVolumeTile(
+    BuildContext context,
+    AudioService audioService,
+    NotificationPreferencesService preferencesService,
+  ) {
+    final volume = preferencesService.settings.musicVolume;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            Icon(
+              volume > 0 ? Icons.music_note : Icons.music_off,
+              color: Colors.deepPurpleAccent,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.musicVolume,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: Colors.deepPurpleAccent,
+                            inactiveTrackColor: Colors.white12,
+                            thumbColor: Colors.deepPurpleAccent,
+                            overlayColor: Colors.deepPurpleAccent.withOpacity(0.2),
+                            trackHeight: 4,
+                          ),
+                          child: Slider(
+                            value: volume,
+                            min: 0.0,
+                            max: 1.0,
+                            onChanged: (value) {
+                              audioService.setVolume(value);
+                              preferencesService.setMusicVolume(value);
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 40,
+                        child: Text(
+                          '${(volume * 100).round()}%',
+                          style: const TextStyle(fontSize: 12, color: Colors.white70),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

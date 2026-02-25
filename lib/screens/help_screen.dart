@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// FAQ/Help screen with frequently asked questions
 class HelpScreen extends StatelessWidget {
@@ -6,10 +7,12 @@ class HelpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Ayuda'),
+        title: Text(l10n.helpTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -17,77 +20,43 @@ class HelpScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _buildFAQItem(
-            question: '¿Qué es la Esencia y cómo se genera?',
-            answer: 'La Esencia es el recurso principal de Stillwalks.\n'
-                'Se genera automáticamente cuando tu móvil está bloqueado, sin que tengas que hacer nada.\n\n'
-                'Cuanto más tiempo pases sin usar el teléfono, más Esencia acumulas.\n'
-                'La Esencia se utiliza para comprar Orbes, Santuarios y mejoras que aceleran tu progreso.',
+            question: l10n.helpEssenceQ,
+            answer: l10n.helpEssenceA,
           ),
           
           _buildFAQItem(
-            question: '¿Cómo funcionan los Orbes?',
-            answer: 'Los Orbes son semillas de vida que contienen a los Stillwalks.\n'
-                'Cada Orbe necesita una cantidad determinada de pasos para poder canalizarse.\n\n'
-                'Una vez compras un Orbe:\n'
-                '• Lo colocas en un Santuario\n'
-                '• Caminas para generar Energía (pasos)\n'
-                '• Cuando el progreso se completa, puedes canalizarlo\n'
-                '• Al canalizarlo, descubres una nueva criatura\n\n'
-                'Existen diferentes tipos de Orbes, algunos más raros y exigentes que otros.',
+            question: l10n.helpOrbsQ,
+            answer: l10n.helpOrbsA,
           ),
           
           _buildFAQItem(
-            question: '¿Cómo funcionan los Santuarios?',
-            answer: 'Los Santuarios son el lugar donde los Orbes se canalizan.\n'
-                'En ellos se transforma la Energía (pasos) en progreso del Orbe.\n\n'
-                'Hay dos tipos de Santuarios:\n'
-                '• Permanentes: se pueden mejorar y usar de forma indefinida\n'
-                '• Temporales: ofrecen ventajas especiales, pero duran un número limitado de canalizaciones\n\n'
-                'Los Santuarios pueden tener diferentes beneficios dependiendo de su nivel o el tipo que sea.',
+            question: l10n.helpSanctuariesQ,
+            answer: l10n.helpSanctuariesA,
           ),
           
           _buildFAQItem(
-            question: '¿Cómo cuenta la app mis pasos?',
-            answer: 'Stillwalks utiliza el contador de pasos del sistema de tu dispositivo.\n'
-                'No mide tu ubicación ni registra recorridos, solo el número de pasos.\n\n'
-                'El conteo funciona en segundo plano y se actualiza de forma periódica para reducir el consumo de batería.',
+            question: l10n.helpStepsQ,
+            answer: l10n.helpStepsA,
           ),
           
           _buildFAQItem(
-            question: '¿Por qué los pasos no se actualizan al instante?',
-            answer: 'Para ahorrar batería y respetar el funcionamiento del sistema, '
-                'los pasos no se actualizan en tiempo real.\n\n'
-                'La app recibe los datos en intervalos, por lo que es normal que haya pequeños retrasos.\n'
-                'Todos los pasos realizados acaban contándose correctamente.',
+            question: l10n.helpStepsDelayQ,
+            answer: l10n.helpStepsDelayA,
           ),
           
           _buildFAQItem(
-            question: '¿Qué notificaciones puedo recibir?',
-            answer: 'Dependiendo de tu configuración, puedes recibir:\n'
-                '• Avisos cuando un Orbe está listo para canalizar\n'
-                '• Notificaciones sobre eventos del juego\n'
-                '• Recordatorios no intrusivos para recordarte salir a caminar\n'
-                '• Notificación permanente para ver en todo momento el estado de tu cuenta\n\n'
-                'Todas las notificaciones se pueden activar o desactivar desde Ajustes.',
+            question: l10n.helpNotificationsQ,
+            answer: l10n.helpNotificationsA,
           ),
           
           _buildFAQItem(
-            question: '¿Qué permisos necesita la app?',
-            answer: 'Stillwalks puede solicitar:\n'
-                '• Acceso a actividad física (para contar pasos)\n'
-                '• Permiso de notificaciones (para avisos opcionales)\n\n'
-                'Sin estos permisos el juego sigue funcionando, pero algunas funciones pueden ser menos precisas.',
+            question: l10n.helpPermissionsQ,
+            answer: l10n.helpPermissionsA,
           ),
           
           _buildFAQItem(
-            question: '¿Consume mucha batería?',
-            answer: 'No.\n'
-                'Stillwalks está diseñado para tener un impacto mínimo en la batería.\n\n'
-                'Utiliza:\n'
-                '• El contador de pasos del sistema\n'
-                '• Actualizaciones periódicas, no constantes\n'
-                '• Opciones como el modo ahorro batería\n\n'
-                'Puedes controlar este comportamiento desde Ajustes en cualquier momento.',
+            question: l10n.helpBatteryQ,
+            answer: l10n.helpBatteryA,
           ),
           
           const SizedBox(height: 32),

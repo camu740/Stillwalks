@@ -223,6 +223,14 @@ class NotificationPreferencesService extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- AUDIO ---
+
+  Future<void> setMusicVolume(double volume) async {
+    _settings = _settings.copyWith(musicVolume: volume.clamp(0.0, 1.0));
+    await _saveSettings();
+    notifyListeners();
+  }
+
   // --- GOOGLE FIT ---
 
   Future<void> setHasSeenGoogleFitPrompt(bool seen) async {

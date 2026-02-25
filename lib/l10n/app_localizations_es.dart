@@ -142,6 +142,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get soundVibrationDesc => 'Feedback sonoro y háptico';
 
   @override
+  String get musicVolume => 'Volumen de música';
+
+  @override
+  String get musicVolumeDesc => 'Ajusta el volumen de la música del juego';
+
+  @override
   String get batterySaver => 'Modo ahorro batería';
 
   @override
@@ -1243,4 +1249,113 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get resetCancel => 'Cancelar';
+
+  @override
+  String get creditsTitle => 'Créditos';
+
+  @override
+  String creditsVersion(String version) {
+    return 'Versión $version';
+  }
+
+  @override
+  String get creditsCreationTitle => 'CREACIÓN Y DESARROLLO';
+
+  @override
+  String get creditsCreationContent => 'Idea, diseño y desarrollo\nCamu';
+
+  @override
+  String get creditsTechTitle => 'TECNOLOGÍA';
+
+  @override
+  String get creditsTechContent =>
+      'Desarrollado con tecnologías multiplataforma para dispositivos móviles.\n\nSeguimiento de actividad física mediante APIs nativas del sistema.\n\nSistema de notificaciones y ejecución en segundo plano implementados de forma local.';
+
+  @override
+  String get creditsMusicTitle => 'MÚSICA';
+
+  @override
+  String get creditsMusicContent =>
+      'Banda sonora del juego\n@FronterasDeFantasia\n\nGenerada con SUNO AI';
+
+  @override
+  String get creditsThanksTitle => 'AGRADECIMIENTOS';
+
+  @override
+  String get creditsThanksContent =>
+      'Gracias a todas las personas que han probado el juego, han dado feedback y han apoyado la idea de un uso más consciente del móvil.\n\nGracias también a quienes buscan equilibrar tecnología y bienestar en su día a día.';
+
+  @override
+  String get creditsPhilosophyTitle => 'FILOSOFÍA DEL PROYECTO';
+
+  @override
+  String get creditsPhilosophyContent =>
+      'Stillwalks no pretende que uses más el móvil, sino que lo uses mejor.\n\nDiseñado para acompañarte, no para exigirte.';
+
+  @override
+  String get creditsLegalTitle => 'INFORMACIÓN LEGAL';
+
+  @override
+  String get creditsLegalContent =>
+      '© 2026 Camu. Todos los derechos reservados.\n\nEste proyecto utiliza librerías y tecnologías de terceros cuyas licencias pueden consultarse en la sección correspondiente.';
+
+  @override
+  String get helpTitle => 'Ayuda';
+
+  @override
+  String get helpEssenceQ => '¿Qué es la Esencia y cómo se genera?';
+
+  @override
+  String get helpEssenceA =>
+      'La Esencia es el recurso principal de Stillwalks.\nPuedes generarla de dos formas:\n\n• Haciendo tap en la pantalla principal\n• Comprando edificios que la producen automáticamente\n\nLa Esencia se utiliza para comprar Orbes, Santuarios, edificios y mejoras que aceleran tu progreso.';
+
+  @override
+  String get helpOrbsQ => '¿Cómo funcionan los Orbes?';
+
+  @override
+  String get helpOrbsA =>
+      'Los Orbes son semillas de vida que contienen a los Stillwalks.\nCada Orbe necesita una cantidad determinada de pasos para poder canalizarse.\n\nUna vez compras un Orbe:\n• Lo colocas en un Santuario\n• Caminas para generar Energía (pasos)\n• Cuando el progreso se completa, puedes canalizarlo\n• Al canalizarlo, descubres una nueva criatura\n\nExisten diferentes tipos de Orbes, algunos más raros y exigentes que otros.';
+
+  @override
+  String get helpSanctuariesQ => '¿Cómo funcionan los Santuarios?';
+
+  @override
+  String get helpSanctuariesA =>
+      'Los Santuarios son el lugar donde los Orbes se canalizan.\nEn ellos se transforma la Energía (pasos) en progreso del Orbe.\n\nHay dos tipos de Santuarios:\n• Permanentes: se pueden mejorar y usar de forma indefinida\n• Temporales: ofrecen ventajas especiales, pero duran un número limitado de canalizaciones\n\nLos Santuarios pueden tener diferentes beneficios dependiendo de su nivel o el tipo que sea.';
+
+  @override
+  String get helpStepsQ => '¿Cómo cuenta la app mis pasos?';
+
+  @override
+  String get helpStepsA =>
+      'Stillwalks utiliza el contador de pasos del sistema de tu dispositivo.\nNo mide tu ubicación ni registra recorridos, solo el número de pasos.\n\nEl conteo funciona en segundo plano y se actualiza de forma periódica para reducir el consumo de batería.';
+
+  @override
+  String get helpStepsDelayQ =>
+      '¿Por qué los pasos no se actualizan al instante?';
+
+  @override
+  String get helpStepsDelayA =>
+      'Para ahorrar batería y respetar el funcionamiento del sistema, los pasos no se actualizan en tiempo real.\n\nLa app recibe los datos en intervalos, por lo que es normal que haya pequeños retrasos.\nTodos los pasos realizados acaban contándose correctamente.';
+
+  @override
+  String get helpNotificationsQ => '¿Qué notificaciones puedo recibir?';
+
+  @override
+  String get helpNotificationsA =>
+      'Dependiendo de tu configuración, puedes recibir:\n• Avisos cuando un Orbe está listo para canalizar\n• Notificaciones sobre eventos del juego\n• Recordatorios no intrusivos para recordarte salir a caminar\n• Notificación permanente para ver en todo momento el estado de tu cuenta\n\nTodas las notificaciones se pueden activar o desactivar desde Ajustes.';
+
+  @override
+  String get helpPermissionsQ => '¿Qué permisos necesita la app?';
+
+  @override
+  String get helpPermissionsA =>
+      'Stillwalks puede solicitar:\n• Acceso a actividad física (para contar pasos)\n• Permiso de notificaciones (para avisos opcionales)\n\nSin estos permisos el juego sigue funcionando, pero algunas funciones pueden ser menos precisas.';
+
+  @override
+  String get helpBatteryQ => '¿Consume mucha batería?';
+
+  @override
+  String get helpBatteryA =>
+      'No.\nStillwalks está diseñado para tener un impacto mínimo en la batería.\n\nUtiliza:\n• El contador de pasos del sistema\n• Actualizaciones periódicas, no constantes\n• Opciones como el modo ahorro batería\n\nPuedes controlar este comportamiento desde Ajustes en cualquier momento.';
 }

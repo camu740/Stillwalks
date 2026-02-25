@@ -49,6 +49,8 @@
   
   "soundVibration": "Sound / Vibration",
   "soundVibrationDesc": "Sound and haptic feedback",
+  "musicVolume": "Music Volume",
+  "musicVolumeDesc": "Adjust in-game music volume",
   "batterySaver": "Battery Saver Mode",
   "batterySaverDesc": "Reduces battery consumption",
   
@@ -575,5 +577,43 @@
   "resetConfirmationTitle": "Delete everything?",
   "resetConfirmationDesc": "This action cannot be undone. You will lose all your creatures, levels, and essence.",
   "resetConfirm": "Delete Everything",
-  "resetCancel": "Cancel"
+  "resetCancel": "Cancel",
+
+  "creditsTitle": "Credits",
+  "creditsVersion": "Version {version}",
+  "@creditsVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "creditsCreationTitle": "CREATION & DEVELOPMENT",
+  "creditsCreationContent": "Idea, design and development\nCamu",
+  "creditsTechTitle": "TECHNOLOGY",
+  "creditsTechContent": "Built with cross-platform technologies for mobile devices.\n\nPhysical activity tracking through native system APIs.\n\nNotification system and background execution implemented locally.",
+  "creditsMusicTitle": "MUSIC",
+  "creditsMusicContent": "Game soundtrack\n@FronterasDeFantasia\n\nGenerated with SUNO AI",
+  "creditsThanksTitle": "ACKNOWLEDGEMENTS",
+  "creditsThanksContent": "Thanks to everyone who tested the game, gave feedback and supported the idea of a more mindful phone usage.\n\nThanks also to those who seek to balance technology and wellbeing in their daily lives.",
+  "creditsPhilosophyTitle": "PROJECT PHILOSOPHY",
+  "creditsPhilosophyContent": "Stillwalks doesn't want you to use your phone more, but to use it better.\n\nDesigned to accompany you, not to demand from you.",
+  "creditsLegalTitle": "LEGAL INFORMATION",
+  "creditsLegalContent": "© 2026 Camu. All rights reserved.\n\nThis project uses third-party libraries and technologies whose licenses can be found in the corresponding section.",
+
+  "helpTitle": "Help",
+  "helpEssenceQ": "What is Essence and how is it generated?",
+  "helpEssenceA": "Essence is the main resource in Stillwalks.\nYou can generate it in two ways:\n\n• Tapping on the main screen\n• Buying buildings that produce it automatically\n\nEssence is used to buy Orbs, Sanctuaries, buildings and upgrades that speed up your progress.",
+  "helpOrbsQ": "How do Orbs work?",
+  "helpOrbsA": "Orbs are seeds of life that contain the Stillwalks.\nEach Orb requires a certain number of steps to be channeled.\n\nOnce you buy an Orb:\n• You place it in a Sanctuary\n• You walk to generate Energy (steps)\n• When the progress is complete, you can channel it\n• Upon channeling, you discover a new creature\n\nThere are different types of Orbs, some rarer and more demanding than others.",
+  "helpSanctuariesQ": "How do Sanctuaries work?",
+  "helpSanctuariesA": "Sanctuaries are where Orbs are channeled.\nIn them, Energy (steps) is transformed into Orb progress.\n\nThere are two types of Sanctuaries:\n• Permanent: can be upgraded and used indefinitely\n• Temporary: offer special advantages but last a limited number of channelings\n\nSanctuaries can have different benefits depending on their level or type.",
+  "helpStepsQ": "How does the app count my steps?",
+  "helpStepsA": "Stillwalks uses your device's built-in step counter.\nIt doesn't track your location or record routes, only step count.\n\nCounting works in the background and updates periodically to reduce battery usage.",
+  "helpStepsDelayQ": "Why don't steps update instantly?",
+  "helpStepsDelayA": "To save battery and respect the system's operation, steps are not updated in real time.\n\nThe app receives data at intervals, so small delays are normal.\nAll steps taken are eventually counted correctly.",
+  "helpNotificationsQ": "What notifications can I receive?",
+  "helpNotificationsA": "Depending on your settings, you can receive:\n• Alerts when an Orb is ready to channel\n• Notifications about game events\n• Gentle reminders to go out for a walk\n• A permanent notification to see your account status at all times\n\nAll notifications can be turned on or off from Settings.",
+  "helpPermissionsQ": "What permissions does the app need?",
+  "helpPermissionsA": "Stillwalks may request:\n• Physical activity access (to count steps)\n• Notification permission (for optional alerts)\n\nWithout these permissions the game still works, but some features may be less accurate.",
+  "helpBatteryQ": "Does it drain a lot of battery?",
+  "helpBatteryA": "No.\nStillwalks is designed to have minimal impact on battery.\n\nIt uses:\n• The system's step counter\n• Periodic updates, not constant ones\n• Options like battery saver mode\n\nYou can control this behavior from Settings at any time."
 }

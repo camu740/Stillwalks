@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:stillwalks/l10n/app_localizations.dart';
 
 /// Credits screen showing project information
 class CreditsScreen extends StatefulWidget {
@@ -29,10 +30,12 @@ class _CreditsScreenState extends State<CreditsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Créditos'),
+        title: Text(l10n.creditsTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -53,7 +56,7 @@ class _CreditsScreenState extends State<CreditsScreen> {
           const SizedBox(height: 8),
           Center(
             child: Text(
-              'Versión $_version',
+              l10n.creditsVersion(_version),
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.white54,
@@ -64,35 +67,33 @@ class _CreditsScreenState extends State<CreditsScreen> {
           const SizedBox(height: 48),
           
           _buildSection(
-            title: 'CREACIÓN Y DESARROLLO',
-            content: 'Idea, diseño y desarrollo\nCamu',
+            title: l10n.creditsCreationTitle,
+            content: l10n.creditsCreationContent,
           ),
           
           _buildSection(
-            title: 'TECNOLOGÍA',
-            content: 'Desarrollado con tecnologías multiplataforma para dispositivos móviles.\n\n'
-                'Seguimiento de actividad física mediante APIs nativas del sistema.\n\n'
-                'Sistema de notificaciones y ejecución en segundo plano implementados de forma local.',
+            title: l10n.creditsTechTitle,
+            content: l10n.creditsTechContent,
           ),
           
           _buildSection(
-            title: 'AGRADECIMIENTOS',
-            content: 'Gracias a todas las personas que han probado el juego, '
-                'han dado feedback y han apoyado la idea de un uso más consciente del móvil.\n\n'
-                'Gracias también a quienes buscan equilibrar tecnología y bienestar en su día a día.',
+            title: l10n.creditsMusicTitle,
+            content: l10n.creditsMusicContent,
           ),
           
           _buildSection(
-            title: 'FILOSOFÍA DEL PROYECTO',
-            content: 'Stillwalks no pretende que uses más el móvil, sino que lo uses mejor.\n\n'
-                'Diseñado para acompañarte, no para exigirte.',
+            title: l10n.creditsThanksTitle,
+            content: l10n.creditsThanksContent,
           ),
           
           _buildSection(
-            title: 'INFORMACIÓN LEGAL',
-            content: '© 2026 Camu. Todos los derechos reservados.\n\n'
-                'Este proyecto utiliza librerías y tecnologías de terceros '
-                'cuyas licencias pueden consultarse en la sección correspondiente.',
+            title: l10n.creditsPhilosophyTitle,
+            content: l10n.creditsPhilosophyContent,
+          ),
+          
+          _buildSection(
+            title: l10n.creditsLegalTitle,
+            content: l10n.creditsLegalContent,
           ),
           
           const SizedBox(height: 32),
